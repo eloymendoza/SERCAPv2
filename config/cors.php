@@ -19,12 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'https://sercapv2.grupo-iai.com.mx',
-        'http://sercapv2.grupo-iai.com.mx:98',
-        'http://localhost:98',
-        'http://127.0.0.1:98',
-    ],
+    'allowed_origins' => ['https://sercapv2.grupo-iai.com.mx'],
 
     'allowed_origins_patterns' => [],
 
