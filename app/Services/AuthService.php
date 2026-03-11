@@ -2,41 +2,35 @@
 
 namespace App\Services;
 
-use App\DTOs\LoginDTO;
+use App\DTOs\AuthDTO;
 use App\Mappers\UserMapper;
 use Illuminate\Http\Request;
+use App\Clients\DjangoAuthClient;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Auth;
 use App\Repositories\UserRepository;
+use Illuminate\Support\Facades\Auth;
+use App\Actions\Auth\SyncSessionAction;
+use App\Actions\Auth\CompleteLogoutAction;
 use Exception;
 
 class AuthService
 {
     public function __construct(
-        private readonly UserRepository $userRepository
+        private readonly UserRepository $userRepository,
+        private readonly DjangoAuthClient $authClient,
+        private readonly SyncSessionAction $syncSessionAction,
+        private readonly CompleteLogoutAction $completeLogoutAction
     ) {}
 
-    /**
-     * Lógica de autenticación contra la API de Django y sincronización local.
-     * @throws Exception
-     */
-    public function authenticate(LoginDTO $dto): array
-    {
-        $payload = [
-            'token'     => base64_encode(env('SECRET_KEY')), 
-            'user'      => $dto->username,
-            'password'  => base64_encode($dto->password), 
-            'idSistema' => env('ID_SISTEMA'),
-            'timeExp'   => 1,
-            'saveTk'    => 1
-        ];
 
-        // Consultar API Django
-        $response = Http::timeout(30)
-            ->withOptions(['verify' => app()->environment('local')])
-            ->post(env('API_AUTH'), $payload);
+    /**
+     * Proceso de autenticación orquestado.
+     */
+    public function authenticate(AuthDTO $dto): array
+    {
+        // 1. Consultar API Django vía Cliente
+        $response = $this->authClient->authenticate($dto->username, $dto->password);
 
         if (!$response->successful()) {
             $this->logError('Fallo de respuesta HTTP en Django', $response, $dto->username);
@@ -45,82 +39,86 @@ class AuthService
 
         $data = $response->json();
 
-        // Validar respuesta "Success" de Django
+        // 2. Validar respuesta de negocio
         if (($data['message'] ?? '') !== 'Success') {
             $this->logError('Django rechazó las credenciales', $response, $dto->username);
             throw new Exception($data['message'] ?? 'Credenciales inválidas', 401);
         }
 
-        Log::channel('auth')->info("Contenido de data: ", $data);
+        Log::channel('auth')->info("Contenido de data de Django: ", $data);
 
-        // Sincronizar usuario localmente usando el Mapper
+        // 3. Sincronizar usuario local (Repository)
         $mappedData = UserMapper::fromDjangoToLocal($data);
         $user = $this->userRepository->syncExternalUser($mappedData);
 
-        // Control de Sesiones Concurrentes (Nivel Elite)
-        // Eliminar cualquier otra sesión activa del usuario para garantizar sesión única
-        DB::table('sessions')
-            ->where('user_id', $user->id)
-            ->delete();
+        // 4. Control de Sesiones Concurrentes (Nivel Elite)
+        DB::table('sessions')->where('user_id', $user->id)->delete();
 
-        // Iniciar sesión en Laravel
+        // 5. Autenticación en Laravel
         Auth::login($user);
-
-        // Regenerar sesión para prevenir fijación de sesiones (Estándar de Seguridad)
         request()->session()->regenerate();
 
-        // Retornar datos para el controlador
+        // 6. Sincronizar sesión vía Acción
+        $this->syncSessionAction->execute($data);
+
         return [
             'user' => $user,
             'data' => $data
         ];
     }
 
+
     /**
-     * Cierra la sesión activa en Laravel.
+     * Cierre de sesión orquestado.
      */
     public function logout(Request $request): void
     {
-        // 1. Logout del guard web (Limpia sesión física)
-        Auth::guard('web')->logout();
+        $username = Auth::user()?->username;
 
-        // 2. Limpiar el usuario del Resolver del Request
-        $request->setUserResolver(fn () => null);
-
-        // 3. Limpieza profunda de TODOS los guards cargados
-        // Esto evita que Sanctum u otros guards mantengan al usuario en memoria
-        foreach (array_keys(config('auth.guards')) as $guardName) {
-            $guard = Auth::guard($guardName);
-            if (method_exists($guard, 'logout')) {
-                $guard->logout();
+        // 1. Inactivar Token en Django vía Cliente
+        if ($username) {
+            $response = $this->authClient->invalidateToken($username);
+            if ($response->successful() && ($response->json()['status'] ?? '') === 'Success') {
+                Log::channel('auth')->info("Token inactivado correctamente para {$username}");
+            } else {
+                Log::channel('auth')->error("Fallo al inactivar token para {$username}");
             }
         }
 
-        // 4. Forzar a olvidar el usuario en el gestor de autenticación
-        Auth::forgetUser();
-
-        // 5. Limpieza física de la sesión
-        $request->session()->flush();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        Log::channel('auth')->info('=== POST-LOGOUT DEBUG ===', [
-            'auth_check'       => Auth::check(),
-            'auth_id'          => Auth::id(),
-            'session_id'       => $request->session()->getId(),
-            'session_user_id'  => $request->session()->get('login_web_59ba36addc2b2f9401580f014c7f58ea4e30989d'),
-            'session_data'     => $request->session()->all(),
-        ]);
-
-        Log::channel('auth')->info('Usuario removido de todos los guards y sesión invalidada');
+        // 2. Cierre de sesión y limpieza de Laravel vía Acción
+        $this->completeLogoutAction->execute($request);
     }
 
+
+    /**
+     * Verificación de token orquestada.
+     */
+    public function verifyToken(string $username, string $token): bool
+    {
+        try {
+            $response = $this->authClient->verifyToken($username, $token);
+
+            if ($response->successful()) {
+                return ($response->json()['message'] ?? '') === 'Success';
+            }
+
+            return false;
+        } catch (Exception $e) {
+            Log::channel('auth')->error("Error en verifyToken: {$e->getMessage()}");
+            return false;
+        }
+    }
+
+
+    /**
+     * Logs de error centralizados.
+     */
     private function logError(string $message, $response, string $username): void
     {
         Log::channel('auth')->error($message, [
-            'status' => $response->status(),
+            'status'  => $response->status(),
             'usuario' => $username,
-            'body' => $response->json()
+            'body'    => $response->json()
         ]);
     }
 }

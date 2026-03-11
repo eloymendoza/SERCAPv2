@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
-use App\DTOs\LoginDTO;
+use App\Mappers\AuthMapper;
 use App\Mappers\UserMapper;
 use Illuminate\Http\Request;
 use App\Services\AuthService;
@@ -18,21 +18,14 @@ class AuthController extends Controller
         private readonly AuthService $authService
     ) {}
 
-    /**
-     * Inicia sesión autenticando contra Django y sincronizando el usuario.
-     */
+
     public function login(LoginRequest $request): JsonResponse
     {
-        Log::channel('auth')->info('Iniciando sesión');
-        Log::channel('auth')->info('=== LOGIN DEBUG ===', [
-            'session_id_generada' => $request->session()->getId(),
-        ]);
+        Log::channel('auth')->info("Usuario: {$request->username} - Iniciando autenticación");
+        
         try {
-            $dto = LoginDTO::fromRequest($request);
+            $dto = AuthMapper::toAuthDTO($request);
             $authData = $this->authService->authenticate($dto);
-
-            // Guardar datos adicionales en la sesión
-            $this->syncSession($authData['data']);
 
             return response()->json([
                 'message' => 'Success',
@@ -44,23 +37,20 @@ class AuthController extends Controller
                 'usuario' => $request->username,
                 'error'   => $e->getMessage()
             ]);
+            
             return response()->json([
                 'message' => $e->getMessage()
             ], in_array($e->getCode(), [401, 422, 502]) ? $e->getCode() : 500);
         }
     }
 
-    /**
-     * Cierra la sesión del usuario.
-     */
+
     public function logout(Request $request): JsonResponse
     {
         try {
             $this->authService->logout($request);
             
-            // Creamos la respuesta y eliminamos la cookie explícitamente
-            return response()
-                ->json(['message' => 'Sesión cerrada correctamente'])
+            return response()->json(['message' => 'Sesión cerrada correctamente'])
                 ->withCookie(cookie()->forget('laravel_session'))
                 ->withCookie(cookie()->forget('XSRF-TOKEN'));
 
@@ -70,45 +60,23 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Obtiene los datos del usuario autenticado y su sesión.
-     */
-    public function me(Request $request): JsonResponse
-    {
-        return response()->json([
-            'user' => $request->user(),
-            'session' => [
-                'permisos'       => session('permisos'),
-                'tkg'            => session('tkg'),
-                'idPersonal'     => session('idPersonal'),
-                'nombreCompleto' => session('nombreCompleto'),
-            ]
-        ]);
-    }
 
-    /**
-     * Endpoint de prueba para verificar la persistencia de la sesión.
-     */
-    public function sessionTest(): JsonResponse
+    public function verifyToken(Request $request): JsonResponse
     {
-        return response()->json([
-            'is_logged_in' => Auth::check(),
-            'user'         => Auth::user(),
-            'session_data' => session()->all(),
-        ]);
-    }
+        Log::channel('auth')->info("Usuario: {$request->username} - Verificando token");
+        try {
+            $isValid = $this->authService->verifyToken(
+                username: Auth::user()?->username ?? '',
+                token: (string) session('tkg')
+            );
 
-    /**
-     * Sincroniza los datos de la sesión de Laravel con la respuesta de Django.
-     */
-    private function syncSession(array $data): void
-    {
-        session([
-            'permisos'       => $data['permisos'] ?? [],
-            'tkg'            => $data['tkg'] ?? null,
-            'idPersonal'     => $data['idPersonal'] ?? null,
-            'nombreCompleto' => $data['nombreCompleto'] ?? null,
-            'rutaFoto'       => $data['rutaFoto'] ?? null
-        ]);
+            return response()->json([
+                'valid'   => $isValid,
+                'message' => $isValid ? 'Token válido' : 'Token inválido o expirado'
+            ], $isValid ? 200 : 401);
+
+        } catch (Exception $e) {
+            return response()->json(['valid' => false, 'message' => $e->getMessage()], 401);
+        }
     }
 }
