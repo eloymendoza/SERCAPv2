@@ -12,10 +12,13 @@ use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use App\Actions\Auth\SyncSessionAction;
 use App\Actions\Auth\CompleteLogoutAction;
-use Exception;
+use App\Exceptions\Domain\AuthException;
+use App\Traits\HandlesProcess;
 
 class AuthService
 {
+    use HandlesProcess;
+
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly DjangoAuthClient $authClient,
@@ -29,42 +32,47 @@ class AuthService
      */
     public function authenticate(AuthDTO $dto): array
     {
-        // 1. Consultar API Django vía Cliente
-        $response = $this->authClient->authenticate($dto->username, $dto->password);
+        return $this->handle(function () use ($dto) {
+            // 1. Consultar API Django vía Cliente
+            $response = $this->authClient->authenticate($dto->username, $dto->password);
 
-        if (!$response->successful()) {
-            $this->logError('Fallo de respuesta HTTP en Django', $response, $dto->username);
-            throw new Exception($response->json()['message'] ?? 'Error en el servidor de autenticación', $response->status());
-        }
+            if (!$response->successful()) {
+                Log::channel('auth')->error("Fallo de respuesta HTTP en Django", [
+                    'response' => $response->json()
+                ]);
+                
+                // Si la API devuelve un mensaje, lo respetamos pero mediante una excepción de dominio
+                throw AuthException::invalidCredentials('Credenciales inválidas. Por favor, inténtalo de nuevo.');
+            }
 
-        $data = $response->json();
+            $data = $response->json();
 
-        // 2. Validar respuesta de negocio
-        if (($data['message'] ?? '') !== 'Success') {
-            $this->logError('Django rechazó las credenciales', $response, $dto->username);
-            throw new Exception($data['message'] ?? 'Credenciales inválidas', 401);
-        }
+            // 2. Validar respuesta de negocio
+            if (($data['message'] ?? '') !== 'Success') {
+                throw AuthException::invalidCredentials($data['message'] ?? 'Credenciales inválidas');
+            }
 
-        Log::channel('auth')->info("Contenido de data de Django: ", $data);
+            Log::channel('auth')->info("Contenido de data de Django: ", $data);
 
-        // 3. Sincronizar usuario local (Repository)
-        $mappedData = UserMapper::fromDjangoToLocal($data);
-        $user = $this->userRepository->syncExternalUser($mappedData);
+            // 3. Sincronizar usuario local (Repository)
+            $mappedData = UserMapper::fromDjangoToLocal($data);
+            $user = $this->userRepository->syncExternalUser($mappedData);
 
-        // 4. Control de Sesiones Concurrentes (Nivel Elite)
-        DB::table('sessions')->where('user_id', $user->id)->delete();
+            // 4. Control de Sesiones Concurrentes (Nivel Elite)
+            DB::table('sessions')->where('user_id', $user->id)->delete();
 
-        // 5. Autenticación en Laravel
-        Auth::login($user);
-        request()->session()->regenerate();
+            // 5. Autenticación en Laravel
+            Auth::login($user);
+            request()->session()->regenerate();
 
-        // 6. Sincronizar sesión vía Acción
-        $this->syncSessionAction->execute($data);
+            // 6. Sincronizar sesión vía Acción
+            $this->syncSessionAction->execute($data);
 
-        return [
-            'user' => $user,
-            'data' => $data
-        ];
+            return [
+                'user' => $user,
+                'data' => $data
+            ];
+        }, 'AuthService@authenticate');
     }
 
 
@@ -73,20 +81,22 @@ class AuthService
      */
     public function logout(Request $request): void
     {
-        $username = Auth::user()?->username;
+        $this->handle(function () use ($request) {
+            $username = Auth::user()?->username;
 
-        // 1. Inactivar Token en Django vía Cliente
-        if ($username) {
-            $response = $this->authClient->invalidateToken($username);
-            if ($response->successful() && ($response->json()['status'] ?? '') === 'Success') {
-                Log::channel('auth')->info("Token inactivado correctamente para {$username}");
-            } else {
-                Log::channel('auth')->error("Fallo al inactivar token para {$username}");
+            // 1. Inactivar Token en Django vía Cliente
+            if ($username) {
+                $response = $this->authClient->invalidateToken($username);
+                if ($response->successful() && ($response->json()['status'] ?? '') === 'Success') {
+                    Log::channel('auth')->info("Token inactivado correctamente para {$username}");
+                } else {
+                    Log::channel('auth')->error("Fallo al inactivar token para {$username}");
+                }
             }
-        }
 
-        // 2. Cierre de sesión y limpieza de Laravel vía Acción
-        $this->completeLogoutAction->execute($request);
+            // 2. Cierre de sesión y limpieza de Laravel vía Acción
+            $this->completeLogoutAction->execute($request);
+        }, 'AuthService@logout');
     }
 
 
@@ -95,7 +105,7 @@ class AuthService
      */
     public function verifyToken(string $username, string $token): bool
     {
-        try {
+        return $this->handle(function () use ($username, $token) {
             $response = $this->authClient->verifyToken($username, $token);
 
             if ($response->successful()) {
@@ -103,22 +113,6 @@ class AuthService
             }
 
             return false;
-        } catch (Exception $e) {
-            Log::channel('auth')->error("Error en verifyToken: {$e->getMessage()}");
-            return false;
-        }
-    }
-
-
-    /**
-     * Logs de error centralizados.
-     */
-    private function logError(string $message, $response, string $username): void
-    {
-        Log::channel('auth')->error($message, [
-            'status'  => $response->status(),
-            'usuario' => $username,
-            'body'    => $response->json()
-        ]);
+        }, 'AuthService@verifyToken');
     }
 }
