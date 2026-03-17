@@ -2,14 +2,14 @@
 
 namespace App\Traits;
 
-use App\Exceptions\BaseApiException;
-use App\Exceptions\Infrastructure\DatabaseInfrastructureException;
-use App\Exceptions\ResourceNotFoundException;
-use App\Exceptions\ServiceException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Log;
 use Throwable;
+use Illuminate\Support\Facades\Log;
+use App\Exceptions\BaseApiException;
+use App\Exceptions\ServiceException;
+use Illuminate\Database\QueryException;
+use App\Exceptions\ResourceNotFoundException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Exceptions\Infrastructure\DatabaseInfrastructureException;
 
 trait HandlesProcess
 {
@@ -22,15 +22,29 @@ trait HandlesProcess
             return $callback();
         } 
         catch (BaseApiException $e) {
+            Log::channel('auth')->error("[BASE_API_ERROR] {$context}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             throw $e;
         }
         catch (QueryException $e) {
+            Log::channel('auth')->error("[DATABASE_ERROR] {$context}: {$e->getMessage()}", [
+                'sql' => $e->getSql(),
+                'bindings' => $e->getBindings(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             throw new DatabaseInfrastructureException(
                 message: "Error técnico en base de datos registrado en {$context}",
                 previous: $e
             );
         }
         catch (ModelNotFoundException $e) {
+            Log::channel('auth')->error("[MODEL_NOT_FOUND] {$context}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
+
             throw new ResourceNotFoundException("Recurso en {$context}");
         }
         catch (Throwable $e) {

@@ -23,13 +23,6 @@ class AuthMapper
         ];
     }
 
-    // DTO → Array para respuesta HTTP
-    public function toResponseArray(AuthDTO $dto): array {
-        return [
-            'username' => $dto->username,
-        ];
-    }
-
     // Múltiples Models → DTOs
     public function toDTOCollection(iterable $requests): array {
         $dtos = [];

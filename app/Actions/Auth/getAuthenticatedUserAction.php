@@ -12,9 +12,11 @@ class GetAuthenticatedUserAction
     public function execute(): array
     {
         return [
+            'id'             => Session::get('id'),
             'idPersonal'     => Session::get('idPersonal'),
             'usuario'        => Session::get('usuario'),
             'nombreCompleto' => Session::get('nombreCompleto'),
+            'email'          => Session::get('email'),
             'puestoActual'   => Session::get('puestoActual'),
             'rutaFoto'       => Session::get('rutaFoto'),
             'permisos'       => Session::get('permisos', []),

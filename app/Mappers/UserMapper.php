@@ -11,47 +11,46 @@ class UserMapper
      */
     public function fromDjangoToDTO(array $data): UserDTO
     {
+        $username = $data['usuario'] ?? '';
+        
         return new UserDTO(
-            id: $data['idPersonal'] ?? null,
-            username: $data['usuario'] ?? '',
+            id: null,
+            idPersonal: isset($data['idPersonal']) ? (int) $data['idPersonal'] : null,
+            username: $username,
             name: $data['nombreCompleto'] ?? '',
-            email: ($data['usuario'] ?? 'user') . '@grupo-iai.com.mx'
+            email: $data['email'] ?? $this->generateDefaultEmail($username),
+            puestoActual: $data['puestoActual'] ?? null,
+            rutaFoto: $data['rutaFoto'] ?? null,
+            permisos: $data['permisos'] ?? [],
+            token: $data['token'] ?? null
         );
     }
 
     // Model → DTO
     public function toDTO(array|object $data): UserDTO {
         $data = (array) $data;
+        $username = $data['usuario'] ?? $data['username'] ?? '';
+
         return new UserDTO(
-            id: $data['idPersonal'] ?? $data['id'] ?? null,
-            username: $data['usuario'] ?? $data['username'] ?? '',
+            id: $data['id'] ?? null,
+            idPersonal: isset($data['id_personal']) ? (int) $data['id_personal'] : (isset($data['idPersonal']) ? (int) $data['idPersonal'] : null),
+            username: $username,
             name: $data['nombreCompleto'] ?? $data['name'] ?? '',
-            email: $data['email'] ?? '',
+            email: $data['email'] ?? $this->generateDefaultEmail($username),
             puestoActual: $data['puestoActual'] ?? null,
             rutaFoto: $data['rutaFoto'] ?? null,
-            permisos: $data['permisos'] ?? []
+            permisos: $data['permisos'] ?? [],
+            token: $data['token'] ?? null
         );
     }
 
     // DTO → Array para guardar en BD
     public function toPersistenceArray(UserDTO $dto): array {
         return [
-            'id'       => $dto->id,
-            'username' => $dto->username,
-            'name'     => $dto->name,
-            'email'    => $dto->email,
-        ];
-    }
-
-    // DTO → Array para respuesta HTTP
-    public function toResponseArray(UserDTO $dto): array {
-        return [
-            'idPersonal'     => $dto->id,
-            'usuario'        => $dto->username,
-            'nombreCompleto' => $dto->name,
-            'puestoActual'   => $dto->puestoActual,
-            'rutaFoto'       => $dto->rutaFoto,
-            'permisos'       => $dto->permisos,
+            'id_personal' => $dto->idPersonal,
+            'username'    => $dto->username,
+            'name'        => $dto->name,
+            'email'       => $dto->email,
         ];
     }
 
@@ -62,5 +61,14 @@ class UserMapper
             $dtos[] = $this->toDTO($model);
         }
         return $dtos;
+    }
+
+    /**
+     * Genera un email por defecto basado en el usuario y configuración.
+     */
+    private function generateDefaultEmail(string $username): string
+    {
+        $domain = config('services.django_auth.default_email_domain', 'grupo-iai.com.mx');
+        return !empty($username) ? "{$username}@{$domain}" : "";
     }
 }

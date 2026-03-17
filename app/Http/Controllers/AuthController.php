@@ -3,43 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Mappers\AuthMapper;
-use Illuminate\Http\Request;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\LoginRequest;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\UserResource;
 
 class AuthController extends Controller
 {
     public function __construct(
-        private readonly AuthService $authService
+        private readonly AuthService $authService,
+        private readonly AuthMapper $authMapper
     ) {}
-
 
 
     public function login(LoginRequest $request): JsonResponse
     {
-        Log::channel('auth')->info("Usuario: {$request->username} - AuthController::login");
-        
-        $dto = (new AuthMapper())->toDTO($request);
-        $authData = $this->authService->authenticate($dto);
-
-        Log::channel('auth')->info("Datos de usuario obtenidos correctamente: ", $authData);
+        $dto = $this->authMapper->toDTO($request);
+        $userDto = $this->authService->authenticate($dto);
 
         return response()->json([
             'success' => true,
             'message' => 'Sesión iniciada correctamente.',
-            'data'    => $authData['data']
+            'data'    => new UserResource($userDto)
         ]);
     }
 
 
-    public function logout(Request $request): JsonResponse
+    public function logout(): JsonResponse
     {
-        Log::channel('auth')->info("Usuario: {$request->username} - AuthController::logout");
-
-        $this->authService->logout($request);
+        $this->authService->logout();
         
         return response()->json(['message' => 'Sesión cerrada correctamente'])
             ->withCookie(cookie()->forget('laravel_session'))
@@ -47,16 +39,14 @@ class AuthController extends Controller
     }
 
 
-    public function checkSession(Request $request): JsonResponse
+    public function checkSession(): JsonResponse
     {
-        Log::channel('auth')->info("Usuario: " . Auth::user()?->username . " - AuthController::checkSession");
-        
-        $authData = $this->authService->checkSession($request);
+        $userDto = $this->authService->checkSession();
 
         return response()->json([
             'success' => true,
             'message' => 'Sesión verificada correctamente.',
-            'data'    => $authData['sessionData']
+            'data'    => new UserResource($userDto)
         ]);
     }
 }

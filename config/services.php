@@ -41,6 +41,7 @@ return [
         'system_id'   => env('ID_SISTEMA'),
         'verify_tk'   => env('API_VERIFY_TK'),
         'inactivate'  => env('API_INA_TK'),
+        'default_email_domain' => env('DEFAULT_EMAIL_DOMAIN', 'grupo-iai.com.mx'),
     ],
 
 ];

@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\DTOs\AuthDTO;
+use App\DTOs\UserDTO;
 use App\Mappers\UserMapper;
-use Illuminate\Http\Request;
 use App\Traits\HandlesProcess;
 use App\Clients\DjangoAuthClient;
 use Illuminate\Support\Facades\Log;
@@ -27,14 +27,15 @@ class AuthService
         private readonly SyncSessionAction $syncSessionAction,
         private readonly CompleteLogoutAction $completeLogoutAction,
         private readonly GetAuthenticatedUserAction $getAuthenticatedUserAction,
-        private readonly ClearUserSessionsAction $clearUserSessionsAction
+        private readonly ClearUserSessionsAction $clearUserSessionsAction,
+        private readonly UserMapper $userMapper
     ) {}
 
 
     /**
      * Proceso de autenticación orquestado.
      */
-    public function authenticate(AuthDTO $dto): array
+    public function authenticate(AuthDTO $dto): UserDTO
     {
         Log::channel('auth')->info("Usuario: {$dto->username} - AuthService::authenticate");
         
@@ -47,23 +48,36 @@ class AuthService
             }
 
             $data = $response->json();
+            Log::channel('auth')->info("Proceso de autenticación exitoso: ", [
+                'data' => $data
+            ]);
 
-            // Sincronizar usuario local
-            $userDto = (new UserMapper())->fromDjangoToDTO($data);
-            $user = $this->userRepository->syncExternalUser((new UserMapper)->toPersistenceArray($userDto));
+            // Sincronizar datos base (incluyendo token)
+            $userDto = $this->userMapper->fromDjangoToDTO($data);
+            
+            // Persistir localmente
+            $user = $this->userRepository->syncExternalUser($this->userMapper->toPersistenceArray($userDto));
 
-            // Limpiar sesiones anteriores (Garantizar sesión única)
-            $this->clearUserSessionsAction->execute($user->id);
-
-            // Autenticar en Laravel y sincronizar sesión
+            // Autenticar en Laravel
             Auth::login($user);
             request()->session()->regenerate();
-            $this->syncSessionAction->execute($data);
 
-            // Retornar datos de respuesta
+            // Actualizar DTO con ID local para la sesión
+            $fullDto = $userDto->withId($user->id);
+            Log::channel('auth')->info("DTO completo actualizado: ", [
+                'data' => $fullDto
+            ]);
+
+            // Sincronizar sesión usando DTO
+            $this->syncSessionAction->execute($fullDto);
+
+            // Limpiar sesiones anteriores
+            $this->clearUserSessionsAction->execute($user->id);
+
+            // Retornar DTO para el controlador
             $sessionData = $this->getAuthenticatedUserAction->execute();
 
-            return ['data' => (new UserMapper)->toResponseArray((new UserMapper)->toDTO($sessionData))];
+            return $this->userMapper->toDTO($sessionData);
         }, 'AuthService@authenticate');
     }
 
@@ -71,10 +85,11 @@ class AuthService
     /**
      * Cierre de sesión orquestado.
      */
-    public function logout(Request $request): void
+    public function logout(): void
     {
-        Log::channel('auth')->info("Usuario: {$request->username} - AuthService::logout");
-        $this->handle(function () use ($request) {
+        Log::channel('auth')->info("Usuario: " . Auth::user()?->username . " - AuthService::logout");
+
+        $this->handle(function () {
             $username = Auth::user()?->username;
 
             // Inactivar Token en API Auth
@@ -88,7 +103,7 @@ class AuthService
             }
 
             // Cierre de sesión y limpieza de Laravel
-            $this->completeLogoutAction->execute($request);
+            $this->completeLogoutAction->execute(request());
         }, 'AuthService@logout');
     }
 
@@ -96,11 +111,11 @@ class AuthService
     /**
      * Obtiene los datos del usuario autenticado y valida la vigencia del token externo.
      */
-    public function checkSession(Request $request): array
+    public function checkSession(): UserDTO
     {
         Log::channel('auth')->info("Usuario: " . Auth::user()?->username . " - AuthService::checkSession");
         
-        return $this->handle(function () use ($request) {
+        return $this->handle(function () {
             $username = Auth::user()?->username;
 
             // Validar identidad en API Auth
@@ -108,7 +123,7 @@ class AuthService
                 Log::channel('auth')->warning("Sesión invalidada por token expirado/inválido: {$username}");
                 
                 // Aplicar Auto-Logout Proactivo
-                $this->completeLogoutAction->execute($request);
+                $this->completeLogoutAction->execute(request());
                 
                 throw AuthException::invalidCredentials('Tu sesión ha expirado por seguridad.');
             }   
@@ -116,10 +131,7 @@ class AuthService
             // Extraer metadatos de sesión
             $sessionData = $this->getAuthenticatedUserAction->execute();
 
-            return [
-                'user' => Auth::user(),
-                'sessionData' => (new UserMapper)->toResponseArray((new UserMapper)->toDTO($sessionData))
-            ];
+            return $this->userMapper->toDTO($sessionData);
         }, 'AuthService@checkSession');
     }
 

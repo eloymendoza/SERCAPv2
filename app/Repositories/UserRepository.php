@@ -16,7 +16,7 @@ class UserRepository
     public function syncExternalUser(array $mappedData): User
     {
         return $this->model->updateOrCreate(
-            ['username' => $mappedData['username']], 
+            ['id_personal' => $mappedData['id_personal']], 
             $mappedData
         );
     }
