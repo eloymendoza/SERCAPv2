@@ -34,7 +34,7 @@ trait HandlesProcess
             throw new ResourceNotFoundException("Recurso en {$context}");
         }
         catch (Throwable $e) {
-            Log::critical("[UNEXPECTED_ERROR] {$context}: {$e->getMessage()}", [
+            Log::channel('auth')->critical("[UNEXPECTED_ERROR] {$context}: {$e->getMessage()}", [
                 'file'  => $e->getFile(),
                 'line'  => $e->getLine(),
                 'trace' => $e->getTraceAsString()

@@ -4,8 +4,6 @@ namespace App\Clients;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Log;
-use Exception;
 
 class DjangoAuthClient
 {
@@ -15,9 +13,9 @@ class DjangoAuthClient
 
     public function __construct()
     {
-        $this->baseUrl = (string) env('API_AUTH');
-        $this->secretKey = (string) env('SECRET_KEY');
-        $this->systemId = (int) env('ID_SISTEMA');
+        $this->baseUrl   = (string) config('services.django_auth.base_url');
+        $this->secretKey = (string) config('services.django_auth.secret_key');
+        $this->systemId  = (int)    config('services.django_auth.system_id');
     }
 
     /**
@@ -47,7 +45,7 @@ class DjangoAuthClient
             'idSistema' => $this->systemId
         ];
 
-        return $this->post((string) env('API_INA_TK'), $payload);
+        return $this->post((string) config('services.django_auth.inactivate'), $payload);
     }
 
     /**
@@ -62,7 +60,7 @@ class DjangoAuthClient
             'idSistema' => $this->systemId
         ];
 
-        return $this->post((string) env('API_VERIFY_TK'), $payload);
+        return $this->post((string) config('services.django_auth.verify_tk'), $payload);
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Mappers\AuthMapper;
-use App\Mappers\UserMapper;
 use Illuminate\Http\Request;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
@@ -18,28 +17,28 @@ class AuthController extends Controller
     ) {}
 
 
-    /**
-     * Proceso de Login profesional.
-     */
+
     public function login(LoginRequest $request): JsonResponse
     {
-        Log::channel('auth')->info("Usuario: {$request->username} - Iniciando autenticación");
+        Log::channel('auth')->info("Usuario: {$request->username} - AuthController::login");
         
-        $dto = AuthMapper::toAuthDTO($request);
+        $dto = (new AuthMapper())->toDTO($request);
         $authData = $this->authService->authenticate($dto);
+
+        Log::channel('auth')->info("Datos de usuario obtenidos correctamente: ", $authData);
 
         return response()->json([
             'success' => true,
-            'message' => 'Autenticación exitosa',
-            'user'    => UserMapper::toResponse($authData['user'], $authData['data'])
+            'message' => 'Sesión iniciada correctamente.',
+            'data'    => $authData['data']
         ]);
     }
 
-    /**
-     * Cierre de sesión seguro.
-     */
+
     public function logout(Request $request): JsonResponse
     {
+        Log::channel('auth')->info("Usuario: {$request->username} - AuthController::logout");
+
         $this->authService->logout($request);
         
         return response()->json(['message' => 'Sesión cerrada correctamente'])
@@ -47,21 +46,17 @@ class AuthController extends Controller
             ->withCookie(cookie()->forget('XSRF-TOKEN'));
     }
 
-    /**
-     * Verificación de token.
-     */
-    public function verifyToken(Request $request): JsonResponse
+
+    public function checkSession(Request $request): JsonResponse
     {
-        Log::channel('auth')->info("Usuario: {$request->username} - Verificando token");
+        Log::channel('auth')->info("Usuario: " . Auth::user()?->username . " - AuthController::checkSession");
         
-        $isValid = $this->authService->verifyToken(
-            username: Auth::user()?->username ?? '',
-            token: (string) session('tkg')
-        );
+        $authData = $this->authService->checkSession($request);
 
         return response()->json([
-            'success' => $isValid,
-            'message' => $isValid ? 'Token válido' : 'Token inválido o expirado'
+            'success' => true,
+            'message' => 'Sesión verificada correctamente.',
+            'data'    => $authData['sessionData']
         ]);
     }
 }

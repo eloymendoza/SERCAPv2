@@ -9,12 +9,14 @@ class SyncSessionAction
      */
     public function execute(array $data): void
     {
-        session([
-            'permisos'       => $data['permisos'] ?? [],
-            'tkg'            => $data['tkg'] ?? null,
+        session()->put([
             'idPersonal'     => $data['idPersonal'] ?? null,
+            'usuario'        => $data['usuario'] ?? null,
             'nombreCompleto' => $data['nombreCompleto'] ?? null,
-            'rutaFoto'       => $data['rutaFoto'] ?? null
+            'puestoActual'   => $data['puestoActual'] ?? null,
+            'permisos'       => $data['permisos'] ?? [],
+            'token'          => $data['token'] ?? null,
+            'rutaFoto'       => $data['rutaFoto'] ?? null,
         ]);
     }
 }

@@ -7,15 +7,35 @@ use App\Http\Requests\LoginRequest;
 
 class AuthMapper
 {
-    /**
-     * Transforma una LoginRequest en un AuthDTO,
-     * aplicando el encoding Base64 a la contraseña para la API de Django.
-     */
-    public static function toAuthDTO(LoginRequest $request): AuthDTO
-    {
+    // Model → DTO (No hay modelo Auth directo, pero se usa para DTO)
+    public function toDTO(LoginRequest $request): AuthDTO {
         return new AuthDTO(
             username: $request->validated('username'),
             password: base64_encode(trim($request->validated('password')))
         );
+    }
+
+    // DTO → Array para guardar en BD
+    public function toPersistenceArray(AuthDTO $dto): array {
+        return [
+            'username' => $dto->username,
+            'password' => $dto->password,
+        ];
+    }
+
+    // DTO → Array para respuesta HTTP
+    public function toResponseArray(AuthDTO $dto): array {
+        return [
+            'username' => $dto->username,
+        ];
+    }
+
+    // Múltiples Models → DTOs
+    public function toDTOCollection(iterable $requests): array {
+        $dtos = [];
+        foreach ($requests as $request) {
+            $dtos[] = self::toDTO($request);
+        }
+        return $dtos;
     }
 }

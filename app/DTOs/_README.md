@@ -23,39 +23,53 @@ Esta carpeta contiene los **DTOs** (Data Transfer Objects). Un DTO es un objeto 
 FormRequest → DTO::fromRequest() → Service → Mapper::toArray(DTO)
 ```
 
-## Ejemplo
+# 📋 REGLAS PARA UN DTO (Data Transfer Object)
 
+✅ **UN DTO DEBE:**
+- Transportar datos de un lugar a otro
+- Tener propiedades públicas (readonly si es posible)
+- Tener constructor simple
+- Tener método `toArray(): array` (convertir a array)
+- Tener método estático `fromArray(array): self` (crear desde array)
+- Ser un contenedor simple de datos
+
+❌ **UN DTO NUNCA DEBE:**
+- Validar datos
+- Acceder a base de datos
+- Persistir datos
+- Tener lógica de negocio
+- Disparar eventos
+- Encriptar/desencriptar datos
+- Hacer transformaciones complejas
+- Tener inyección de dependencias
+- Tener métodos con efectos secundarios
+
+**RESUMEN:** El DTO es un **CONTENEDOR DE DATOS**. Nada más.
+
+## ESTRUCTURA MÍNIMA:
 ```php
-<?php
-
-namespace App\DTOs;
-
-use App\Http\Requests\StoreUserRequest;
-
-class UserDTO
+class [Entidad]DTO
 {
     public function __construct(
-        public readonly string $name,
-        public readonly string $email,
-        public readonly ?string $phone = null,
+        public readonly string $campo1,
+        public readonly string $campo2,
+        public readonly ?string $campo3 = null,
     ) {}
 
-    public static function fromRequest(StoreUserRequest $request): self
-    {
-        return new self(
-            name: $request->validated('name'),
-            email: $request->validated('email'),
-            phone: $request->validated('phone'),
-        );
+    public function toArray(): array {
+        return [
+            'campo1' => $this->campo1,
+            'campo2' => $this->campo2,
+            'campo3' => $this->campo3,
+        ];
     }
 
-    public function toArray(): array
-    {
-        return [
-            'name'  => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
-        ];
+    public static function fromArray(array $data): self {
+        return new self(
+            campo1: $data['campo1'],
+            campo2: $data['campo2'],
+            campo3: $data['campo3'] ?? null,
+        );
     }
 }
 ```

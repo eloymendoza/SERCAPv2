@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'django_auth' => [
+        'base_url'    => env('API_AUTH'),
+        'secret_key'  => env('SECRET_KEY'),
+        'system_id'   => env('ID_SISTEMA'),
+        'verify_tk'   => env('API_VERIFY_TK'),
+        'inactivate'  => env('API_INA_TK'),
+    ],
+
 ];

@@ -2,34 +2,65 @@
 
 namespace App\Mappers;
 
-use App\Models\User;
+use App\DTOs\UserDTO;
 
 class UserMapper
 {
     /**
-     * Transforma la respuesta cruda de la API de Django en un array 
-     * compatible con los atributos del modelo User local.
+     * Transforma la respuesta cruda de la API de Django en un UserDTO.
      */
-    public static function fromDjangoToLocal(array $data): array
+    public function fromDjangoToDTO(array $data): UserDTO
     {
+        return new UserDTO(
+            id: $data['idPersonal'] ?? null,
+            username: $data['usuario'] ?? '',
+            name: $data['nombreCompleto'] ?? '',
+            email: ($data['usuario'] ?? 'user') . '@grupo-iai.com.mx'
+        );
+    }
+
+    // Model → DTO
+    public function toDTO(array|object $data): UserDTO {
+        $data = (array) $data;
+        return new UserDTO(
+            id: $data['idPersonal'] ?? $data['id'] ?? null,
+            username: $data['usuario'] ?? $data['username'] ?? '',
+            name: $data['nombreCompleto'] ?? $data['name'] ?? '',
+            email: $data['email'] ?? '',
+            puestoActual: $data['puestoActual'] ?? null,
+            rutaFoto: $data['rutaFoto'] ?? null,
+            permisos: $data['permisos'] ?? []
+        );
+    }
+
+    // DTO → Array para guardar en BD
+    public function toPersistenceArray(UserDTO $dto): array {
         return [
-            'id'       => $data['idPersonal'],
-            'username' => $data['usuario'],
-            'name'     => $data['nombreCompleto'],
-            'email'    => ($data['usuario'] ?? 'user') . '@grupo-iai.com.mx',
+            'id'       => $dto->id,
+            'username' => $dto->username,
+            'name'     => $dto->name,
+            'email'    => $dto->email,
         ];
     }
 
-    /**
-     * (Opcional) Transforma un modelo User a un formato de respuesta estándar.
-     */
-    public static function toResponse(User $user, array $extraData = []): array
-    {
+    // DTO → Array para respuesta HTTP
+    public function toResponseArray(UserDTO $dto): array {
         return [
-            'id'       => $user->id,
-            'name'     => $user->name,
-            'username' => $user->username,
-            'rutaFoto' => $extraData['rutaFoto'] ?? null,
+            'idPersonal'     => $dto->id,
+            'usuario'        => $dto->username,
+            'nombreCompleto' => $dto->name,
+            'puestoActual'   => $dto->puestoActual,
+            'rutaFoto'       => $dto->rutaFoto,
+            'permisos'       => $dto->permisos,
         ];
+    }
+
+    // Múltiples Models → DTOs
+    public function toDTOCollection(iterable $models): array {
+        $dtos = [];
+        foreach ($models as $model) {
+            $dtos[] = $this->toDTO($model);
+        }
+        return $dtos;
     }
 }

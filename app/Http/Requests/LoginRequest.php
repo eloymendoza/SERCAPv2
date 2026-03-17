@@ -16,8 +16,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string|min:3|max:255', // regex:/^[a-zA-Z0-9_]+$/
-            'password' => 'required|string|min:3|max:255', // regex:/^[a-zA-Z0-9_]+$/
+            'username' => 'required|string|min:3|max:255',
+            'password' => 'required|string|min:3|max:255',
         ];
     }
 
@@ -32,8 +32,6 @@ class LoginRequest extends FormRequest
             'password.min' => 'El campo :attribute debe tener al menos :min caracteres.',
             'username.max' => 'El campo :attribute debe tener menos de :max caracteres.',
             'password.max' => 'El campo :attribute debe tener menos de :max caracteres.',
-            // 'username.regex' => 'El campo :attribute debe contener solo letras, números y guiones bajos.',
-            // 'password.regex' => 'El campo :attribute debe contener solo letras, números y guiones bajos.',
         ];
     }
 

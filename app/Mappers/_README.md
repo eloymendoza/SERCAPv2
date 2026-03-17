@@ -23,34 +23,65 @@ Service usa Mapper::toArray(DTO) → pasa array al Repository
 Repository retorna Model → Mapper::toDTO(Model) → Service retorna DTO
 ```
 
-## Ejemplo
+# 🔄 REGLAS PARA UN MAPPER
 
+✅ **UN MAPPER DEBE:**
+- Convertir Model → DTO
+- Convertir DTO → Array (para persistencia en BD)
+- Convertir DTO → Array (para respuesta HTTP)
+- Convertir Array → DTO
+- Convertir colecciones de Models a DTOs
+- Aplicar transformaciones de campos (snake_case ↔ camelCase)
+- Incluir/excluir campos según contexto
+- Ser stateless (sin estado, sin cache)
+
+❌ **UN MAPPER NUNCA DEBE:**
+- Validar datos
+- Persistir datos en BD
+- Tener lógica de negocio
+- Disparar eventos
+- Acceder a BD (excepto leer Models ya cargados)
+- Encriptar datos
+- Tener estado (propiedades privadas, cache)
+- Tener métodos con efectos secundarios
+
+**RESUMEN:** El Mapper es un **TRANSFORMADOR DE DATOS**. Solo convierte de un formato a otro.
+
+## ESTRUCTURA MÍNIMA:
 ```php
-<?php
-
-namespace App\Mappers;
-
-use App\DTOs\UserDTO;
-use App\Models\User;
-
-class UserMapper
+class [Entidad]Mapper
 {
-    public static function toArray(UserDTO $dto): array
-    {
+    // Model → DTO
+    public function toDTO(Model $model): [Entidad]DTO {
+        return new [Entidad]DTO(
+            campo1: $model->campo1,
+            campo2: $model->campo2,
+        );
+    }
+
+    // DTO → Array para guardar en BD
+    public function toPersistenceArray([Entidad]DTO $dto): array {
         return [
-            'nombre'    => $dto->name,
-            'correo'    => $dto->email,
-            'telefono'  => $dto->phone,
+            'campo1' => $dto->campo1,
+            'campo2' => $dto->campo2,
         ];
     }
 
-    public static function toDTO(User $user): UserDTO
-    {
-        return new UserDTO(
-            name: $user->nombre,
-            email: $user->correo,
-            phone: $user->telefono,
-        );
+    // DTO → Array para respuesta HTTP
+    public function toResponseArray([Entidad]DTO $dto): array {
+        return [
+            'campo1' => $dto->campo1,
+            'campo2' => $dto->campo2,
+        ];
+    }
+
+    // Múltiples Models → DTOs
+    public function toDTOCollection(iterable $models): array {
+        $dtos = [];
+        foreach ($models as $model) {
+            $dtos[] = $this->toDTO($model);
+        }
+        return $dtos;
     }
 }
 ```
