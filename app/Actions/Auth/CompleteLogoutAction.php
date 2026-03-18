@@ -13,13 +13,13 @@ class CompleteLogoutAction
      */
     public function execute(Request $request): void
     {
-        // 1. Logout del guard web
+        // Logout del guard web
         Auth::guard('web')->logout();
 
-        // 2. Limpiar el usuario del Resolver del Request
+        // Limpiar el usuario del Resolver del Request
         $request->setUserResolver(fn () => null);
 
-        // 3. Limpieza de todos los guards cargados
+        // Limpieza de todos los guards cargados
         foreach (array_keys(config('auth.guards')) as $guardName) {
             $guard = Auth::guard($guardName);
             if (method_exists($guard, 'logout')) {
@@ -27,10 +27,10 @@ class CompleteLogoutAction
             }
         }
 
-        // 4. Forzar olvido del usuario
+        // Forzar olvido del usuario
         Auth::forgetUser();
 
-        // 5. Invalidar y regenerar token de sesión
+        // Invalidar y regenerar token de sesión
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

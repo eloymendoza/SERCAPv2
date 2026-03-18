@@ -116,21 +116,11 @@ class AuthService
         Log::channel('auth')->info("Usuario: " . Auth::user()?->username . " - AuthService::checkSession");
         
         return $this->handle(function () {
-            $username = Auth::user()?->username;
-
-            // Validar identidad en API Auth
-            if (!$this->verifyToken($username)) {
-                Log::channel('auth')->warning("Sesión invalidada por token expirado/inválido: {$username}");
-                
-                // Aplicar Auto-Logout Proactivo
-                $this->completeLogoutAction->execute(request());
-                
-                throw AuthException::invalidCredentials('Tu sesión ha expirado por seguridad.');
-            }   
-
             // Extraer metadatos de sesión
             $sessionData = $this->getAuthenticatedUserAction->execute();
-
+            Log::channel('auth')->info("Datos de sesión extraídos: ", [
+                'data' => $sessionData
+            ]);
             return $this->userMapper->toDTO($sessionData);
         }, 'AuthService@checkSession');
     }
