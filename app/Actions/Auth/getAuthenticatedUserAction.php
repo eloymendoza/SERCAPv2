@@ -4,10 +4,13 @@ namespace App\Actions\Auth;
 
 use Illuminate\Support\Facades\Session;
 
+/**
+ * Recuperación de metadatos de sesión del usuario.
+ */
 class GetAuthenticatedUserAction
 {
     /**
-     * Extrae los metadatos de la sesión actual de Laravel.
+     * @return array
      */
     public function execute(): array
     {

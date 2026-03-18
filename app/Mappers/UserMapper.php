@@ -4,10 +4,15 @@ namespace App\Mappers;
 
 use App\DTOs\UserDTO;
 
+/**
+ * Mapeo de identidad y datos de perfil de usuario.
+ */
 class UserMapper
 {
     /**
-     * Transforma la respuesta cruda de la API de Django en un UserDTO.
+     * Convierte una respuesta cruda de API Auth en un UserDTO.
+     * @param array $data Respuesta cruda de API Auth.
+     * @return UserDTO
      */
     public function fromDjangoToDTO(array $data): UserDTO
     {
@@ -26,7 +31,11 @@ class UserMapper
         );
     }
 
-    // Model → DTO
+    /**
+     * Convierte un array o objeto en un UserDTO.
+     * @param array|object $data
+     * @return UserDTO
+     */
     public function toDTO(array|object $data): UserDTO {
         $data = (array) $data;
         $username = $data['usuario'] ?? $data['username'] ?? '';
@@ -44,7 +53,11 @@ class UserMapper
         );
     }
 
-    // DTO → Array para guardar en BD
+    /**
+     * Convierte un UserDTO en un array para persistencia.
+     * @param UserDTO $dto
+     * @return array Estructura para persistencia local.
+     */
     public function toPersistenceArray(UserDTO $dto): array {
         return [
             'id_personal' => $dto->idPersonal,
@@ -54,7 +67,11 @@ class UserMapper
         ];
     }
 
-    // Múltiples Models → DTOs
+    /**
+     * Convierte una colección de modelos en una colección de DTOs.
+     * @param iterable $models
+     * @return array<UserDTO>
+     */
     public function toDTOCollection(iterable $models): array {
         $dtos = [];
         foreach ($models as $model) {
@@ -65,6 +82,8 @@ class UserMapper
 
     /**
      * Genera un email por defecto basado en el usuario y configuración.
+     * @param string $username
+     * @return string
      */
     private function generateDefaultEmail(string $username): string
     {

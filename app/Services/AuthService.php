@@ -17,6 +17,12 @@ use App\Actions\Auth\CompleteLogoutAction;
 use App\Actions\Auth\ClearUserSessionsAction;
 use App\Actions\Auth\GetAuthenticatedUserAction;
 
+/**
+ * Servicio de Autenticación.
+ * 
+ * Gestiona la integración con la API Auth, sincronización de usuarios locales,
+ * persistencia de sesiones y validación de tokens.
+ */
 class AuthService
 {
     use HandlesProcess;
@@ -33,14 +39,17 @@ class AuthService
 
 
     /**
-     * Proceso de autenticación orquestado.
+     * Orquestación de inicio de sesión y sincronización local.
+     * 
+     * @param AuthDTO $dto
+     * @return UserDTO
+     * @throws AuthException
      */
     public function authenticate(AuthDTO $dto): UserDTO
     {
         Log::channel('auth')->info("Usuario: {$dto->username} - AuthService::authenticate");
         
         return $this->handle(function () use ($dto) {
-            // Autenticar en API Externa
             $response = $this->authClient->authenticate($dto->username, $dto->password);
 
             if (!$response->successful()) {
@@ -52,29 +61,19 @@ class AuthService
                 'data' => $data
             ]);
 
-            // Sincronizar datos base (incluyendo token)
             $userDto = $this->userMapper->fromDjangoToDTO($data);
-            
-            // Persistir localmente
             $user = $this->userRepository->syncExternalUser($this->userMapper->toPersistenceArray($userDto));
 
-            // Autenticar en Laravel
             Auth::login($user);
-            request()->session()->regenerate();
 
-            // Actualizar DTO con ID local para la sesión
             $fullDto = $userDto->withId($user->id);
             Log::channel('auth')->info("DTO completo actualizado: ", [
                 'data' => $fullDto
             ]);
 
-            // Sincronizar sesión usando DTO
             $this->syncSessionAction->execute($fullDto);
-
-            // Limpiar sesiones anteriores
             $this->clearUserSessionsAction->execute($user->id);
 
-            // Retornar DTO para el controlador
             $sessionData = $this->getAuthenticatedUserAction->execute();
 
             return $this->userMapper->toDTO($sessionData);
@@ -83,7 +82,7 @@ class AuthService
 
 
     /**
-     * Cierre de sesión orquestado.
+     * Invalida la sesión local y el estado del token externo.
      */
     public function logout(): void
     {
@@ -92,7 +91,6 @@ class AuthService
         $this->handle(function () {
             $username = Auth::user()?->username;
 
-            // Inactivar Token en API Auth
             if ($username) {
                 $response = $this->authClient->invalidateToken($username);
                 if ($response->successful() && ($response->json()['status'] ?? '') === 'Success') {
@@ -102,21 +100,21 @@ class AuthService
                 }
             }
 
-            // Cierre de sesión y limpieza de Laravel
             $this->completeLogoutAction->execute(request());
         }, 'AuthService@logout');
     }
 
 
     /**
-     * Obtiene los datos del usuario autenticado y valida la vigencia del token externo.
+     * Recupera la información del usuario desde la sesión persistida.
+     * 
+     * @return UserDTO
      */
     public function checkSession(): UserDTO
     {
         Log::channel('auth')->info("Usuario: " . Auth::user()?->username . " - AuthService::checkSession");
         
         return $this->handle(function () {
-            // Extraer metadatos de sesión
             $sessionData = $this->getAuthenticatedUserAction->execute();
             Log::channel('auth')->info("Datos de sesión extraídos: ", [
                 'data' => $sessionData
@@ -127,7 +125,10 @@ class AuthService
 
 
     /**
-     * Verificación de token orquestada contra API externa.
+     * Verifica la validez del token contra el servicio externo.
+     * 
+     * @param string $username
+     * @return bool
      */
     public function verifyToken(string $username): bool
     {

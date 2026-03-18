@@ -4,10 +4,13 @@ namespace App\Actions\Auth;
 
 use App\DTOs\UserDTO;
 
+/**
+ * Sincronización de identidad y perfil en sesión.
+ */
 class SyncSessionAction
 {
     /**
-     * Sincroniza los datos del DTO en la sesión de Laravel.
+     * @param UserDTO $dto
      */
     public function execute(UserDTO $dto): void
     {

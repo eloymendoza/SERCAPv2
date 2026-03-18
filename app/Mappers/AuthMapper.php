@@ -5,9 +5,16 @@ namespace App\Mappers;
 use App\DTOs\AuthDTO;
 use App\Http\Requests\LoginRequest;
 
+/**
+ * Mapeo de datos para autenticación.
+ */
 class AuthMapper
 {
-    // Model → DTO (No hay modelo Auth directo, pero se usa para DTO)
+    /**
+     * Convierte una solicitud de login en un AuthDTO.
+     * @param LoginRequest $request Solicitud de login.
+     * @return AuthDTO DTO de autenticación.
+     */
     public function toDTO(LoginRequest $request): AuthDTO {
         return new AuthDTO(
             username: $request->validated('username'),
@@ -15,7 +22,11 @@ class AuthMapper
         );
     }
 
-    // DTO → Array para guardar en BD
+    /**
+     * Convierte un AuthDTO en un array para persistencia.
+     * @param AuthDTO $dto DTO de autenticación.
+     * @return array Array para persistencia.
+     */
     public function toPersistenceArray(AuthDTO $dto): array {
         return [
             'username' => $dto->username,
@@ -23,7 +34,11 @@ class AuthMapper
         ];
     }
 
-    // Múltiples Models → DTOs
+    /**
+     * Convierte una colección de requests en una colección de DTOs.
+     * @param iterable $requests Colección de solicitudes de login.
+     * @return array<AuthDTO> Colección de DTOs de autenticación.
+     */
     public function toDTOCollection(iterable $requests): array {
         $dtos = [];
         foreach ($requests as $request) {

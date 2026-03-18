@@ -3,7 +3,7 @@
 namespace App\Exceptions\Domain;
 
 /**
- * Maneja errores relacionados con el proceso de autenticación.
+ * Excepción de dominio para errores de autenticación.
  */
 class AuthException extends DomainException
 {
@@ -11,9 +11,7 @@ class AuthException extends DomainException
     protected int $statusCode = 401;
 
     /**
-     * Crea una instancia de la excepción para credenciales no válidas.
-     * 
-     * @param string $message Mensaje amigable para el usuario.
+     * @param string $message
      * @return self
      */
     public static function invalidCredentials(string $message = 'Las credenciales proporcionadas son incorrectas.'): self

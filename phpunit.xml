@@ -22,6 +22,7 @@
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
+        <env name="SANCTUM_STATEFUL_DOMAINS" value="localhost,127.0.0.1"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
@@ -31,5 +32,13 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        
+        <!-- Django Auth API Testing -->
+        <env name="API_AUTH" value="https://api.django.test/auth"/>
+        <env name="SECRET_KEY" value="testing_secret_key"/>
+        <env name="ID_SISTEMA" value="1"/>
+        <env name="API_VERIFY_TK" value="https://api.django.test/verify"/>
+        <env name="API_INA_TK" value="https://api.django.test/invalidate"/>
+        <env name="DEFAULT_EMAIL_DOMAIN" value="test.com"/>
     </php>
 </phpunit>

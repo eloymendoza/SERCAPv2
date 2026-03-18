@@ -6,6 +6,9 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
+/**
+ * Validación de credenciales de acceso.
+ */
 class LoginRequest extends FormRequest
 {
     public function authorize(): bool

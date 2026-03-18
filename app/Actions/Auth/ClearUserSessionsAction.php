@@ -5,10 +5,13 @@ namespace App\Actions\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Eliminación de sesiones concurrentes por ID de usuario.
+ */
 class ClearUserSessionsAction
 {
     /**
-     * Elimina todas las sesiones activas del usuario para garantizar sesión única.
+     * @param int $userId
      */
     public function execute(int $userId): void
     {

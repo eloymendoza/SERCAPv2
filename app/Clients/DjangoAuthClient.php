@@ -5,6 +5,9 @@ namespace App\Clients;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Response;
 
+/**
+ * Cliente para la API de Autenticación de Django.
+ */
 class DjangoAuthClient
 {
     private readonly string $baseUrl;
@@ -18,8 +21,12 @@ class DjangoAuthClient
         $this->systemId  = (int)    config('services.django_auth.system_id');
     }
 
+
     /**
-     * Autentica al usuario contra la API de Django.
+     * Autentica un usuario contra la API Auth.
+     * @param string $username
+     * @param string $password
+     * @return Response
      */
     public function authenticate(string $username, string $password): Response
     {
@@ -35,8 +42,11 @@ class DjangoAuthClient
         return $this->post($this->baseUrl, $payload);
     }
 
+
     /**
-     * Inactiva el token en la API de Django.
+     * Invalida el token de un usuario en la API Auth.
+     * @param string $username
+     * @return Response
      */
     public function invalidateToken(string $username): Response
     {
@@ -48,8 +58,12 @@ class DjangoAuthClient
         return $this->post((string) config('services.django_auth.inactivate'), $payload);
     }
 
+
     /**
-     * Verifica la validez de un token en la API de Django.
+     * Valida la vigencia del token en la API Auth.
+     * @param string $username
+     * @param string $token
+     * @return Response
      */
     public function verifyToken(string $username, string $token): Response
     {
@@ -63,8 +77,12 @@ class DjangoAuthClient
         return $this->post((string) config('services.django_auth.verify_tk'), $payload);
     }
 
+    
     /**
-     * Helper centralizado para peticiones POST con configuración común.
+     * Realiza una petición POST a la API Auth.
+     * @param string $url
+     * @param array $payload
+     * @return Response
      */
     private function post(string $url, array $payload): Response
     {
