@@ -18,18 +18,20 @@ trait HandlesProcess
      */
     protected function handle(callable $callback, string $context = ''): mixed
     {
+        $channel = property_exists($this, 'logChannel') ? $this->logChannel : 'daily';
+
         try {
             return $callback();
         } 
         catch (BaseApiException $e) {
-            Log::channel('auth')->error("[BASE_API_ERROR] {$context}: {$e->getMessage()}", [
+            Log::channel($channel)->error("[BASE_API_ERROR] {$context}: {$e->getMessage()}", [
                 'trace' => $e->getTraceAsString()
             ]);
 
             throw $e;
         }
         catch (QueryException $e) {
-            Log::channel('auth')->error("[DATABASE_ERROR] {$context}: {$e->getMessage()}", [
+            Log::channel($channel)->error("[DATABASE_ERROR] {$context}: {$e->getMessage()}", [
                 'sql' => $e->getSql(),
                 'bindings' => $e->getBindings(),
                 'trace' => $e->getTraceAsString()
@@ -41,14 +43,14 @@ trait HandlesProcess
             );
         }
         catch (ModelNotFoundException $e) {
-            Log::channel('auth')->error("[MODEL_NOT_FOUND] {$context}: {$e->getMessage()}", [
+            Log::channel($channel)->error("[MODEL_NOT_FOUND] {$context}: {$e->getMessage()}", [
                 'trace' => $e->getTraceAsString()
             ]);
 
             throw new ResourceNotFoundException("Recurso en {$context}");
         }
         catch (Throwable $e) {
-            Log::channel('auth')->critical("[UNEXPECTED_ERROR] {$context}: {$e->getMessage()}", [
+            Log::channel($channel)->critical("[UNEXPECTED_ERROR] {$context}: {$e->getMessage()}", [
                 'file'  => $e->getFile(),
                 'line'  => $e->getLine(),
                 'trace' => $e->getTraceAsString()
