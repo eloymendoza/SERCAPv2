@@ -1,59 +1,323 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SERCAP V2 (backend)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Configuración inicial del proyecto
 
-## About Laravel
+1. Se decidió utilizar la versión 8.5.3 NTS x64 de PHP (no la TS), para que funcione de manera óptima con nginx, por lo que, puedes descargarla desde [este enlace](https://downloads.php.net/~windows/releases/archives/).
+2. Una vez descargado, descomprimes el zip y lo colocas junto tus otras versiones de php y puedes elegir cómo gestionarlas. Una opción puede ser crear un script que te ayude a cambiar rápidamente entre versiones, como por ejemplo:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+    **En un archivo llamado use-php82.bat (o algo por el estilo):**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+    ``` powershell
+    @echo off
+    rmdir C:\php\active
+    mklink /D C:\php\active C:\php\php-8.2.27-Win32-vs16-x64
+    php -v
+    ```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    Y hacer esto para cada versión que utilices en tu equipo.
 
-## Learning Laravel
+    > [!NOTE]
+    > *Si quieres saber más, puedes preguntar a Eloy o a Alda*
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+3. Descarga los dll 5.13.0 de SQL Server en [este link](https://learn.microsoft.com/en-us/sql/connect/php/release-notes-php-sql-driver?view=sql-server-ver17#previous-releases).
+4. Descomprime el zip y busca:
+    - php_sqlsrv_85_nts_x64.dll
+    - php_pdo_sqlsrv_85_nts_x64.dll
+5. Cópialos y pégalos en la carpeta `\ext` de tu versión de php.
+6. En caso de no contar con el archivo `cacert-2025-12-02.pem`, solicítalo a Eloy o Alda.
+7. Una vez que lo tengas, dirígete a `\extras\ssl` en tu versión de php y pégalo ahí.
+8. Haz una copia del archivo `php.ini-dev`, cambia el nombre a `php.ini` y asegúrate de lo siguiente
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    ``` ini
+    # Que esto esté descomentado
+    extension_dir = "./ext"
 
-## Laravel Sponsors
+    extension=curl
+    extension=fileinfo
+    extension=mbstring
+    extension=openssl
+    extension=php_sqlsrv_85_nts_x64
+    extension=php_pdo_sqlsrv_85_nts_x64
+    extension=zip
+    ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+    ``` ini
+    # En estas variables, agregar las rutas al cacert.pem
+    curl.cainfo = "C:\php\php-8.5.3-nts-Win32-vs17-x64\extras\ssl\cacert-2025-12-02.pem" (la ruta exacta donde tienes el archivo)
+    openssl.cafile = "C:\php\php-8.5.3-nts-Win32-vs17-x64\extras\ssl\cacert-2025-12-02.pem" (lo mismo aquí)
+    ```
+9. Clona el proyecto de github en tu equipo
+10. Ya que tengas tu repositorio, ejecuta el siguiente comando:
 
-### Premium Partners
+    ``` bash
+    # Crea una copia del .env de ejemplo para que el proyecto pueda utilizar este archivo.
+    cp .env.example .env
+    ```
+11. Pide a Eloy o Aldair los valores reales de este archivo
+12. Ejecuta:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+    ``` bash
+    # Instala dependencias php del proyecto.
+    composer install
 
-## Contributing
+    # Para verificar que todo esté correcto, ejecuta el proyecto en el puerto que le indiques (ej.):
+    php artisan serve --port 85
+    ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+13. En tu navegador, dirígete a la ruta que te indique la terminal. Si aparece la información de Laravel, el proyecto fue configurado correctamente.
 
-## Code of Conduct
+## Despliegue con nginx y NSSM
+1. Descarga [nginx](https://nginx.org/en/download.html) (v1.26) y [NSSM](https://nssm.cc/download) (v2.24)
+2. Crea un directorio propio para cada uno (ej. `C:\nginx` y `C:\nssm`) y descomprime los zip en su directorio correspondiente
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Configuración de nginx
+3. Para verificar que nginx funciona correctamente:
 
-## Security Vulnerabilities
+    ``` bash
+    # Cambia al directorio de nginx
+    cd C:\nginx
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    # Ejecuta el servidor, pero antes asegúrate que IIS esté detenido en tu equipo
+    start nginx
 
-## License
+    # Para validar si está corriendo nginx. Si aparecen elementos, quiere decir que todo correcto
+    tasklist /fi "imagename eq nginx.exe"
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    # Otra manera, es en tu navegador, poner localhost sin ningún puerto, y deberías ver el mensaje: "Welcome to nginx!" 
+    ```
+
+4. Genera los certificados para el dominio que utilizarás localmente (ej. sercapv2-<tunombre>pc.grupo-iai.com.mx):
+
+    4.1 Abre una terminal como administrador e instala mkcert
+    ``` powershell
+    choco install mkcert
+    ```
+    4.2 Ejecuta lo siguiente para crear un CA local en el sistema
+    ``` powershell
+    mkcert -install
+    ```
+    4.3 Crea un nuevo directorio para alojar tus certificados (ej. `C:\nginx\certificados`)
+
+    4.4 Muévete a ese nuevo directorio
+    ``` powershell
+    cd C:\nginx\certificados
+    ```
+    4.5 Genera los certificados
+    ``` powershell
+    mkcert sercapv2-<tunombre>pc.grupo-iai.com.mx
+    ```
+    4.6 Esto te va a generar los siguientes archivos en tu directorio
+    ``` powershell
+    sercapv2-<tunombre>pc.grupo-iai.com.mx.pem
+    sercapv2-<tunombre>pc.grupo-iai.com.mx-key.pem
+    ```
+
+5. Dirígete a `C:\nginx\conf\nginx.conf`
+6. Ingresa lo siguiente:
+
+    ```
+    # Optimización de procesos según el hardware
+    worker_processes auto;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        include mime.types;
+        default_type application/octet-stream;
+
+        # FORMATO DE LOG PERSONALIZADO para distinguir puertos en archivos unificados
+        log_format vhost_combined '$remote_addr - $remote_user [$time_local] '
+                                '"$request" $status $body_bytes_sent '
+                                '"$http_referer" "$http_user_agent" '
+                                'Port:$server_port';
+
+        # LOG GLOBAL
+        error_log logs/nginx.error.log warn;
+
+        # --- OPTIMIZACIONES ---
+        sendfile on;
+        keepalive_timeout 65;
+        server_names_hash_bucket_size 64;
+        server_tokens off; # Seguridad: oculta la versión de Nginx
+    
+        # --- COMPRESIÓN PARA AGILIZAR CARGA INICIAL ---
+        gzip on;
+        gzip_proxied any;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+        gzip_vary on;
+        gzip_comp_level 5;
+
+        # --- AJUSTES DE BUFFER PARA SISTEMAS CARGADOS ---
+        proxy_buffers 8 16k;
+        proxy_buffer_size 32k;
+
+        # --- DEFINICIÓN DE BACKENDS (UPSTREAMS) ---
+        # Centralizar aquí permite cambiar puertos sin buscar en todo el archivo
+
+        upstream sercapv2_backend { server 127.0.0.1:9002; }
+        upstream sercapv2_frontend { server 127.0.0.1:3000; }
+
+        # --- CONFIGURACIÓN SSL GLOBAL ---
+        # Se define una vez para todos los servidores
+
+        # ASEGÚRATE QUE APUNTA CORRECTAMENTE AL DIRECTORIO DONDE ESTÁN TUS CERTIFICADOS CREADOS POR MKCERT:
+        ssl_certificate C:/nginx/certificados/sercapv2-<tunombre>pc.grupo-iai.com.mx.pem;
+        ssl_certificate_key C:/nginx/certificados/sercapv2-<tunombre>pc.grupo-iai.com.mx-key.pem;
+
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_timeout 10m;
+
+        # =============================================================
+        # 0. BLOQUE DE SEGURIDAD (DEFAULT)
+        # Bloquea accesos por IP o nombres de red internos (ej. iaipc130-pc)
+        # =============================================================
+        server {
+            listen 80 default_server;
+            listen 443 ssl default_server;
+            server_name _;
+
+            access_log logs/default.access.log;
+            error_log logs/default.error.log warn;
+
+            return 444;
+        }
+    
+        # -----------------------------
+        # REDIRECCIÓN HTTP → HTTPS
+        # -----------------------------
+        server {
+            listen 80;
+            # ASEGÚRATE QUE ESTÉ BIEN PUESTO EL NOMBRE DE TU DOMINIO LOCAL
+            server_name sercapv2-<tunombre>pc.grupo-iai.com.mx;
+            return 301 https://$host$request_uri;
+        }
+
+        # -----------------------------
+        # SERVIDOR PRINCIPAL HTTPS
+        # -----------------------------
+        server {
+            listen 443 ssl;
+
+            # ASEGÚRATE QUE ESTÉ BIEN PUESTO EL NOMBRE DE TU DOMINIO LOCAL
+            server_name sercapv2-<tunombre>pc.grupo-iai.com.mx;
+
+            # RUTA DONDE INSTALASTE EL PROYECTO DEL BACKEND
+            root C:/Proyectos/SERCAPv2/public;
+            index index.php index.html;
+
+            # -----------------------------
+            # API (Laravel)
+            # -----------------------------
+            location ^~ /api {
+                try_files $uri $uri/ /index.php?$query_string;
+            }
+
+            location ^~ /sanctum {
+                try_files $uri $uri/ /index.php?$query_string;
+            }
+
+            location ^~ /up {
+                try_files $uri $uri/ /index.php?$query_string;
+            }
+
+            # -----------------------------
+            # PHP (Laravel)
+            # -----------------------------
+            location ~ \.php$ {
+                fastcgi_pass sercapv2_backend;
+                fastcgi_index index.php;
+                include fastcgi_params;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+
+                # Estos tres son críticos para cookies y sesiones
+                fastcgi_param HTTPS on;
+                fastcgi_param SERVER_PORT 443;
+                fastcgi_param HTTP_X_FORWARDED_PROTO https;  # Laravel detecta HTTPS real
+
+                fastcgi_read_timeout 300;
+            }
+
+            # -----------------------------
+            # FRONTEND (React Dev Server)
+            # -----------------------------
+            location / {
+                proxy_pass http://sercapv2_frontend;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto https;
+            }
+        }
+    }
+    ```
+7. En los .env, debes tener de esta manera en estas variables:
+    ``` bash  
+    # Backend
+    APP_URL=https://sercapv2-<tunombre>pc.grupo-iai.com.mx
+    SANCTUM_STATEFUL_DOMAINS=sercapv2-<tunombre>pc.grupo-iai.com.mx
+
+    # Frontend
+    VITE_APP_API_URL=https://sercapv2-<tunombre>pc.grupo-iai.com.mx/api
+    VITE_APP_HOST=sercapv2-<tunombre>pc.grupo-iai.com.mx
+    ```
+
+8. En el archivo `cors.php`, en `allowed_origins`, se tiene que definir tu dominio, o buscar que esto sea dinámico
+
+### Configuración de NSSM
+
+9. Ejecuta una terminal como administrador y dirígete a donde tienes el .exe de nssm
+    ``` bash  
+    # Ejemplo
+    cd C:\nssm\win64
+    ```
+10. Instala tus servicios:
+
+    **nginx**
+
+    10.1 Ejecuta:
+    ``` bash  
+    .\nssm install nginx
+    ```
+    10.2 Se abrirá una ventana de nssm donde configurarás lo siguiente:
+    ``` bash  
+    # Pestaña Aplicación
+    Path: C:\nginx\nginx.exe
+    Startup directory: C:\nginx
+
+    # Pestaña I/O
+    C:\nssm\win64\logs\nginx\nginx_out_log # Ruta a un directorio para guardar logs por servicio
+    C:\nssm\win64\logs\nginx\nginx_error_log # Ruta a un directorio para guardar logs por servicio
+    ```
+
+    **PHP 8.5.3 NTS**
+
+    10.3 Ejecuta:
+    ``` bash  
+    .\nssm install PHP8.5.3-NTS
+    ```
+    10.4 Se abrirá una ventana de nssm donde configurarás lo siguiente:
+    ``` bash  
+    # Pestaña Aplicación
+    Path: C:\php\php-8.5.3-nts\php-cgi.exe
+    Startup directory: C:\php\php-8.5.3-nts
+    Arguments: -b 127.0.0.1:9002 # o el puerto de tu elección
+
+    # Pestaña I/O
+    C:\nssm\win64\logs\PHP8.5.3-NTS\php_cgi_out.log # Ruta a un directorio para guardar logs por servicio
+    C:\nssm\win64\logs\PHP8.5.3-NTS\php_cgi_error.log # Ruta a un directorio para guardar logs por servicio
+    ```
+
+11. Si todo se configuró correctamente, ejecuta:
+    ``` bash  
+    .\nssm start nginx
+    .\nssm start PHP8.5.3-NTS
+    ```
+12. Corre el proyecto del frontend con `npm run dev`
+13. Dirígete a tu dominio y verifica que se ejecute todo correctamente
