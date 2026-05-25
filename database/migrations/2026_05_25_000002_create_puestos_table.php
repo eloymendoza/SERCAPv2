@@ -20,7 +20,8 @@ return new class extends Migration
                 ->constrained('puestos')
                 ->noActionOnDelete();
             $table->string('tipo')->default('Directo')->comment('Directo, Indirecto');
-            $table->timestamps();
+            $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
         });
     }
 

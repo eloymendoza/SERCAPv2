@@ -6,12 +6,14 @@ use App\Enums\RequisicionEstado;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Representa la requisición autorizada (Folio Padre) que agrupa las vacantes operativas.
  */
 class Requisicion extends Model
 {
+    use SoftDeletes;
     /**
      * El nombre de la tabla asociada al modelo.
      *

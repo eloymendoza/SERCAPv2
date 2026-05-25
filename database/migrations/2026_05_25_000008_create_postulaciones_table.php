@@ -20,14 +20,15 @@ return new class extends Migration
                 ->constrained('detalle_requisiciones')
                 ->cascadeOnDelete();
             $table->string('tipo_movimiento')->comment('Calculado: Nuevo Ingreso, Reingreso, Mov. Interno');
-            $table->dateTime('fecha_inicio_sla_entrevista')->nullable()->comment('SLA 3 o 5 días hábiles');
+            $table->dateTime('fecha_inicio_sla_entrevista', 7)->nullable()->comment('SLA 3 o 5 días hábiles');
             $table->string('resultado_entrevista')->nullable();
             $table->string('resultado_examen_tecnico')->nullable();
             $table->string('resultado_medico')->nullable();
             $table->string('resultado_psicometrico')->nullable();
             $table->string('notas_autorizacion_excepcional')->nullable();
             $table->string('estado')->comment('Preseleccionado, En_Entrevista, En_Examenes, Autorizacion_Excepcional, Rechazado, Seleccionado');
-            $table->timestamps();
+            $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
         });
     }
 

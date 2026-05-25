@@ -21,12 +21,13 @@ return new class extends Migration
                 ->unique()
                 ->constrained('aspirantes')
                 ->nullOnDelete();
-            $table->dateTime('fecha_limite_anexo_a')->nullable()->comment('SLA 3 días');
+            $table->dateTime('fecha_limite_anexo_a', 7)->nullable()->comment('SLA 3 días');
             $table->decimal('sueldo_anexo_d', 12, 2)->nullable();
             $table->string('observaciones_rechazo')->nullable();
             $table->date('fecha_alta_imss')->nullable();
             $table->string('estado')->comment('Pendiente_Perfil, Busqueda_Activa, Seleccionada, En_Auditoria, Contratada, Cancelada');
-            $table->timestamps();
+            $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
         });
     }
 

@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Representa el desglose o partida específica de un puesto solicitado en una requisición.
  */
 class DetalleRequisicion extends Model
 {
+    use SoftDeletes;
     /**
      * El nombre de la tabla asociada al modelo.
      *

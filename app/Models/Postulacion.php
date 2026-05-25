@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Enums\PostulacionEstado;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Representa el viaje individual de un candidato compitiendo por una plaza.
  */
 class Postulacion extends Model
 {
+    use SoftDeletes;
     /**
      * El nombre de la tabla asociada al modelo.
      *

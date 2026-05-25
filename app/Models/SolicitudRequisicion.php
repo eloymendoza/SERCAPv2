@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Enums\SolicitudRequisicionEstado;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Representa la solicitud formal de presupuesto y personal de un proyecto (Workflow de entrada).
  */
 class SolicitudRequisicion extends Model
 {
+    use SoftDeletes;
     /**
      * El nombre de la tabla asociada al modelo.
      *
@@ -28,9 +30,9 @@ class SolicitudRequisicion extends Model
         'proyecto_id',
         'id_instancia_workflow',
         'solicitante_id',
-        'direccion',
-        'gerencia',
-        'coordinacion',
+        'direccion_id',
+        'gerencia_id',
+        'coordinacion_id',
         'observaciones',
         'estado',
     ];

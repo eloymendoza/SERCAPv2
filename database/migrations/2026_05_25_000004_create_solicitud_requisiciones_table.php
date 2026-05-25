@@ -19,12 +19,13 @@ return new class extends Migration
             $table->unsignedBigInteger('id_instancia_workflow')->nullable()
                 ->comment('Referencia lógica a id_instancia_workflow de BD Workflows');
             $table->unsignedBigInteger('solicitante_id')->nullable()->comment('id_empleado (DIR, GA, JP o LI)');
-            $table->string('direccion');
-            $table->string('gerencia');
-            $table->string('coordinacion')->nullable();
+            $table->unsignedBigInteger('direccion_id');
+            $table->unsignedBigInteger('gerencia_id');
+            $table->unsignedBigInteger('coordinacion_id')->nullable();
             $table->string('observaciones')->nullable();
             $table->string('estado')->comment('Borrador, En Proceso, Rechazado, Cancelado, Terminado');
-            $table->timestamps();
+            $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
         });
     }
 

@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Enums\VacanteEstado;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Representa un asiento o plaza presupuestal viva (Token de nivel 3).
  */
 class Vacante extends Model
 {
+    use SoftDeletes;
     /**
      * El nombre de la tabla asociada al modelo.
      *

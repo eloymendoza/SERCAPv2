@@ -25,7 +25,8 @@ return new class extends Migration
             $table->date('fecha_termino')->nullable();
             $table->date('fecha_limite_requerimiento');
             $table->string('empleados_propuestos')->nullable()->comment('IDs de candidatos opcionales separados por coma');
-            $table->timestamps();
+            $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
         });
     }
 

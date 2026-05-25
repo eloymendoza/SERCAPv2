@@ -21,7 +21,8 @@ return new class extends Migration
             $table->integer('tipo')->comment('0 corporativo, 1 CLV');
             $table->string('observaciones')->nullable();
             $table->string('estado')->comment('Borrador, Pendiente_Perfil, Abierta, En_Proceso, Cierre_Parcial, Validacion_Admin, Cubierta, Cancelada');
-            $table->timestamps();
+            $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
         });
     }
 
