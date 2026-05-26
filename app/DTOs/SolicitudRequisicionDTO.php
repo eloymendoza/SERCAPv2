@@ -14,7 +14,7 @@ class SolicitudRequisicionDTO
      */
     public function __construct(
         public readonly ?int $id,
-        public readonly string $folio,
+        public readonly ?string $folio,
         public readonly ?int $proyectoId,
         public readonly ?int $idInstanciaWorkflow,
         public readonly ?int $solicitanteId,
@@ -22,7 +22,7 @@ class SolicitudRequisicionDTO
         public readonly ?int $gerenciaId,
         public readonly ?int $coordinacionId,
         public readonly ?string $observaciones,
-        public readonly SolicitudRequisicionEstado $estado
+        public readonly ?SolicitudRequisicionEstado $estado
     ) {}
 
     /**
@@ -42,7 +42,7 @@ class SolicitudRequisicionDTO
             'gerencia_id' => $this->gerenciaId,
             'coordinacion_id' => $this->coordinacionId,
             'observaciones' => $this->observaciones,
-            'estado' => $this->estado->value,
+            'estado' => $this->estado?->value,
         ];
     }
 
@@ -54,14 +54,17 @@ class SolicitudRequisicionDTO
      */
     public static function fromArray(array $data): self
     {
-        $estadoVal = $data['estado'] ?? SolicitudRequisicionEstado::BORRADOR->value;
-        $estado = $estadoVal instanceof SolicitudRequisicionEstado 
-            ? $estadoVal 
-            : SolicitudRequisicionEstado::tryFrom($estadoVal) ?? SolicitudRequisicionEstado::BORRADOR;
+        $estado = null;
+        if (isset($data['estado'])) {
+            $estadoVal = $data['estado'];
+            $estado = $estadoVal instanceof SolicitudRequisicionEstado 
+                ? $estadoVal 
+                : SolicitudRequisicionEstado::tryFrom($estadoVal);
+        }
 
         return new self(
             id: isset($data['id']) ? (int) $data['id'] : null,
-            folio: $data['folio'] ?? '',
+            folio: $data['folio'] ?? null,
             proyectoId: isset($data['proyecto_id']) ? (int) $data['proyecto_id'] : null,
             idInstanciaWorkflow: isset($data['id_instancia_workflow']) ? (int) $data['id_instancia_workflow'] : null,
             solicitanteId: isset($data['solicitante_id']) ? (int) $data['solicitante_id'] : null,

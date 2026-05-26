@@ -37,6 +37,11 @@ class AuthService
         private readonly UserMapper $userMapper
     ) {}
 
+    protected function getLogChannel(): string
+    {
+        return 'auth';
+    }
+
 
     /**
      * Orquestación de inicio de sesión y sincronización local.

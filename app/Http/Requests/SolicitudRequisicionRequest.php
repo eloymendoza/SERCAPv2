@@ -31,7 +31,7 @@ class SolicitudRequisicionRequest extends FormRequest
         $id = $this->route('solicitud_requisicion') ?? $this->input('id');
 
         return [
-            'folio' => ['required','string','max:255',Rule::unique('solicitud_requisiciones', 'folio')->ignore($id),],
+            'folio' => ['nullable','string','max:255',Rule::unique('solicitud_requisiciones', 'folio')->ignore($id),],
             'proyecto_id' => ['nullable','integer',],
             'id_instancia_workflow' => ['nullable','integer',],
             'solicitante_id' => ['nullable','integer',],
@@ -39,7 +39,7 @@ class SolicitudRequisicionRequest extends FormRequest
             'gerencia_id' => ['required','integer',],
             'coordinacion_id' => ['nullable','integer',],
             'observaciones' => ['nullable', 'string',],
-            'estado' => ['nullable', Rule::enum(SolicitudRequisicionEstado::class)],
+            'accion' => ['nullable', 'string', Rule::in(['guardar', 'emitir'])],
         ];
     }
 

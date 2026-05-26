@@ -14,11 +14,16 @@ use App\Exceptions\Infrastructure\DatabaseInfrastructureException;
 trait HandlesProcess
 {
     /**
+     * Define el canal de logs a utilizar.
+     */
+    abstract protected function getLogChannel(): string;
+
+    /**
      * Traduce excepciones técnicas a excepciones de dominio o infraestructura.
      */
     protected function handle(callable $callback, string $context = ''): mixed
     {
-        $channel = property_exists($this, 'logChannel') ? $this->logChannel : 'daily';
+        $channel = $this->getLogChannel();
 
         try {
             return $callback();
@@ -38,16 +43,18 @@ trait HandlesProcess
             ]);
 
             throw new DatabaseInfrastructureException(
-                message: "Error técnico en base de datos registrado en {$context}",
+                message: "Ocurrió un error inesperado al procesar la información en la base de datos.",
                 previous: $e
             );
         }
         catch (ModelNotFoundException $e) {
             Log::channel($channel)->error("[MODEL_NOT_FOUND] {$context}: {$e->getMessage()}", [
+                'model' => $e->getModel(),
+                'ids'   => $e->getIds(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            throw new ResourceNotFoundException("Recurso en {$context}");
+            throw new ResourceNotFoundException("registro");
         }
         catch (Throwable $e) {
             Log::channel($channel)->critical("[UNEXPECTED_ERROR] {$context}: {$e->getMessage()}", [

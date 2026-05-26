@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\SolicitudRequisicionDTO;
+use App\Enums\SolicitudRequisicionEstado;
 use App\Mappers\SolicitudRequisicionMapper;
 use App\Models\SolicitudRequisicion;
 use App\Traits\HandlesProcess;
@@ -23,7 +24,7 @@ class SolicitudRequisicionService
      *
      * @var string
      */
-    protected string $logChannel = 'daily';
+    protected string $logChannel = 'requisicion';
 
     /**
      * Inicializa una nueva instancia de SolicitudRequisicionService.
@@ -32,19 +33,32 @@ class SolicitudRequisicionService
         private readonly SolicitudRequisicionMapper $mapper
     ) {}
 
+    protected function getLogChannel(): string
+    {
+        return $this->logChannel;
+    }
+
     /**
      * Registra una nueva solicitud de requisición en base de datos.
      *
      * @param SolicitudRequisicionDTO $dto
+     * @param string|null $accion Acción a ejecutar (ej. 'emitir')
      * @return SolicitudRequisicionDTO
      */
-    public function create(SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
+    public function create(SolicitudRequisicionDTO $dto, ?string $accion = null): SolicitudRequisicionDTO
     {
         Log::channel($this->logChannel)->info("Iniciando creación de solicitud: {$dto->folio}");
 
-        return $this->handle(function () use ($dto) {
-            return DB::transaction(function () use ($dto) {
+        return $this->handle(function () use ($dto, $accion) {
+            return DB::transaction(function () use ($dto, $accion) {
                 $data = $this->mapper->toPersistenceArray($dto);
+                
+                if ($accion === 'emitir') {
+                    $data['estado'] = SolicitudRequisicionEstado::EN_PROCESO;
+                } elseif (empty($data['estado'])) {
+                    unset($data['estado']);
+                }
+                
                 $model = SolicitudRequisicion::create($data);
 
                 Log::channel($this->logChannel)->info("Solicitud creada con ID: {$model->id}");
@@ -59,16 +73,24 @@ class SolicitudRequisicionService
      *
      * @param int $id
      * @param SolicitudRequisicionDTO $dto
+     * @param string|null $accion Acción a ejecutar (ej. 'emitir')
      * @return SolicitudRequisicionDTO
      */
-    public function update(int $id, SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
+    public function update(int $id, SolicitudRequisicionDTO $dto, ?string $accion = null): SolicitudRequisicionDTO
     {
         Log::channel($this->logChannel)->info("Iniciando actualización de solicitud ID: {$id}");
 
-        return $this->handle(function () use ($id, $dto) {
-            return DB::transaction(function () use ($id, $dto) {
+        return $this->handle(function () use ($id, $dto, $accion) {
+            return DB::transaction(function () use ($id, $dto, $accion) {
                 $model = SolicitudRequisicion::findOrFail($id);
                 $data = $this->mapper->toPersistenceArray($dto);
+                
+                if ($accion === 'emitir') {
+                    $data['estado'] = SolicitudRequisicionEstado::EN_PROCESO;
+                } elseif ($dto->estado === null) {
+                    unset($data['estado']);
+                }
+                
                 $model->update($data);
 
                 Log::channel($this->logChannel)->info("Solicitud ID {$id} actualizada con éxito.");

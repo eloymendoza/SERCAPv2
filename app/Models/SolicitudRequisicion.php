@@ -21,6 +21,15 @@ class SolicitudRequisicion extends Model
     protected $table = 'solicitud_requisiciones';
 
     /**
+     * Los valores por defecto para los atributos del modelo.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'estado' => 'borrador',
+    ];
+
+    /**
      * Los atributos que son asignables en masa.
      *
      * @var array<int, string>
@@ -36,6 +45,28 @@ class SolicitudRequisicion extends Model
         'observaciones',
         'estado',
     ];
+
+    /**
+     * Inicializa los eventos del modelo para la generación automática del folio.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (SolicitudRequisicion $model) {
+            if (empty($model->folio) && $model->estado !== SolicitudRequisicionEstado::BORRADOR) {
+                $year = date('Y');
+                $random = mt_rand(10000, 99999);
+                $model->folio = sprintf('SR-%s-%05d', $year, $random);
+            }
+        });
+
+        static::updating(function (SolicitudRequisicion $model) {
+            if (empty($model->folio) && $model->estado !== SolicitudRequisicionEstado::BORRADOR) {
+                $year = date('Y');
+                $random = mt_rand(10000, 99999);
+                $model->folio = sprintf('SR-%s-%05d', $year, $random);
+            }
+        });
+    }
 
     /**
      * Retorna el tipado automático de los campos de la tabla.

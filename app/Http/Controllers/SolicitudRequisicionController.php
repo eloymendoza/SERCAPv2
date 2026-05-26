@@ -40,8 +40,11 @@ class SolicitudRequisicionController extends Controller
      */
     public function store(SolicitudRequisicionRequest $request): JsonResponse
     {
-        $dtoInput = SolicitudRequisicionDTO::fromArray($request->validated());
-        $dtoOutput = $this->service->create($dtoInput);
+        $validated = $request->validated();
+        $accion = $validated['accion'] ?? null;
+        
+        $dtoInput = SolicitudRequisicionDTO::fromArray($validated);
+        $dtoOutput = $this->service->create($dtoInput, $accion);
         $response = $this->mapper->toResponseArray($dtoOutput);
 
         return response()->json([
@@ -67,9 +70,12 @@ class SolicitudRequisicionController extends Controller
      */
     public function update(SolicitudRequisicionRequest $request, int $id): JsonResponse
     {
-        $data = array_merge($request->validated(), ['id' => $id]);
+        $validated = $request->validated();
+        $accion = $validated['accion'] ?? null;
+        
+        $data = array_merge($validated, ['id' => $id]);
         $dtoInput = SolicitudRequisicionDTO::fromArray($data);
-        $dtoOutput = $this->service->update($id, $dtoInput);
+        $dtoOutput = $this->service->update($id, $dtoInput, $accion);
         $response = $this->mapper->toResponseArray($dtoOutput);
 
         return response()->json([
