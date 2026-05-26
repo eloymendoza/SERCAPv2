@@ -15,6 +15,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Scoped garantiza un ciclo de vida acotado al request, compatible con Octane.
         $this->app->scoped(LogContext::class);
+
+        $this->app->bind(
+            \App\Contracts\SolicitudRequisicionRepositoryInterface::class,
+            \App\Repositories\EloquentSolicitudRequisicionRepository::class
+        );
     }
 
     /**

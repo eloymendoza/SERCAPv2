@@ -75,4 +75,23 @@ class SolicitudRequisicionDTO
             estado: $estado
         );
     }
+
+    /**
+     * Retorna una nueva instancia del DTO con el estado actualizado.
+     */
+    public function withEstado(SolicitudRequisicionEstado $estado): self
+    {
+        return new self(
+            id: $this->id,
+            folio: $this->folio,
+            proyectoId: $this->proyectoId,
+            idInstanciaWorkflow: $this->idInstanciaWorkflow,
+            solicitanteId: $this->solicitanteId,
+            direccionId: $this->direccionId,
+            gerenciaId: $this->gerenciaId,
+            coordinacionId: $this->coordinacionId,
+            observaciones: $this->observaciones,
+            estado: $estado
+        );
+    }
 }
