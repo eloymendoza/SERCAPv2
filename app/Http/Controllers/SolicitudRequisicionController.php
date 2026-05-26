@@ -8,6 +8,7 @@ use App\Mappers\SolicitudRequisicionMapper;
 use App\Services\SolicitudRequisicionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use App\Logging\LogContext;
 
 /**
  * Controlador de API para gestionar el recurso de Solicitudes de Requisición.
@@ -19,8 +20,11 @@ class SolicitudRequisicionController extends Controller
      */
     public function __construct(
         private readonly SolicitudRequisicionService $service,
-        private readonly SolicitudRequisicionMapper $mapper
-    ) {}
+        private readonly SolicitudRequisicionMapper $mapper,
+        private readonly LogContext $logContext
+    ) {
+        $this->logContext->setChannel('requisicion');
+    }
 
     /**
      * Retorna una colección de todas las solicitudes registradas.

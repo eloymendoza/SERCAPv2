@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\Domain\AuthException;
 use App\Actions\Auth\CompleteLogoutAction;
+use App\Logging\LogContext;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -23,7 +24,8 @@ class VerifyDjangoToken
 {
     public function __construct(
         private readonly AuthService $authService,
-        private readonly CompleteLogoutAction $completeLogoutAction
+        private readonly CompleteLogoutAction $completeLogoutAction,
+        private readonly LogContext $logContext
     ) {}
 
     /**
@@ -42,7 +44,7 @@ class VerifyDjangoToken
             
             if ($username) {
                 if (!$this->authService->verifyToken($username)) {
-                    Log::channel('auth')->warning("Middleware: Sesión invalidada por token expirado/inválido: {$username}");
+                    Log::channel($this->logContext->channel())->warning("Middleware: Sesión invalidada por token expirado/inválido: {$username}");
 
                     $this->completeLogoutAction->execute($request);
                     

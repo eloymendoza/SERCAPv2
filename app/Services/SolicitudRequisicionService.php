@@ -9,6 +9,7 @@ use App\Models\SolicitudRequisicion;
 use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Logging\LogContext;
 
 /**
  * Servicio para la gestión de Solicitudes de Requisición.
@@ -20,23 +21,19 @@ class SolicitudRequisicionService
     use HandlesProcess;
 
     /**
-     * Canal de log configurado para este servicio.
-     *
-     * @var string
-     */
-    protected string $logChannel = 'requisicion';
-
-    /**
      * Inicializa una nueva instancia de SolicitudRequisicionService.
      */
     public function __construct(
-        private readonly SolicitudRequisicionMapper $mapper
+        private readonly SolicitudRequisicionMapper $mapper,
+        private readonly LogContext $logContext
     ) {}
 
     protected function getLogChannel(): string
     {
-        return $this->logChannel;
+        return 'requisicion';
     }
+
+
 
     /**
      * Registra una nueva solicitud de requisición en base de datos.
@@ -47,7 +44,7 @@ class SolicitudRequisicionService
      */
     public function create(SolicitudRequisicionDTO $dto, ?string $accion = null): SolicitudRequisicionDTO
     {
-        Log::channel($this->logChannel)->info("Iniciando creación de solicitud: {$dto->folio}");
+        Log::channel($this->logContext->channel())->info("Iniciando creación de solicitud: {$dto->folio}");
 
         return $this->handle(function () use ($dto, $accion) {
             return DB::transaction(function () use ($dto, $accion) {
@@ -61,7 +58,7 @@ class SolicitudRequisicionService
                 
                 $model = SolicitudRequisicion::create($data);
 
-                Log::channel($this->logChannel)->info("Solicitud creada con ID: {$model->id}");
+                Log::channel($this->logContext->channel())->info("Solicitud creada con ID: {$model->id}");
 
                 return $this->mapper->toDTO($model);
             });
@@ -78,7 +75,7 @@ class SolicitudRequisicionService
      */
     public function update(int $id, SolicitudRequisicionDTO $dto, ?string $accion = null): SolicitudRequisicionDTO
     {
-        Log::channel($this->logChannel)->info("Iniciando actualización de solicitud ID: {$id}");
+        Log::channel($this->logContext->channel())->info("Iniciando actualización de solicitud ID: {$id}");
 
         return $this->handle(function () use ($id, $dto, $accion) {
             return DB::transaction(function () use ($id, $dto, $accion) {
@@ -93,7 +90,7 @@ class SolicitudRequisicionService
                 
                 $model->update($data);
 
-                Log::channel($this->logChannel)->info("Solicitud ID {$id} actualizada con éxito.");
+                Log::channel($this->logContext->channel())->info("Solicitud ID {$id} actualizada con éxito.");
 
                 return $this->mapper->toDTO($model);
             });
@@ -108,7 +105,7 @@ class SolicitudRequisicionService
      */
     public function find(int $id): SolicitudRequisicionDTO
     {
-        Log::channel($this->logChannel)->info("Buscando solicitud ID: {$id}");
+        Log::channel($this->logContext->channel())->info("Buscando solicitud ID: {$id}");
 
         return $this->handle(function () use ($id) {
             $model = SolicitudRequisicion::findOrFail($id);
@@ -123,7 +120,7 @@ class SolicitudRequisicionService
      */
     public function list(): array
     {
-        Log::channel($this->logChannel)->info("Consultando colección de solicitudes");
+        Log::channel($this->logContext->channel())->info("Consultando colección de solicitudes");
 
         return $this->handle(function () {
             $models = SolicitudRequisicion::all();
@@ -139,13 +136,13 @@ class SolicitudRequisicionService
      */
     public function delete(int $id): void
     {
-        Log::channel($this->logChannel)->info("Eliminando solicitud ID: {$id}");
+        Log::channel($this->logContext->channel())->info("Eliminando solicitud ID: {$id}");
 
         $this->handle(function () use ($id) {
             DB::transaction(function () use ($id) {
                 $model = SolicitudRequisicion::findOrFail($id);
                 $model->delete();
-                Log::channel($this->logChannel)->info("Solicitud ID {$id} eliminada.");
+                Log::channel($this->logContext->channel())->info("Solicitud ID {$id} eliminada.");
             });
         }, 'SolicitudRequisicionService@delete');
     }

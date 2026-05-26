@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Logging\LogContext;
 use App\Actions\Auth\SyncSessionAction;
 use App\Exceptions\Domain\AuthException;
 use App\Actions\Auth\CompleteLogoutAction;
@@ -34,7 +35,8 @@ class AuthService
         private readonly CompleteLogoutAction $completeLogoutAction,
         private readonly GetAuthenticatedUserAction $getAuthenticatedUserAction,
         private readonly ClearUserSessionsAction $clearUserSessionsAction,
-        private readonly UserMapper $userMapper
+        private readonly UserMapper $userMapper,
+        private readonly LogContext $logContext
     ) {}
 
     protected function getLogChannel(): string
@@ -52,7 +54,7 @@ class AuthService
      */
     public function authenticate(AuthDTO $dto): UserDTO
     {
-        Log::channel('auth')->info("Usuario: {$dto->username} - AuthService::authenticate");
+        Log::channel($this->logContext->channel())->info("Usuario: {$dto->username} - AuthService::authenticate");
         
         return $this->handle(function () use ($dto) {
             $response = $this->authClient->authenticate($dto->username, $dto->password);
@@ -62,7 +64,7 @@ class AuthService
             }
 
             $data = $response->json();
-            Log::channel('auth')->info("Proceso de autenticación exitoso: ", [
+            Log::channel($this->logContext->channel())->info("Proceso de autenticación exitoso: ", [
                 'data' => $data
             ]);
 
@@ -70,9 +72,10 @@ class AuthService
             $user = $this->userRepository->syncExternalUser($this->userMapper->toPersistenceArray($userDto));
 
             Auth::login($user);
+            $this->logContext->setUsername($user->username);
 
             $fullDto = $userDto->withId($user->id);
-            Log::channel('auth')->info("DTO completo actualizado: ", [
+            Log::channel($this->logContext->channel())->info("DTO completo actualizado: ", [
                 'data' => $fullDto
             ]);
 
@@ -91,7 +94,7 @@ class AuthService
      */
     public function logout(): void
     {
-        Log::channel('auth')->info("Usuario: " . Auth::user()?->username . " - AuthService::logout");
+        Log::channel($this->logContext->channel())->info("Usuario: " . Auth::user()?->username . " - AuthService::logout");
 
         $this->handle(function () {
             $username = Auth::user()?->username;
@@ -99,9 +102,9 @@ class AuthService
             if ($username) {
                 $response = $this->authClient->invalidateToken($username);
                 if ($response->successful() && ($response->json()['status'] ?? '') === 'Success') {
-                    Log::channel('auth')->info("Token inactivado correctamente para {$username}");
+                    Log::channel($this->logContext->channel())->info("Token inactivado correctamente para {$username}");
                 } else {
-                    Log::channel('auth')->error("Fallo al inactivar token para {$username}");
+                    Log::channel($this->logContext->channel())->error("Fallo al inactivar token para {$username}");
                 }
             }
 
@@ -117,11 +120,11 @@ class AuthService
      */
     public function checkSession(): UserDTO
     {
-        Log::channel('auth')->info("Usuario: " . Auth::user()?->username . " - AuthService::checkSession");
+        Log::channel($this->logContext->channel())->info("Usuario: " . Auth::user()?->username . " - AuthService::checkSession");
         
         return $this->handle(function () {
             $sessionData = $this->getAuthenticatedUserAction->execute();
-            Log::channel('auth')->info("Datos de sesión extraídos: ", [
+            Log::channel($this->logContext->channel())->info("Datos de sesión extraídos: ", [
                 'data' => $sessionData
             ]);
             return $this->userMapper->toDTO($sessionData);
@@ -149,7 +152,7 @@ class AuthService
             $isValid = $response->successful() && ($response->json()['message'] ?? '') === 'Success';
 
             if (!$isValid) {
-                Log::channel('auth')->error("Fallo de validación de token en Django para {$username}", [
+                Log::channel($this->logContext->channel())->error("Fallo de validación de token en Django para {$username}", [
                     'response' => $response->json()
                 ]);
             }

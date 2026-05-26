@@ -10,6 +10,7 @@ use Illuminate\Database\QueryException;
 use App\Exceptions\ResourceNotFoundException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Exceptions\Infrastructure\DatabaseInfrastructureException;
+use App\Logging\LogContext;
 
 trait HandlesProcess
 {
@@ -19,11 +20,24 @@ trait HandlesProcess
     abstract protected function getLogChannel(): string;
 
     /**
+     * Resuelve el canal desde el LogContext actual, o utiliza el canal definido
+     * en el servicio si no hay un contexto activo (ej. comandos Artisan o Jobs).
+     */
+    private function resolveChannel(): string
+    {
+        try {
+            return app(LogContext::class)->channel();
+        } catch (\Throwable) {
+            return $this->getLogChannel();
+        }
+    }
+
+    /**
      * Traduce excepciones técnicas a excepciones de dominio o infraestructura.
      */
     protected function handle(callable $callback, string $context = ''): mixed
     {
-        $channel = $this->getLogChannel();
+        $channel = $this->resolveChannel();
 
         try {
             return $callback();

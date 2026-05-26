@@ -7,6 +7,7 @@ use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
+use App\Logging\LogContext;
 
 /**
  * Orquestación de autenticación.
@@ -19,11 +20,15 @@ class AuthController extends Controller
     /**
      * @param AuthService $authService Lógica de autenticación y validación externa.
      * @param AuthMapper $authMapper Transformación de inputs a DTOs de dominio.
+     * @param LogContext $logContext Contexto de logging.
      */
     public function __construct(
         private readonly AuthService $authService,
-        private readonly AuthMapper $authMapper
-    ) {}
+        private readonly AuthMapper $authMapper,
+        private readonly LogContext $logContext
+    ) {
+        $this->logContext->setChannel('auth');
+    }
 
 
     /**

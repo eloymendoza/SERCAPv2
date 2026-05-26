@@ -12,6 +12,7 @@ use Illuminate\Auth\AuthenticationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Http\Middleware\VerifyDjangoToken;
+use App\Http\Middleware\InitializeLogContext;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(InitializeLogContext::class);
         $middleware->statefulApi();
         $middleware->append(SecurityHeaders::class);
         $middleware->alias([
