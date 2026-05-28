@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -32,6 +33,11 @@ class Aspirante extends Model
         'email',
         'telefono',
         'observaciones',
+        'tipo_aspirante',
+        'Id_personal',
+        'ubicacion_id',
+        'resumen',
+        'estado_aspirante'
     ];
 
     /**
@@ -48,5 +54,51 @@ class Aspirante extends Model
     public function vacante(): HasOne
     {
         return $this->hasOne(Vacante::class, 'aspirante_id');
+    }
+
+    /**
+     * Retorna las experiencias laborales del aspirante.
+     */
+    public function experiencia(): HasMany
+    {
+        return $this->hasMany(ExperienciaAspirante::class, 'aspirante_id');
+    }
+
+    /**
+     * Retorna la educación del aspirante.
+     */
+    public function educacion(): HasMany
+    {
+        return $this->hasMany(EducacionAspirante::class, 'aspirante_id');
+    }
+
+    /**
+     * Retorna los certificados del aspirante.
+     */
+    public function certificado(): HasMany
+    {
+        return $this->hasMany(CertificadoAspirante::class, 'aspirante_id');
+    }
+
+    /**
+     * Retorna los idiomas del aspirante.
+     */
+    public function idioma(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            CatalogoIdiomas::class,
+            'idiomas_aspirantes',   // tabla pivote
+            'aspirante_id',         // FK de este modelo en la pivote
+            'idioma_id'             // FK del modelo relacionado en la pivote
+        )->withPivot('nivel')       // exponer columnas extra de la pivote
+         ->withTimestamps();
+    }
+
+    /**
+     * Retorna los conocimientos técnicos del aspirante.
+     */
+    public function conocimientoTecnico(): HasMany
+    {
+        return $this->hasMany(ConocimientoTecnicoAspirante::class, 'aspirante_id');
     }
 }
