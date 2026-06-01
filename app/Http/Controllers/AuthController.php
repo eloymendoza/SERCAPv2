@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Mappers\AuthMapper;
+
+use App\Logging\LogContext;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
-use App\Logging\LogContext;
 
 /**
  * Orquestación de autenticación.
@@ -19,12 +19,9 @@ class AuthController extends Controller
 {
     /**
      * @param AuthService $authService Lógica de autenticación y validación externa.
-     * @param AuthMapper $authMapper Transformación de inputs a DTOs de dominio.
-     * @param LogContext $logContext Contexto de logging.
      */
     public function __construct(
         private readonly AuthService $authService,
-        private readonly AuthMapper $authMapper,
         private readonly LogContext $logContext
     ) {
         $this->logContext->setChannel('auth');
@@ -40,7 +37,7 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $dto = $this->authMapper->toDTO($request);
+        $dto = $request->toDTO();
         $userDto = $this->authService->authenticate($dto);
 
         // La regeneración de sesión es una preocupación de HTTP/Controlador

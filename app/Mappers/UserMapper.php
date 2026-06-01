@@ -3,6 +3,7 @@
 namespace App\Mappers;
 
 use App\DTOs\UserDTO;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Mapeo de identidad y datos de perfil de usuario.
@@ -37,7 +38,12 @@ class UserMapper
      * @return UserDTO
      */
     public function toDTO(array|object $data): UserDTO {
-        $data = (array) $data;
+        if ($data instanceof Model) {
+            $data = $data->toArray();
+        } else {
+            $data = (array) $data;
+        }
+
         $username = $data['usuario'] ?? $data['username'] ?? '';
 
         return new UserDTO(

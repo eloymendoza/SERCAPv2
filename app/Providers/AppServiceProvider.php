@@ -20,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\SolicitudRequisicionRepositoryInterface::class,
             \App\Repositories\EloquentSolicitudRequisicionRepository::class
         );
+
     }
 
     /**

@@ -2,21 +2,19 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use App\DTOs\AuthDTO;
 use App\DTOs\UserDTO;
 use App\Mappers\UserMapper;
+use App\Logging\LogContext;
 use App\Traits\HandlesProcess;
 use App\Clients\DjangoAuthClient;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-use App\Logging\LogContext;
-use App\Actions\Auth\SyncSessionAction;
 use App\Exceptions\Domain\AuthException;
-use App\Actions\Auth\CompleteLogoutAction;
-use App\Actions\Auth\ClearUserSessionsAction;
-use App\Actions\Auth\GetAuthenticatedUserAction;
+use Illuminate\Auth\AuthenticationException;
 
 /**
  * Servicio de Autenticación.
@@ -29,12 +27,7 @@ class AuthService
     use HandlesProcess;
 
     public function __construct(
-        private readonly UserRepository $userRepository,
         private readonly DjangoAuthClient $authClient,
-        private readonly SyncSessionAction $syncSessionAction,
-        private readonly CompleteLogoutAction $completeLogoutAction,
-        private readonly GetAuthenticatedUserAction $getAuthenticatedUserAction,
-        private readonly ClearUserSessionsAction $clearUserSessionsAction,
         private readonly UserMapper $userMapper,
         private readonly LogContext $logContext
     ) {}
@@ -43,7 +36,6 @@ class AuthService
     {
         return 'auth';
     }
-
 
     /**
      * Orquestación de inicio de sesión y sincronización local.
@@ -54,7 +46,9 @@ class AuthService
      */
     public function authenticate(AuthDTO $dto): UserDTO
     {
-        Log::channel($this->logContext->channel())->info("Usuario: {$dto->username} - AuthService::authenticate");
+        Log::channel($this->logContext->channel())->info("Iniciando autenticación.", [
+            'username' => $dto->username
+        ]);
         
         return $this->handle(function () use ($dto) {
             $response = $this->authClient->authenticate($dto->username, $dto->password);
@@ -64,37 +58,42 @@ class AuthService
             }
 
             $data = $response->json();
-            Log::channel($this->logContext->channel())->info("Proceso de autenticación exitoso: ", [
+            Log::channel($this->logContext->channel())->info("Autenticación exitosa.", [
                 'data' => $data
             ]);
 
             $userDto = $this->userMapper->fromDjangoToDTO($data);
-            $user = $this->userRepository->syncExternalUser($this->userMapper->toPersistenceArray($userDto));
+            
+            $persistenceData = $this->userMapper->toPersistenceArray($userDto);
+            $user = User::updateOrCreate(
+                ['id_personal' => $persistenceData['id_personal']], 
+                $persistenceData
+            );
+            $userDtoResult = $this->userMapper->toDTO($user);
 
-            Auth::login($user);
-            $this->logContext->setUsername($user->username);
+            Auth::loginUsingId($userDtoResult->id);
+            $this->logContext->setUsername($userDtoResult->username);
 
-            $fullDto = $userDto->withId($user->id);
-            Log::channel($this->logContext->channel())->info("DTO completo actualizado: ", [
+            $fullDto = $userDto->withId($userDtoResult->id);
+            Log::channel($this->logContext->channel())->info("Sesión local sincronizada.", [
                 'data' => $fullDto
             ]);
 
-            $this->syncSessionAction->execute($fullDto);
-            $this->clearUserSessionsAction->execute($user->id);
+            $this->syncLocalSession($fullDto);
+            $this->clearOtherSessions($userDtoResult->id);
 
-            $sessionData = $this->getAuthenticatedUserAction->execute();
+            $sessionData = $this->getAuthenticatedSession();
 
             return $this->userMapper->toDTO($sessionData);
         }, 'AuthService@authenticate');
     }
-
 
     /**
      * Invalida la sesión local y el estado del token externo.
      */
     public function logout(): void
     {
-        Log::channel($this->logContext->channel())->info("Usuario: " . Auth::user()?->username . " - AuthService::logout");
+        Log::channel($this->logContext->channel())->info("Iniciando cierre de sesión.");
 
         $this->handle(function () {
             $username = Auth::user()?->username;
@@ -102,16 +101,15 @@ class AuthService
             if ($username) {
                 $response = $this->authClient->invalidateToken($username);
                 if ($response->successful() && ($response->json()['status'] ?? '') === 'Success') {
-                    Log::channel($this->logContext->channel())->info("Token inactivado correctamente para {$username}");
+                    Log::channel($this->logContext->channel())->info("Token externo inactivado.");
                 } else {
-                    Log::channel($this->logContext->channel())->error("Fallo al inactivar token para {$username}");
+                    Log::channel($this->logContext->channel())->error("Fallo al inactivar token externo.");
                 }
             }
 
-            $this->completeLogoutAction->execute(request());
+            $this->completeLogout();
         }, 'AuthService@logout');
     }
-
 
     /**
      * Recupera la información del usuario desde la sesión persistida.
@@ -120,17 +118,16 @@ class AuthService
      */
     public function checkSession(): UserDTO
     {
-        Log::channel($this->logContext->channel())->info("Usuario: " . Auth::user()?->username . " - AuthService::checkSession");
+        Log::channel($this->logContext->channel())->info("Consultando sesión activa.");
         
         return $this->handle(function () {
-            $sessionData = $this->getAuthenticatedUserAction->execute();
-            Log::channel($this->logContext->channel())->info("Datos de sesión extraídos: ", [
+            $sessionData = $this->getAuthenticatedSession();
+            Log::channel($this->logContext->channel())->info("Sesión local recuperada.", [
                 'data' => $sessionData
             ]);
             return $this->userMapper->toDTO($sessionData);
         }, 'AuthService@checkSession');
     }
-
 
     /**
      * Verifica la validez del token contra el servicio externo.
@@ -152,12 +149,58 @@ class AuthService
             $isValid = $response->successful() && ($response->json()['message'] ?? '') === 'Success';
 
             if (!$isValid) {
-                Log::channel($this->logContext->channel())->error("Fallo de validación de token en Django para {$username}", [
+                Log::channel($this->logContext->channel())->error("Token externo inválido.", [
                     'response' => $response->json()
                 ]);
             }
 
             return $isValid;
         }, 'AuthService@verifyToken');
+    }
+
+    private function syncLocalSession(UserDTO $dto): void
+    {
+        Session::put([
+            'id' => $dto->id,
+            'idPersonal' => $dto->idPersonal,
+            'username' => $dto->username,
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'puestoActual' => $dto->puestoActual,
+            'rutaFoto' => $dto->rutaFoto,
+            'permisos' => $dto->permisos,
+            'token' => $dto->token,
+        ]);
+    }
+
+    private function clearOtherSessions(int $userId): void
+    {
+        if (config('session.driver') !== 'database') {
+            return;
+        }
+        
+        DB::table(config('session.table', 'sessions'))
+            ->where('user_id', $userId)
+            ->where('id', '!=', Session::getId())
+            ->delete();
+    }
+
+    private function completeLogout(): void
+    {
+        Auth::logout();
+        Session::invalidate();
+        Session::regenerateToken();
+    }
+
+    private function getAuthenticatedSession(): array
+    {
+        if (!Auth::check() || !Session::has('username')) {
+            throw new AuthenticationException('Sesión no encontrada o expirada.');
+        }
+
+        return Session::only([
+            'id', 'idPersonal', 'username', 'name', 'email',
+            'puestoActual', 'rutaFoto', 'permisos', 'token'
+        ]);
     }
 }

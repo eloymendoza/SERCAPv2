@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
+use App\DTOs\AuthDTO;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
 /**
  * Validación de credenciales de acceso.
@@ -46,14 +45,15 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function toDTO(): AuthDTO
     {
-        throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => 'Parámetros inválidos',
-                'errors' => $validator->errors(),
-            ], 422)
+        $validated = $this->validated();
+        
+        return new AuthDTO(
+            username: $validated['username'],
+            password: base64_encode($validated['password'])
         );
     }
+
+
 }
