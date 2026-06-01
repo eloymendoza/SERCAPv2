@@ -23,6 +23,13 @@ Esta carpeta contiene los **Comandos Artisan** personalizados. Un Command permit
 Terminal / Scheduler → Command → Service → Repository
 ```
 
+
+## 🟢 Cuándo usar
+- Para tareas cron, mantenimiento, migraciones personalizadas o scripts administrativos desde la terminal.
+
+## 🔴 Cuándo NO usar
+- No coloques lógica de negocio compleja aquí; delega la lógica a un Service y usa el Command solo como disparador.
+
 ## Ejemplo
 
 ```php

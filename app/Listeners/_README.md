@@ -22,6 +22,13 @@ Esta carpeta contiene los **Listeners**. Un Listener **reacciona** a un Event ej
 Event → Listener → (envía Notification, llama Action, etc.)
 ```
 
+
+## 🟢 Cuándo usar
+- Para reaccionar a un Evento y ejecutar acciones secundarias (enviar un correo de bienvenida cuando alguien se registra).
+
+## 🔴 Cuándo NO usar
+- No metas lógica del flujo principal que impida que una transacción de BD termine si el listener falla.
+
 ## Ejemplo
 
 ```php

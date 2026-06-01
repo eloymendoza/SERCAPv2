@@ -24,6 +24,13 @@ Controller / Service / Listener → dispatch(Job) → Queue Worker ejecuta el Jo
 Job → Service → Repository (si necesita acceder a datos)
 ```
 
+
+## 🟢 Cuándo usar
+- Para procesos pesados o lentos (envío de correos, generación de PDFs) que deben ejecutarse en segundo plano (colas).
+
+## 🔴 Cuándo NO usar
+- No retornes datos desde un Job esperando que el controlador los reciba de inmediato.
+
 ## Ejemplo
 
 ```php

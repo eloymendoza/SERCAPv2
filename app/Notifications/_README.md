@@ -21,6 +21,13 @@ Esta carpeta contiene las **Notificaciones** del sistema. Una Notification enví
 Listener / Service → Notification → Canal(es) de envío
 ```
 
+
+## 🟢 Cuándo usar
+- Para alertar a los usuarios a través de canales específicos (Mail, Database, SMS, Slack).
+
+## 🔴 Cuándo NO usar
+- No uses Notifications si el sistema en sí debe reaccionar de forma interna (para eso usa Events/Listeners).
+
 ## Ejemplo
 
 ```php

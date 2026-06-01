@@ -22,6 +22,13 @@ Esta carpeta contiene los **Observers**. Un Observer escucha los **eventos del c
 Model (evento) → Observer → (acciones secundarias)
 ```
 
+
+## 🟢 Cuándo usar
+- Para escuchar eventos silenciosos de Eloquent (`creating`, `updating`, `deleted`) y ejecutar lógicas transversales (ej. asignar UUIDs o limpiar caché).
+
+## 🔴 Cuándo NO usar
+- Evita meter lógica de negocio compleja aquí porque es código 'oculto' y difícil de rastrear.
+
 ## Ejemplo
 
 ```php

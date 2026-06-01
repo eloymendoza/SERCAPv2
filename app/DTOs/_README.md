@@ -73,3 +73,9 @@ class [Entidad]DTO
     }
 }
 ```
+## 🟢 Cuándo usar
+- Para transportar datos estructurados y tipados entre capas (ej. de Controller a Service).
+
+## 🔴 Cuándo NO usar
+- No les añadas métodos con lógica de negocio ni dependencias a base de datos. Deben ser contenedores anémicos e inmutables.
+

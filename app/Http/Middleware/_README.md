@@ -24,6 +24,13 @@ Request → Middleware (filtro) → Controller
 Controller → Middleware (post-filtro) → Response
 ```
 
+
+## 🟢 Cuándo usar
+- Para interceptar, modificar o bloquear peticiones antes de que lleguen al controlador (ej. inyectar logs, checar roles temporales).
+
+## 🔴 Cuándo NO usar
+- No realices validación de datos de un formulario específico aquí.
+
 ## Ejemplo
 
 ```php

@@ -26,6 +26,13 @@ Observer ← Model (eventos del ciclo de vida)
 Policy ← Model (autorización)
 ```
 
+
+## 🟢 Cuándo usar
+- Para mapear tablas de base de datos (Active Record) y definir las relaciones de Eloquent.
+
+## 🔴 Cuándo NO usar
+- Evita sobrecargar el modelo con lógica de negocio o formato de JSON de presentación.
+
 ## Ejemplo
 
 ```php

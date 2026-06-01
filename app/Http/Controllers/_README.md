@@ -23,6 +23,13 @@ Esta carpeta contiene los **Controladores** de la aplicación. Un Controller rec
 Route → Middleware → FormRequest → Controller → Service → Response
 ```
 
+
+## 🟢 Cuándo usar
+- Para recibir peticiones HTTP, instanciar DTOs y retornar respuestas JSON.
+
+## 🔴 Cuándo NO usar
+- ¡NUNCA pongas reglas de negocio, validaciones o llamadas a BD aquí! Delega a los FormRequests y Services.
+
 ## Ejemplo
 
 ```php

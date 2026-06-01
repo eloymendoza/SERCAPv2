@@ -24,6 +24,13 @@ Blade (labels)  ← Enum
 Service (lógica) ← Enum
 ```
 
+
+## 🟢 Cuándo usar
+- Para definir estados, tipos o categorías predefinidas e inmutables (ej. Estados de Solicitud, Roles).
+
+## 🔴 Cuándo NO usar
+- No los uses para datos dinámicos que el usuario pueda crear o editar en la base de datos.
+
 ## Ejemplo
 
 ```php

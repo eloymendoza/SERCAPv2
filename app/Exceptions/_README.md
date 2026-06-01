@@ -22,6 +22,13 @@ Service lanza → Exception
 Controller captura → Exception (o Handler global)
 ```
 
+
+## 🟢 Cuándo usar
+- Para definir errores de dominio específicos y centralizar los códigos HTTP y mensajes de error.
+
+## 🔴 Cuándo NO usar
+- No las uses para validaciones simples de formularios (eso pertenece a los FormRequests).
+
 ## Ejemplo
 
 ```php

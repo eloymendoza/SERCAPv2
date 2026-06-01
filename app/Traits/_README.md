@@ -23,6 +23,13 @@ Controller ← use Trait
 Service    ← use Trait
 ```
 
+
+## 🟢 Cuándo usar
+- Para reutilizar código genérico transversal que no depende de la herencia (ej. `HandlesProcess`, `HasUuids`).
+
+## 🔴 Cuándo NO usar
+- No los uses como 'basureros' de funciones que deberían pertenecer a una clase abstracta o a un servicio específico.
+
 ## Ejemplo
 
 ```php

@@ -22,6 +22,13 @@ Esta carpeta contiene los **Form Requests**. Un FormRequest encapsula las **regl
 Route → Middleware → FormRequest (valida) → Controller
 ```
 
+
+## 🟢 Cuándo usar
+- Para validar datos de entrada (reglas, mensajes) y transformar el array validado en un DTO.
+
+## 🔴 Cuándo NO usar
+- No realices persistencia a la base de datos desde el Request.
+
 ## Ejemplo
 
 ```php

@@ -25,6 +25,13 @@ Controller → Service → Repository → Model
               DTO / Mapper
 ```
 
+
+## 🟢 Cuándo usar
+- Para albergar toda la lógica de negocio, reglas empresariales, llamadas a base de datos y coordinación del flujo.
+
+## 🔴 Cuándo NO usar
+- No les inyectes dependencias de presentación (`Request`, `Response`) ni los uses para devolver respuestas JSON directamente.
+
 ## Ejemplo
 
 ```php

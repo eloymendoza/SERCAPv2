@@ -24,6 +24,13 @@ Service → Client (petición a API externa)
 Client → DTO (opcionalmente para estructurar datos de entrada complejos)
 ```
 
+
+## 🟢 Cuándo usar
+- Cuando necesites comunicarte con una API externa (ej. Django, Stripe, AWS).
+
+## 🔴 Cuándo NO usar
+- No los uses para lógica de base de datos o lógica de negocio puramente interna.
+
 ## Ejemplo
 
 ```php

@@ -85,3 +85,9 @@ class [Entidad]Mapper
     }
 }
 ```
+## 🟢 Cuándo usar
+- Como Capa Anticorrupción para traducir estructuras de datos externas (JSON de APIs) a DTOs locales.
+
+## 🔴 Cuándo NO usar
+- No los crees para mapeos triviales donde el FormRequest o el Modelo Eloquent pueden generar el DTO directamente.
+

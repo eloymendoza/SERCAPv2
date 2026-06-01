@@ -23,6 +23,13 @@ Controller → $this->authorize('action', $model) → Policy
 Blade → @can('action', $model) → Policy
 ```
 
+
+## 🟢 Cuándo usar
+- Para encapsular reglas de autorización y decidir si el usuario autenticado puede realizar una acción sobre un Modelo específico.
+
+## 🔴 Cuándo NO usar
+- No realices validación de datos del formulario aquí.
+
 ## Ejemplo
 
 ```php

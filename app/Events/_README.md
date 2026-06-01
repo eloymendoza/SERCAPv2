@@ -22,6 +22,13 @@ Esta carpeta contiene los **Eventos** del sistema. Un Event representa algo que 
 Service/Controller → dispara Event → Listener(s) lo manejan
 ```
 
+
+## 🟢 Cuándo usar
+- Para anunciar que algo importante acaba de suceder en el dominio (ej. `UserRegistered`, `RequisicionApproved`).
+
+## 🔴 Cuándo NO usar
+- No realices lógica de negocio aquí. El Evento solo es un contenedor de datos para notificar al sistema.
+
 ## Ejemplo
 
 ```php

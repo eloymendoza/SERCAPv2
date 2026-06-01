@@ -23,6 +23,13 @@ Esta carpeta contiene los **API Resources**. Un Resource transforma modelos Eloq
 Controller retorna → Resource::make($model) → JSON Response
 ```
 
+
+## 🟢 Cuándo usar
+- Para transformar modelos Eloquent o DTOs en estructuras JSON predecibles para el frontend.
+
+## 🔴 Cuándo NO usar
+- No ocultes lógica de negocio aquí; solo formatea (fechas, booleanos, anidaciones) para la presentación.
+
 ## Ejemplo
 
 ```php
