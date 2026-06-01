@@ -19,10 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => 
+    'allowed_origins' =>
         [
             'https://sercapv2.grupo-iai.com.mx',
-            'https://sercapv2-aldapc.grupo-iai.com.mx'
+            'https://sercapv2-aldapc.grupo-iai.com.mx',
+            'https://sercapv2-miryampc.grupo-iai.com.mx'
         ],
 
     'allowed_origins_patterns' => [],

@@ -118,59 +118,55 @@
     ```
     # Optimización de procesos según el hardware
     worker_processes auto;
-
+    
     events {
         worker_connections 1024;
     }
-
+    
     http {
         include mime.types;
         default_type application/octet-stream;
-
+    
         # FORMATO DE LOG PERSONALIZADO para distinguir puertos en archivos unificados
         log_format vhost_combined '$remote_addr - $remote_user [$time_local] '
                                 '"$request" $status $body_bytes_sent '
                                 '"$http_referer" "$http_user_agent" '
                                 'Port:$server_port';
-
+    
         # LOG GLOBAL
         error_log logs/nginx.error.log warn;
-
+    
         # --- OPTIMIZACIONES ---
         sendfile on;
         keepalive_timeout 65;
         server_names_hash_bucket_size 64;
         server_tokens off; # Seguridad: oculta la versión de Nginx
-    
         # --- COMPRESIÓN PARA AGILIZAR CARGA INICIAL ---
         gzip on;
         gzip_proxied any;
         gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
         gzip_vary on;
         gzip_comp_level 5;
-
+    
         # --- AJUSTES DE BUFFER PARA SISTEMAS CARGADOS ---
         proxy_buffers 8 16k;
         proxy_buffer_size 32k;
-
+    
         # --- DEFINICIÓN DE BACKENDS (UPSTREAMS) ---
         # Centralizar aquí permite cambiar puertos sin buscar en todo el archivo
-
         upstream sercapv2_backend { server 127.0.0.1:9002; }
         upstream sercapv2_frontend { server 127.0.0.1:3000; }
-
+    
+    
         # --- CONFIGURACIÓN SSL GLOBAL ---
         # Se define una vez para todos los servidores
-
-        # ASEGÚRATE QUE APUNTA CORRECTAMENTE AL DIRECTORIO DONDE ESTÁN TUS CERTIFICADOS CREADOS POR MKCERT:
         ssl_certificate C:/nginx/certificados/sercapv2-<tunombre>pc.grupo-iai.com.mx.pem;
         ssl_certificate_key C:/nginx/certificados/sercapv2-<tunombre>pc.grupo-iai.com.mx-key.pem;
-
         ssl_protocols TLSv1.2 TLSv1.3;
         ssl_ciphers HIGH:!aNULL:!MD5;
         ssl_session_cache shared:SSL:10m;
         ssl_session_timeout 10m;
-
+    
         # =============================================================
         # 0. BLOQUE DE SEGURIDAD (DEFAULT)
         # Bloquea accesos por IP o nombres de red internos (ej. iaipc130-pc)
@@ -179,82 +175,82 @@
             listen 80 default_server;
             listen 443 ssl default_server;
             server_name _;
-
+    
             access_log logs/default.access.log;
             error_log logs/default.error.log warn;
-
+    
             return 444;
         }
     
-        # -----------------------------
-        # REDIRECCIÓN HTTP → HTTPS
-        # -----------------------------
-        server {
-            listen 80;
-            # ASEGÚRATE QUE ESTÉ BIEN PUESTO EL NOMBRE DE TU DOMINIO LOCAL
-            server_name sercapv2-<tunombre>pc.grupo-iai.com.mx;
-            return 301 https://$host$request_uri;
-        }
 
-        # -----------------------------
-        # SERVIDOR PRINCIPAL HTTPS
-        # -----------------------------
-        server {
-            listen 443 ssl;
+    # =============================================================
+        # SERVIDOR 5: SERCAPv2 (Laravel)
+    # =============================================================
+    # -----------------------------
+    # REDIRECCIÓN HTTP → HTTPS
+    # -----------------------------
+    server {
+    listen 80;
+    server_name sercapv2-<tunombre>pc.grupo-iai.com.mx;
+    return 301 https://$host$request_uri;
+    }
+    
+    # -----------------------------
+    # SERVIDOR PRINCIPAL HTTPS
+    # -----------------------------
+    server {
+    listen 443 ssl;
+    server_name sercapv2-<tunombre>pc.grupo-iai.com.mx;
+    root C:/Proyectos/SERCAPv2/public;
+    index index.php index.html;
+    
+    # -----------------------------
+    # API (Laravel)
+    # -----------------------------
+    location ^~ /api {
+    try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    location ^~ /sanctum {
+    try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    location ^~ /up {
+    try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    # -----------------------------
+    # PHP (Laravel)
+    # -----------------------------
+    location ~ \.php$ {
+    fastcgi_pass sercapv2_backend;
+    fastcgi_index index.php;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    
+    # Estos tres son críticos para cookies y sesiones
+    fastcgi_param HTTPS on;
+    fastcgi_param SERVER_PORT 443;
+    fastcgi_param HTTP_X_FORWARDED_PROTO https;  # Laravel detecta HTTPS real
+    
+    fastcgi_read_timeout 300;
+    }
+    
+    # -----------------------------
+    # FRONTEND (React Dev Server)
+    # -----------------------------
+    location / {
+    proxy_pass http://sercapv2_frontend;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
+    }
+    }
 
-            # ASEGÚRATE QUE ESTÉ BIEN PUESTO EL NOMBRE DE TU DOMINIO LOCAL
-            server_name sercapv2-<tunombre>pc.grupo-iai.com.mx;
-
-            # RUTA DONDE INSTALASTE EL PROYECTO DEL BACKEND
-            root C:/Proyectos/SERCAPv2/public;
-            index index.php index.html;
-
-            # -----------------------------
-            # API (Laravel)
-            # -----------------------------
-            location ^~ /api {
-                try_files $uri $uri/ /index.php?$query_string;
-            }
-
-            location ^~ /sanctum {
-                try_files $uri $uri/ /index.php?$query_string;
-            }
-
-            location ^~ /up {
-                try_files $uri $uri/ /index.php?$query_string;
-            }
-
-            # -----------------------------
-            # PHP (Laravel)
-            # -----------------------------
-            location ~ \.php$ {
-                fastcgi_pass sercapv2_backend;
-                fastcgi_index index.php;
-                include fastcgi_params;
-                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-
-                # Estos tres son críticos para cookies y sesiones
-                fastcgi_param HTTPS on;
-                fastcgi_param SERVER_PORT 443;
-                fastcgi_param HTTP_X_FORWARDED_PROTO https;  # Laravel detecta HTTPS real
-
-                fastcgi_read_timeout 300;
-            }
-
-            # -----------------------------
-            # FRONTEND (React Dev Server)
-            # -----------------------------
-            location / {
-                proxy_pass http://sercapv2_frontend;
-                proxy_http_version 1.1;
-                proxy_set_header Upgrade $http_upgrade;
-                proxy_set_header Connection "upgrade";
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto https;
-            }
-        }
     }
     ```
 7. En los .env, debes tener de esta manera en estas variables:
