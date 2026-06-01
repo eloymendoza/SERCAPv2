@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Logging\LogContext;
 use App\Traits\HandlesProcess;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\SolicitudRequisicion;
 use App\DTOs\SolicitudRequisicionDTO;
-use App\Contracts\SolicitudRequisicionRepositoryInterface;
+use App\Mappers\SolicitudRequisicionMapper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SolicitudRequisicionService
@@ -14,7 +16,7 @@ class SolicitudRequisicionService
     use HandlesProcess;
 
     public function __construct(
-        private readonly SolicitudRequisicionRepositoryInterface $repository,
+        private readonly SolicitudRequisicionMapper $mapper,
         private readonly LogContext $logContext
     ) {}
 
@@ -25,11 +27,21 @@ class SolicitudRequisicionService
 
     public function create(SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
     {
-        Log::channel($this->logContext->channel())->info("Iniciando creación de solicitud: {$dto->folio}");
+        Log::channel($this->logContext->channel())->info("Iniciando creación de solicitud.", [
+            'folio' => $dto->folio
+        ]);
 
         return $this->handle(function () use ($dto) {
-            $createdDto = $this->repository->create($dto);
-            Log::channel($this->logContext->channel())->info("Solicitud creada con ID: {$createdDto->id}");
+            $createdDto = DB::transaction(function () use ($dto) {
+                $data = $this->mapper->toPersistenceArray($dto);
+                $model = SolicitudRequisicion::create($data);
+                
+                return $this->mapper->toDTO($model);
+            });
+
+            Log::channel($this->logContext->channel())->info("Solicitud creada.", [
+                'id' => $createdDto->id
+            ]);
 
             return $createdDto;
         }, 'SolicitudRequisicionService@create');
@@ -37,11 +49,22 @@ class SolicitudRequisicionService
 
     public function update(int $id, SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
     {
-        Log::channel($this->logContext->channel())->info("Iniciando actualización de solicitud ID: {$id}");
+        Log::channel($this->logContext->channel())->info("Iniciando actualización de solicitud.", [
+            'id' => $id
+        ]);
 
         return $this->handle(function () use ($id, $dto) {
-            $updatedDto = $this->repository->update($id, $dto);
-            Log::channel($this->logContext->channel())->info("Solicitud ID {$id} actualizada con éxito.");
+            $updatedDto = DB::transaction(function () use ($id, $dto) {
+                $model = SolicitudRequisicion::findOrFail($id);
+                $data = $this->mapper->toUpdatePersistenceArray($dto);
+                
+                $model->update($data);
+                return $this->mapper->toDTO($model);
+            });
+
+            Log::channel($this->logContext->channel())->info("Solicitud actualizada.", [
+                'id' => $id
+            ]);
 
             return $updatedDto;
         }, 'SolicitudRequisicionService@update');
@@ -49,10 +72,13 @@ class SolicitudRequisicionService
 
     public function find(int $id): SolicitudRequisicionDTO
     {
-        Log::channel($this->logContext->channel())->info("Buscando solicitud ID: {$id}");
+        Log::channel($this->logContext->channel())->info("Consultando detalle de solicitud.", [
+            'id' => $id
+        ]);
 
         return $this->handle(function () use ($id) {
-            return $this->repository->findById($id);
+            $model = SolicitudRequisicion::findOrFail($id);
+            return $this->mapper->toDTO($model);
         }, 'SolicitudRequisicionService@find');
     }
 
@@ -61,17 +87,31 @@ class SolicitudRequisicionService
         Log::channel($this->logContext->channel())->info("Consultando colección paginada de solicitudes");
 
         return $this->handle(function () use ($perPage) {
-            return $this->repository->paginate($perPage);
+            $paginator = SolicitudRequisicion::paginate($perPage);
+            
+            $paginator->getCollection()->transform(function ($model) {
+                return $this->mapper->toDTO($model);
+            });
+
+            return $paginator;
         }, 'SolicitudRequisicionService@paginate');
     }
 
     public function delete(int $id): void
     {
-        Log::channel($this->logContext->channel())->info("Eliminando solicitud ID: {$id}");
+        Log::channel($this->logContext->channel())->info("Iniciando eliminación de solicitud.", [
+            'id' => $id
+        ]);
 
         $this->handle(function () use ($id) {
-            $this->repository->delete($id);
-            Log::channel($this->logContext->channel())->info("Solicitud ID {$id} eliminada.");
+            DB::transaction(function () use ($id) {
+                $model = SolicitudRequisicion::findOrFail($id);
+                $model->delete();
+            });
+
+            Log::channel($this->logContext->channel())->info("Solicitud eliminada.", [
+                'id' => $id
+            ]);
         }, 'SolicitudRequisicionService@delete');
     }
 }

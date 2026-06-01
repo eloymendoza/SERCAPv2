@@ -90,5 +90,21 @@ class SolicitudRequisicionRequest extends FormRequest
         ];
     }
 
+    public function toDTO(?int $id = null): \App\DTOs\SolicitudRequisicionDTO
+    {
+        $data = $this->validated();
+        if ($id !== null) {
+            $data['id'] = $id;
+        }
+
+        $dto = \App\DTOs\SolicitudRequisicionDTO::fromArray($data);
+
+        if (($data['accion'] ?? null) === 'emitir') {
+            $dto = $dto->withEstado(\App\Enums\SolicitudRequisicionEstado::EN_PROCESO);
+        }
+
+        return $dto;
+    }
+
 
 }

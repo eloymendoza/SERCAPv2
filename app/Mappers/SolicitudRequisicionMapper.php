@@ -76,31 +76,7 @@ class SolicitudRequisicionMapper
         return $data;
     }
 
-    /**
-     * Convierte un DTO en un array compatible con respuestas HTTP.
-     *
-     * @param SolicitudRequisicionDTO $dto
-     * @return array<string, mixed>
-     */
-    public function toResponseArray(SolicitudRequisicionDTO $dto): array
-    {
-        return [
-            'id' => $dto->id,
-            'folio' => $dto->folio,
-            'proyecto_id' => $dto->proyectoId,
-            'id_instancia_workflow' => $dto->idInstanciaWorkflow,
-            'solicitante_id' => $dto->solicitanteId,
-            'direccion_id' => $dto->direccionId,
-            'gerencia_id' => $dto->gerenciaId,
-            'coordinacion_id' => $dto->coordinacionId,
-            'observaciones' => $dto->observaciones,
-            'estado' => [
-                'value' => $dto->estado->value,
-                'label' => $dto->estado->label(),
-                'color' => $dto->estado->color(),
-            ],
-        ];
-    }
+
 
     /**
      * Convierte una colección de modelos SolicitudRequisicion a DTOs.
