@@ -3,6 +3,7 @@
 namespace App\Contracts;
 
 use App\DTOs\SolicitudRequisicionDTO;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface SolicitudRequisicionRepositoryInterface
 {
@@ -12,10 +13,7 @@ interface SolicitudRequisicionRepositoryInterface
 
     public function findById(int $id): SolicitudRequisicionDTO;
 
-    /**
-     * @return array<int, SolicitudRequisicionDTO>
-     */
-    public function all(): array;
+    public function paginate(int $perPage = 15): LengthAwarePaginator;
 
     public function delete(int $id): void;
 }

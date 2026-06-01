@@ -2,11 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\SolicitudRequisicionEstado;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Valida los datos recibidos para la creación o edición de una SolicitudRequisicion.
@@ -93,20 +90,5 @@ class SolicitudRequisicionRequest extends FormRequest
         ];
     }
 
-    /**
-     * Controla el comportamiento ante fallos de validación, arrojando una respuesta JSON estructurada.
-     *
-     * @param Validator $validator
-     * @throws HttpResponseException
-     */
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => 'Parámetros inválidos',
-                'errors' => $validator->errors(),
-            ], 422)
-        );
-    }
+
 }

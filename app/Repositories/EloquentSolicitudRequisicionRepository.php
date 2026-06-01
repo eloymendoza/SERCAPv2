@@ -2,11 +2,12 @@
 
 namespace App\Repositories;
 
-use App\Contracts\SolicitudRequisicionRepositoryInterface;
+use Illuminate\Support\Facades\DB;
+use App\Models\SolicitudRequisicion;
 use App\DTOs\SolicitudRequisicionDTO;
 use App\Mappers\SolicitudRequisicionMapper;
-use App\Models\SolicitudRequisicion;
-use Illuminate\Support\Facades\DB;
+use App\Contracts\SolicitudRequisicionRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class EloquentSolicitudRequisicionRepository implements SolicitudRequisicionRepositoryInterface
 {
@@ -20,11 +21,6 @@ class EloquentSolicitudRequisicionRepository implements SolicitudRequisicionRepo
         return DB::transaction(function () use ($dto) {
             $data = $this->mapper->toPersistenceArray($dto);
             
-            // Removemos estado si viene nulo para no sobreescribir default DB behavior
-            if (empty($data['estado'])) {
-                unset($data['estado']);
-            }
-            
             $model = $this->model->create($data);
             return $this->mapper->toDTO($model);
         });
@@ -34,11 +30,7 @@ class EloquentSolicitudRequisicionRepository implements SolicitudRequisicionRepo
     {
         return DB::transaction(function () use ($id, $dto) {
             $model = $this->model->findOrFail($id);
-            $data = $this->mapper->toPersistenceArray($dto);
-            
-            if ($dto->estado === null) {
-                unset($data['estado']);
-            }
+            $data = $this->mapper->toUpdatePersistenceArray($dto);
             
             $model->update($data);
             return $this->mapper->toDTO($model);
@@ -51,10 +43,15 @@ class EloquentSolicitudRequisicionRepository implements SolicitudRequisicionRepo
         return $this->mapper->toDTO($model);
     }
 
-    public function all(): array
+    public function paginate(int $perPage = 15): LengthAwarePaginator
     {
-        $models = $this->model->all();
-        return $this->mapper->toDTOCollection($models);
+        $paginator = $this->model->paginate($perPage);
+        
+        $paginator->getCollection()->transform(function ($model) {
+            return $this->mapper->toDTO($model);
+        });
+
+        return $paginator;
     }
 
     public function delete(int $id): void

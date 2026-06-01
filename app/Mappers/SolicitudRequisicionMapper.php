@@ -2,8 +2,8 @@
 
 namespace App\Mappers;
 
-use App\DTOs\SolicitudRequisicionDTO;
 use App\Models\SolicitudRequisicion;
+use App\DTOs\SolicitudRequisicionDTO;
 
 /**
  * Capa de transformación de datos para la entidad SolicitudRequisicion.
@@ -40,7 +40,7 @@ class SolicitudRequisicionMapper
      */
     public function toPersistenceArray(SolicitudRequisicionDTO $dto): array
     {
-        return [
+        $data = [
             'folio' => $dto->folio,
             'proyecto_id' => $dto->proyectoId,
             'id_instancia_workflow' => $dto->idInstanciaWorkflow,
@@ -51,6 +51,29 @@ class SolicitudRequisicionMapper
             'observaciones' => $dto->observaciones,
             'estado' => $dto->estado,
         ];
+
+        if (empty($data['estado'])) {
+            unset($data['estado']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Convierte un DTO en un array para actualización, omitiendo el estado si es nulo.
+     *
+     * @param SolicitudRequisicionDTO $dto
+     * @return array<string, mixed>
+     */
+    public function toUpdatePersistenceArray(SolicitudRequisicionDTO $dto): array
+    {
+        $data = $this->toPersistenceArray($dto);
+        
+        if ($dto->estado === null && array_key_exists('estado', $data)) {
+            unset($data['estado']);
+        }
+        
+        return $data;
     }
 
     /**

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use App\DTOs\SolicitudRequisicionDTO;
-use App\Http\Requests\SolicitudRequisicionRequest;
+use App\Enums\SolicitudRequisicionEstado;
 use App\Mappers\SolicitudRequisicionMapper;
 use App\Services\SolicitudRequisicionService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
-use App\Logging\LogContext;
+use App\Http\Requests\SolicitudRequisicionRequest;
 
 /**
  * Controlador de API para gestionar el recurso de Solicitudes de Requisición.
@@ -20,10 +20,8 @@ class SolicitudRequisicionController extends Controller
      */
     public function __construct(
         private readonly SolicitudRequisicionService $service,
-        private readonly SolicitudRequisicionMapper $mapper,
-        private readonly LogContext $logContext
+        private readonly SolicitudRequisicionMapper $mapper
     ) {
-        $this->logContext->setChannel('requisicion');
     }
 
     /**
@@ -31,11 +29,17 @@ class SolicitudRequisicionController extends Controller
      */
     public function index(): JsonResponse
     {
-        $dtos = $this->service->list();
-        $response = array_map(fn($dto) => $this->mapper->toResponseArray($dto), $dtos);
+        $paginator = $this->service->paginate();
+        $response = collect($paginator->items())->map(fn($dto) => $this->mapper->toResponseArray($dto));
 
         return response()->json([
             'data' => $response,
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ]
         ]);
     }
 
@@ -48,7 +52,12 @@ class SolicitudRequisicionController extends Controller
         $accion = $validated['accion'] ?? null;
         
         $dtoInput = SolicitudRequisicionDTO::fromArray($validated);
-        $dtoOutput = $this->service->create($dtoInput, $accion);
+        
+        if ($accion === 'emitir') {
+            $dtoInput = $dtoInput->withEstado(SolicitudRequisicionEstado::EN_PROCESO);
+        }
+
+        $dtoOutput = $this->service->create($dtoInput);
         $response = $this->mapper->toResponseArray($dtoOutput);
 
         return response()->json([
@@ -79,7 +88,12 @@ class SolicitudRequisicionController extends Controller
         
         $data = array_merge($validated, ['id' => $id]);
         $dtoInput = SolicitudRequisicionDTO::fromArray($data);
-        $dtoOutput = $this->service->update($id, $dtoInput, $accion);
+        
+        if ($accion === 'emitir') {
+            $dtoInput = $dtoInput->withEstado(SolicitudRequisicionEstado::EN_PROCESO);
+        }
+
+        $dtoOutput = $this->service->update($id, $dtoInput);
         $response = $this->mapper->toResponseArray($dtoOutput);
 
         return response()->json([

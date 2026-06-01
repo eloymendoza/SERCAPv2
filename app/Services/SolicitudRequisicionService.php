@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Contracts\SolicitudRequisicionRepositoryInterface;
-use App\DTOs\SolicitudRequisicionDTO;
-use App\Enums\SolicitudRequisicionEstado;
+use App\Logging\LogContext;
 use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\Log;
-use App\Logging\LogContext;
+use App\DTOs\SolicitudRequisicionDTO;
+use App\Contracts\SolicitudRequisicionRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SolicitudRequisicionService
 {
@@ -23,15 +23,11 @@ class SolicitudRequisicionService
         return 'requisicion';
     }
 
-    public function create(SolicitudRequisicionDTO $dto, ?string $accion = null): SolicitudRequisicionDTO
+    public function create(SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
     {
         Log::channel($this->logContext->channel())->info("Iniciando creación de solicitud: {$dto->folio}");
 
-        return $this->handle(function () use ($dto, $accion) {
-            if ($accion === 'emitir') {
-                $dto = $dto->withEstado(SolicitudRequisicionEstado::EN_PROCESO);
-            }
-
+        return $this->handle(function () use ($dto) {
             $createdDto = $this->repository->create($dto);
             Log::channel($this->logContext->channel())->info("Solicitud creada con ID: {$createdDto->id}");
 
@@ -39,15 +35,11 @@ class SolicitudRequisicionService
         }, 'SolicitudRequisicionService@create');
     }
 
-    public function update(int $id, SolicitudRequisicionDTO $dto, ?string $accion = null): SolicitudRequisicionDTO
+    public function update(int $id, SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
     {
         Log::channel($this->logContext->channel())->info("Iniciando actualización de solicitud ID: {$id}");
 
-        return $this->handle(function () use ($id, $dto, $accion) {
-            if ($accion === 'emitir') {
-                $dto = $dto->withEstado(SolicitudRequisicionEstado::EN_PROCESO);
-            }
-
+        return $this->handle(function () use ($id, $dto) {
             $updatedDto = $this->repository->update($id, $dto);
             Log::channel($this->logContext->channel())->info("Solicitud ID {$id} actualizada con éxito.");
 
@@ -64,13 +56,13 @@ class SolicitudRequisicionService
         }, 'SolicitudRequisicionService@find');
     }
 
-    public function list(): array
+    public function paginate(int $perPage = 15): LengthAwarePaginator
     {
-        Log::channel($this->logContext->channel())->info("Consultando colección de solicitudes");
+        Log::channel($this->logContext->channel())->info("Consultando colección paginada de solicitudes");
 
-        return $this->handle(function () {
-            return $this->repository->all();
-        }, 'SolicitudRequisicionService@list');
+        return $this->handle(function () use ($perPage) {
+            return $this->repository->paginate($perPage);
+        }, 'SolicitudRequisicionService@paginate');
     }
 
     public function delete(int $id): void
