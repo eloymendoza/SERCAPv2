@@ -5,14 +5,14 @@ use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\Exceptions\BaseApiException;
 use Illuminate\Foundation\Application;
-use App\Http\Middleware\SecurityHeaders;
+use App\App\Api\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\AuthenticationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\Http\Middleware\VerifyDjangoToken;
-use App\Http\Middleware\InitializeLogContext;
+use App\App\Api\Middleware\VerifyDjangoToken;
+use App\App\Api\Middleware\InitializeLogContext;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(

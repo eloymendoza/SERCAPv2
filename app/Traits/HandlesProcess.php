@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Throwable;
+use App\Logging\LogContext;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\BaseApiException;
 use App\Exceptions\ServiceException;
@@ -10,7 +11,6 @@ use Illuminate\Database\QueryException;
 use App\Exceptions\ResourceNotFoundException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Exceptions\Infrastructure\DatabaseInfrastructureException;
-use App\Logging\LogContext;
 
 trait HandlesProcess
 {
