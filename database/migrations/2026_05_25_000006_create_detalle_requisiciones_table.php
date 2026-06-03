@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('cantidad_solicitada');
             $table->decimal('tabulador_sueldo', 12, 2);
             $table->string('turno_horas');
+            $table->string('tipo_movimiento');
             $table->date('fecha_inicio');
             $table->date('fecha_termino')->nullable();
             $table->date('fecha_limite_requerimiento');

@@ -42,6 +42,17 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlsrv') {
+            // SQL Server requiere eliminar los CHECK constraints generados por los enum() antes de poder borrar las columnas
+            \Illuminate\Support\Facades\DB::statement("
+                DECLARE @sql NVARCHAR(MAX) = N'';
+                SELECT @sql += N'ALTER TABLE aspirantes DROP CONSTRAINT ' + name + ';'
+                FROM sys.check_constraints
+                WHERE parent_object_id = OBJECT_ID('aspirantes');
+                EXEC sp_executesql @sql;
+            ");
+        }
+
         Schema::table('aspirantes', function (Blueprint $table) {
              // Revertir cambios de longitud (volver a los valores originales)
             $table->string('nombres', 255)->change();

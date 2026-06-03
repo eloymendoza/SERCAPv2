@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Domain\Requisiciones\Enums\TipoMovimientoEnum;
 
 /**
  * Representa el desglose o partida específica de un puesto solicitado en una requisición.
@@ -31,6 +32,7 @@ class DetalleRequisicion extends Model
         'cantidad_solicitada',
         'tabulador_sueldo',
         'turno_horas',
+        'tipo_movimiento',
         'fecha_inicio',
         'fecha_termino',
         'fecha_limite_requerimiento',
@@ -44,6 +46,7 @@ class DetalleRequisicion extends Model
     {
         return [
             'tabulador_sueldo' => 'decimal:2',
+            'tipo_movimiento' => TipoMovimientoEnum::class,
             'fecha_inicio' => 'date',
             'fecha_termino' => 'date',
             'fecha_limite_requerimiento' => 'date',
