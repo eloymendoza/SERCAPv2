@@ -2,6 +2,11 @@
 
 namespace App\Domain\Requisiciones\Models;
 
+use App\Models\CatalogoIdiomas;
+use App\Models\CertificadoAspirante;
+use App\Models\ConocimientoTecnicoAspirante;
+use App\Models\EducacionAspirante;
+use App\Models\ExperienciaAspirante;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
