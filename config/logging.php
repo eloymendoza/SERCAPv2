@@ -1,5 +1,6 @@
 <?php
 
+use App\Logging\DynamicLogger;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -18,7 +19,7 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    'default' => env('LOG_CHANNEL', 'daily'),
 
     /*
     |--------------------------------------------------------------------------
@@ -127,11 +128,41 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Canales de Dominio — Rotación Diaria
+        |--------------------------------------------------------------------------
+        |
+        | Cada canal escribe en su propio subdirectorio con archivos rotativos diarios.
+        | El canal se declara en el Controller del dominio y se propaga automáticamente
+        | a todos los componentes del flujo mediante LogContext.
+        |
+        | Retención: LOG_DAILY_DAYS días (por defecto 30).
+        |
+        */
+
         'auth' => [
-            'driver' => 'single',
-            'path' => storage_path('logs/auth.log'),
-            'level' => 'debug',
-            'replace_placeholders' => true,
+            'driver' => 'custom',
+            'via'    => DynamicLogger::class,
+            'name'   => 'auth',
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => env('LOG_DAILY_DAYS', 30),
+        ],
+
+        'requisicion' => [
+            'driver' => 'custom',
+            'via'    => DynamicLogger::class,
+            'name'   => 'requisicion',
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => env('LOG_DAILY_DAYS', 30),
+        ],
+
+        'app' => [
+            'driver' => 'custom',
+            'via'    => DynamicLogger::class,
+            'name'   => 'app',
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => env('LOG_DAILY_DAYS', 30),
         ],
 
     ],
