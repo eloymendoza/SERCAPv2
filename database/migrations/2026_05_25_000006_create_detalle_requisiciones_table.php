@@ -24,7 +24,7 @@ return new class extends Migration
                 ->constrained('disciplinas');
             $table->decimal('tabulador_sueldo', 12, 2);
             $table->string('turno_horas');
-            $table->string('tipo_contrato');
+            $table->string('tipo_contrato')->comment('obra_determinada, tiempo_determinado, tiempo_indeterminado');
             $table->date('fecha_inicio')->nullable();
             $table->date('fecha_termino')->nullable();
             $table->date('fecha_limite_requerimiento');

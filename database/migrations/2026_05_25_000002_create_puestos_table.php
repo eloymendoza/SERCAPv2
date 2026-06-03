@@ -19,8 +19,8 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('puestos')
                 ->noActionOnDelete();
-            $table->string('tipo')->default('Directo')->comment('Directo, Indirecto');
-            $table->string('estado')->default('Borrador')->comment('Borrador, Activo, Inactivo');
+            $table->string('tipo')->default('directo')->comment('directo, indirecto');
+            $table->string('estado')->default('borrador')->comment('borrador, activo, inactivo');
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });

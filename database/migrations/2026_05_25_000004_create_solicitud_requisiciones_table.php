@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('gerencia_id');
             $table->unsignedBigInteger('coordinacion_id')->nullable();
             $table->string('observaciones')->nullable();
-            $table->string('estado')->default('borrador')->comment('Borrador, En Proceso, Rechazado, Cancelado, Terminado');
+            $table->string('estado')->default('borrador')->comment('borrador, en_proceso, rechazado, cancelado, terminado');
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });

@@ -39,7 +39,7 @@ return new class extends Migration
             $table->boolean('requiere_evaluacion_tecnica')->default(false);
             $table->string('otros_examenes')->nullable();
             $table->dateTime('fecha_autorizacion', 7)->nullable();
-            $table->string('estado')->default('Borrador')->comment('Borrador, En Proceso, Rechazado, Terminado, Cancelado');
+            $table->string('estado')->default('borrador')->comment('borrador, en_proceso, rechazado, terminado, cancelado');
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });
