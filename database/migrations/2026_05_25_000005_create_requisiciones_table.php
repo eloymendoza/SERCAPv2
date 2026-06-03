@@ -18,9 +18,9 @@ return new class extends Migration
                 ->constrained('solicitud_requisiciones')
                 ->cascadeOnDelete();
             $table->string('folio')->nullable()->comment('Ej: RPIACDS99926-1');
-            $table->integer('tipo')->comment('0 corporativo, 1 CLV');
+            $table->integer('tipo')->nullable()->comment('0 corporativo, 1 CLV');
             $table->string('observaciones')->nullable();
-            $table->string('estado')->comment('Borrador, Pendiente_Perfil, Abierta, En_Proceso, Cierre_Parcial, Validacion_Admin, Cubierta, Cancelada');
+            $table->string('estado')->default('Borrador')->comment('Borrador, Pendiente_Perfil, Abierta, En_Proceso, Cierre_Parcial, Validacion_Admin, Cubierta, Cancelada');
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });

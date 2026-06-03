@@ -20,11 +20,12 @@ return new class extends Migration
                 ->constrained('puestos');
             $table->integer('cantidad_solicitada');
             $table->foreignId('disciplina_id')
+                ->nullable()
                 ->constrained('disciplinas');
             $table->decimal('tabulador_sueldo', 12, 2);
             $table->string('turno_horas');
             $table->string('tipo_contrato');
-            $table->date('fecha_inicio');
+            $table->date('fecha_inicio')->nullable();
             $table->date('fecha_termino')->nullable();
             $table->date('fecha_limite_requerimiento');
             $table->string('empleados_propuestos')->nullable()->comment('IDs de candidatos opcionales separados por coma');
