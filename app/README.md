@@ -107,6 +107,11 @@ Clases de envío de mensajes (Correo, Slack, SMS).
 - **🟢 Cuándo usar:** Correos electrónicos específicos de este dominio.
 - **🔴 Cuándo NO usar:** Para inyectar lógica de negocio compleja; solo deben recibir datos limpios (DTOs o Modelos) e hidratar las vistas (Blade).
 
+### Policies (`Policies/`)
+Lógica de autorización vinculada a un modelo específico.
+- **🟢 Cuándo usar:** Para decidir si un usuario en sesión tiene permisos para ver, editar o eliminar un registro en particular (ej. `RequisicionPolicy`).
+- **🔴 Cuándo NO usar:** Para validar que los datos enviados en un formulario sean correctos (eso es de los `Requests`), ni para lógica de negocio genérica.
+
 ### Traits (`Traits/`)
 Funciones reusables vía herencia horizontal (Mixins).
 - **🟢 Cuándo usar:** Lógica repetitiva muy atada a componentes del framework que comparten varios modelos de un mismo dominio (ej. `HasEstadoAutorizacion`).
