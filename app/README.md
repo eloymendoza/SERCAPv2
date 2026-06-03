@@ -55,6 +55,20 @@ app/
 
 ---
 
+## 🛠️ Creación de Nuevos Dominios
+
+Para mantener la consistencia arquitectónica, existe un comando personalizado de Artisan que genera toda la estructura base de un nuevo Dominio. Nunca crees las carpetas manualmente.
+
+Ejecuta en tu terminal:
+```bash
+php artisan make:domain NombreDelDominio
+```
+*(Ej. `php artisan make:domain Finanzas`)*
+
+Esto generará automáticamente la carpeta `app/Domain/Finanzas` con sus 14 subdirectorios estandarizados (`Actions`, `DTOs`, `Models`, etc.) y sus respectivos archivos `.gitkeep` para garantizar que Git los rastree.
+
+---
+
 ## 📁 Glosario y Reglas de Artefactos de Dominio
 
 ### Models (`Models/`)
