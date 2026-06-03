@@ -55,6 +55,20 @@ app/
 
 ---
 
+## 🛠️ Creación de Nuevos Dominios
+
+Para mantener la consistencia arquitectónica, existe un comando personalizado de Artisan que genera toda la estructura base de un nuevo Dominio. Nunca crees las carpetas manualmente.
+
+Ejecuta en tu terminal:
+```bash
+php artisan make:domain NombreDelDominio
+```
+*(Ej. `php artisan make:domain Finanzas`)*
+
+Esto generará automáticamente la carpeta `app/Domain/Finanzas` con sus 14 subdirectorios estandarizados (`Actions`, `DTOs`, `Models`, etc.) y sus respectivos archivos `.gitkeep` para garantizar que Git los rastree.
+
+---
+
 ## 📁 Glosario y Reglas de Artefactos de Dominio
 
 ### Models (`Models/`)
@@ -106,6 +120,11 @@ Procesos asíncronos encolables.
 Clases de envío de mensajes (Correo, Slack, SMS).
 - **🟢 Cuándo usar:** Correos electrónicos específicos de este dominio.
 - **🔴 Cuándo NO usar:** Para inyectar lógica de negocio compleja; solo deben recibir datos limpios (DTOs o Modelos) e hidratar las vistas (Blade).
+
+### Policies (`Policies/`)
+Lógica de autorización vinculada a un modelo específico.
+- **🟢 Cuándo usar:** Para decidir si un usuario en sesión tiene permisos para ver, editar o eliminar un registro en particular (ej. `RequisicionPolicy`).
+- **🔴 Cuándo NO usar:** Para validar que los datos enviados en un formulario sean correctos (eso es de los `Requests`), ni para lógica de negocio genérica.
 
 ### Traits (`Traits/`)
 Funciones reusables vía herencia horizontal (Mixins).
