@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\SolicitudRequisicionController;
+use App\App\Api\Controllers\AuthController;
+use App\App\Api\Controllers\SolicitudRequisicionController;
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
