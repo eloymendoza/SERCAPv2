@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('solicitud_requisiciones', function (Blueprint $table) {
             $table->id();
-            $table->string('folio')->nullable()->unique()->comment('Ej: SRPIACDS-001');
+            $table->string('folio')->nullable()->comment('Ej: SRPIACDS-001');
             $table->unsignedBigInteger('proyecto_id')->nullable()
                 ->comment('Referencia lógica a id_proyecto de BD Costosv2');
             $table->unsignedBigInteger('id_instancia_workflow')->nullable()

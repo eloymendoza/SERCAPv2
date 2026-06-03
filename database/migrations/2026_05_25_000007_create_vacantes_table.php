@@ -18,7 +18,6 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->foreignId('aspirante_id')
                 ->nullable()
-                ->unique()
                 ->constrained('aspirantes')
                 ->nullOnDelete();
             $table->dateTime('fecha_limite_anexo_a', 7)->nullable()->comment('SLA 3 días');
