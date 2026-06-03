@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
-use App\Domain\Requisiciones\Mappers\SolicitudRequisicionMapper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Domain\Requisiciones\Mappers\SolicitudRequisicionMapper;
 
 class SolicitudRequisicionService
 {
