@@ -19,9 +19,11 @@ return new class extends Migration
             $table->foreignId('puesto_id')
                 ->constrained('puestos');
             $table->integer('cantidad_solicitada');
+            $table->foreignId('disciplina_id')
+                ->constrained('disciplinas');
             $table->decimal('tabulador_sueldo', 12, 2);
             $table->string('turno_horas');
-            $table->string('tipo_movimiento');
+            $table->string('tipo_contrato');
             $table->date('fecha_inicio');
             $table->date('fecha_termino')->nullable();
             $table->date('fecha_limite_requerimiento');

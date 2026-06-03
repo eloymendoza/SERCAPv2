@@ -30,6 +30,7 @@ class DetalleRequisicion extends Model
         'requisicion_id',
         'puesto_id',
         'cantidad_solicitada',
+        'disciplina_id',
         'tabulador_sueldo',
         'turno_horas',
         'tipo_movimiento',
@@ -67,6 +68,14 @@ class DetalleRequisicion extends Model
     public function puesto(): BelongsTo
     {
         return $this->belongsTo(Puesto::class, 'puesto_id');
+    }
+
+    /**
+     * Retorna la disciplina o área funcional asociada a este desglose.
+     */
+    public function disciplina(): BelongsTo
+    {
+        return $this->belongsTo(Disciplina::class, 'disciplina_id');
     }
 
     /**
