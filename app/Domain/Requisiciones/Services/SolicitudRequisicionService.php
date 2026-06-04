@@ -17,6 +17,7 @@ class SolicitudRequisicionService
 
     public function __construct(
         private readonly SolicitudRequisicionMapper $mapper,
+        private readonly RequisicionService $requisicionService,
         private readonly LogContext $logContext
     ) {}
 
@@ -36,6 +37,11 @@ class SolicitudRequisicionService
                 $data = $this->mapper->toPersistenceArray($dto);
                 $model = SolicitudRequisicion::create($data);
                 
+                if ($dto->requisicion) {
+                    $this->requisicionService->create($dto->requisicion, $model->id);
+                }
+
+                $model->load('requisicion.detalles');
                 return $this->mapper->toDTO($model);
             });
 

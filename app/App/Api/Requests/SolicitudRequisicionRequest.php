@@ -4,6 +4,7 @@ namespace App\App\Api\Requests;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Domain\Requisiciones\Enums\TipoContrato;
 
 /**
  * Valida los datos recibidos para la creación o edición de una SolicitudRequisicion.
@@ -37,6 +38,21 @@ class SolicitudRequisicionRequest extends FormRequest
             'coordinacion_id' => ['nullable','integer',],
             'observaciones' => ['nullable', 'string',],
             'accion' => ['nullable', 'string', Rule::in(['guardar', 'emitir'])],
+            
+            'requisicion' => ['nullable', 'array'],
+            'requisicion.tipo' => ['nullable', 'integer'],
+            'requisicion.detalle' => ['nullable', 'array'],
+            'requisicion.detalle.puesto_id' => ['required_with:requisicion.detalle', 'integer'],
+            'requisicion.detalle.cantidad_solicitada' => ['required_with:requisicion.detalle', 'integer', 'min:1'],
+            'requisicion.detalle.disciplina_id' => ['required_with:requisicion.detalle', 'integer'],
+            'requisicion.detalle.tipo_contrato' => ['required_with:requisicion.detalle', Rule::enum(TipoContrato::class)],
+            'requisicion.detalle.tabulador_sueldo' => ['required_with:requisicion.detalle', 'numeric'],
+            'requisicion.detalle.turno_horas' => ['required_with:requisicion.detalle'],
+            'requisicion.detalle.fecha_inicio' => ['required_with:requisicion.detalle', 'date'],
+            'requisicion.detalle.fecha_termino' => ['nullable', 'date', 'after_or_equal:requisicion.detalle.fecha_inicio'],
+            'requisicion.detalle.fecha_limite_requerimiento' => ['required_with:requisicion.detalle', 'date'],
+            'requisicion.detalle.empleados_propuestos' => ['nullable', 'array'],
+            'requisicion.detalle.empleados_propuestos.*' => ['integer'],
         ];
     }
 

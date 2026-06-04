@@ -22,7 +22,9 @@ class SolicitudRequisicionDTO
         public readonly ?int $gerenciaId,
         public readonly ?int $coordinacionId,
         public readonly ?string $observaciones,
-        public readonly ?SolicitudRequisicionEstado $estado
+        public readonly ?SolicitudRequisicionEstado $estado,
+        public readonly ?string $accion = null,
+        public readonly ?RequisicionDTO $requisicion = null
     ) {}
 
     /**
@@ -43,6 +45,8 @@ class SolicitudRequisicionDTO
             'coordinacion_id' => $this->coordinacionId,
             'observaciones' => $this->observaciones,
             'estado' => $this->estado?->value,
+            'accion' => $this->accion,
+            'requisicion' => $this->requisicion?->toArray(),
         ];
     }
 
@@ -72,7 +76,9 @@ class SolicitudRequisicionDTO
             gerenciaId: isset($data['gerencia_id']) ? (int) $data['gerencia_id'] : null,
             coordinacionId: isset($data['coordinacion_id']) ? (int) $data['coordinacion_id'] : null,
             observaciones: $data['observaciones'] ?? null,
-            estado: $estado
+            estado: $estado,
+            accion: $data['accion'] ?? null,
+            requisicion: isset($data['requisicion']) ? RequisicionDTO::fromArray($data['requisicion']) : null
         );
     }
 
@@ -91,7 +97,9 @@ class SolicitudRequisicionDTO
             gerenciaId: $this->gerenciaId,
             coordinacionId: $this->coordinacionId,
             observaciones: $this->observaciones,
-            estado: $estado
+            estado: $estado,
+            accion: $this->accion,
+            requisicion: $this->requisicion
         );
     }
 }
