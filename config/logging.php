@@ -141,6 +141,14 @@ return [
         |
         */
 
+        'app' => [
+            'driver' => 'custom',
+            'via'    => DynamicLogger::class,
+            'name'   => 'app',
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => env('LOG_DAILY_DAYS', 30),
+        ],
+
         'auth' => [
             'driver' => 'custom',
             'via'    => DynamicLogger::class,
@@ -156,15 +164,14 @@ return [
             'level'  => env('LOG_LEVEL', 'debug'),
             'days'   => env('LOG_DAILY_DAYS', 30),
         ],
-
-        'app' => [
+        
+        'proyecto' => [
             'driver' => 'custom',
             'via'    => DynamicLogger::class,
-            'name'   => 'app',
+            'name'   => 'proyecto',
             'level'  => env('LOG_LEVEL', 'debug'),
             'days'   => env('LOG_DAILY_DAYS', 30),
         ],
-
     ],
 
 ];
