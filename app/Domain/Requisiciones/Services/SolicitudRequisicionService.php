@@ -112,6 +112,11 @@ class SolicitudRequisicionService
         $this->handle(function () use ($id) {
             DB::transaction(function () use ($id) {
                 $model = SolicitudRequisicion::findOrFail($id);
+                
+                if ($model->requisicion) {
+                    $this->requisicionService->delete($model->requisicion->id);
+                }
+                
                 $model->delete();
             });
 
