@@ -7,7 +7,7 @@ use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\Log;
 use App\Domain\Proyectos\Models\Proyecto;
 use App\Domain\Proyectos\Mappers\ProyectoMapper;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class ProyectoService
 {
@@ -24,20 +24,20 @@ class ProyectoService
     }
 
     /**
-     * Obtiene el listado de proyectos paginado.
+     * Obtiene la colección completa de proyectos activos.
+     *
+     * @return Collection<int, \App\Domain\Proyectos\DTOs\ProyectoDTO>
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    public function getActive(): Collection
     {
-        Log::channel($this->logContext->channel())->info("Consultando colección paginada de proyectos");
+        Log::channel($this->logContext->channel())->info("Consultando catálogo de proyectos activos");
 
-        return $this->handle(function () use ($perPage) {
-            $paginator = Proyecto::paginate($perPage);
+        return $this->handle(function () {
+            $collection = Proyecto::where('activoProyecto', true)->get();
             
-            $paginator->getCollection()->transform(function ($model) {
+            return $collection->map(function ($model) {
                 return $this->mapper->toDTO($model);
             });
-
-            return $paginator;
-        }, 'ProyectoService@paginate');
+        }, 'ProyectoService@getActive');
     }
 }

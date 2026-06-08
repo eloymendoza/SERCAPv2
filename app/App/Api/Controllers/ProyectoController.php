@@ -20,12 +20,12 @@ class ProyectoController extends Controller
     }
 
     /**
-     * Retorna el listado de proyectos.
+     * Retorna el listado de proyectos activos.
      */
     public function index(): AnonymousResourceCollection
     {
-        $paginator = $this->service->paginate();
+        $collection = $this->service->getActive();
         
-        return ProyectoResource::collection($paginator);
+        return ProyectoResource::collection($collection);
     }
 }
