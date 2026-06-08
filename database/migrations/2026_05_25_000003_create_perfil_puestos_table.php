@@ -16,6 +16,10 @@ return new class extends Migration
             $table->foreignId('puesto_id')
                 ->constrained('puestos')
                 ->cascadeOnDelete();
+            $table->foreignId('solicitud_id')
+                ->nullable()
+                ->constrained('solicitud_perfil_puestos')
+                ->cascadeOnDelete();
             $table->unsignedBigInteger('id_documento')->nullable()->comment('Referencia lógica a id_documento en BD externa');
             $table->string('nivel_organizacional')->comment('Operativo, Mando Medio, Alta Dirección');
             $table->string('identificacion')->comment('Ej: COR-123/26');
@@ -39,7 +43,7 @@ return new class extends Migration
             $table->boolean('requiere_evaluacion_tecnica')->default(false);
             $table->string('otros_examenes')->nullable();
             $table->dateTime('fecha_autorizacion', 7)->nullable();
-            $table->string('estado')->default('borrador')->comment('borrador, en_proceso, rechazado, terminado, cancelado');
+            $table->string('estado')->default('inactivo')->comment('activo, inactivo (Histórico o pendiente)');
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });
