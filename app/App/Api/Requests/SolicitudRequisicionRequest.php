@@ -4,6 +4,7 @@ namespace App\App\Api\Requests;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Domain\Proyectos\Models\Proyecto;
 use App\Domain\Requisiciones\Enums\TipoContrato;
 
 /**
@@ -30,7 +31,11 @@ class SolicitudRequisicionRequest extends FormRequest
 
         return [
             'folio' => ['nullable','string','max:255'],
-            'proyecto_id' => ['nullable','integer',],
+            'proyecto_id' => [
+                'nullable',
+                'integer',
+                Rule::exists(Proyecto::class, 'idProyecto')->where('activoProyecto', true),
+            ],
             'id_instancia_workflow' => ['nullable','integer',],
             'solicitante_id' => ['nullable','integer',],
             'direccion_id' => ['required','integer',],
@@ -72,13 +77,15 @@ class SolicitudRequisicionRequest extends FormRequest
             'direccion_id.integer' => 'El campo :attribute debe ser un número entero.',
             
             'gerencia_id.required' => 'El campo :attribute es obligatorio.',
-            'gerencia_id.integer' => 'El campo :attribute debe ser un número entero.',
+            'gerencia_id.integer' => 'El campo :attribute debe ser un número entero.', 
             
             'coordinacion_id.integer' => 'El campo :attribute debe ser un número entero.',
             
             'observaciones.string' => 'El campo :attribute debe ser una cadena de texto.',
             
             'proyecto_id.integer' => 'El campo :attribute debe ser un número entero.',
+            'proyecto_id.exists' => 'El proyecto seleccionado no existe.',
+
             'id_instancia_workflow.integer' => 'El campo :attribute debe ser un número entero.',
             'solicitante_id.integer' => 'El campo :attribute debe ser un número entero.',
             'estado.Illuminate\Validation\Rules\Enum' => 'El :attribute seleccionado no es válido.',
