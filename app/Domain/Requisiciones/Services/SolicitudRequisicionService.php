@@ -2,10 +2,8 @@
 
 namespace App\Domain\Requisiciones\Services;
 
-use App\Logging\LogContext;
 use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -18,7 +16,6 @@ class SolicitudRequisicionService
     public function __construct(
         private readonly SolicitudRequisicionMapper $mapper,
         private readonly RequisicionService $requisicionService,
-        private readonly LogContext $logContext
     ) {}
 
     protected function getLogChannel(): string
@@ -28,7 +25,7 @@ class SolicitudRequisicionService
 
     public function create(SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
     {
-        Log::channel($this->logContext->channel())->info("Iniciando creación de solicitud.", [
+        $this->logger()->info("Iniciando creación de solicitud.", [
             'folio' => $dto->folio
         ]);
 
@@ -45,7 +42,7 @@ class SolicitudRequisicionService
                 return $this->mapper->toDTO($model);
             });
 
-            Log::channel($this->logContext->channel())->info("Solicitud creada.", [
+            $this->logger()->info("Solicitud creada.", [
                 'id' => $createdDto->id
             ]);
 
@@ -55,7 +52,7 @@ class SolicitudRequisicionService
 
     public function update(int $id, SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
     {
-        Log::channel($this->logContext->channel())->info("Iniciando actualización de solicitud.", [
+        $this->logger()->info("Iniciando actualización de solicitud.", [
             'id' => $id
         ]);
 
@@ -68,7 +65,7 @@ class SolicitudRequisicionService
                 return $this->mapper->toDTO($model);
             });
 
-            Log::channel($this->logContext->channel())->info("Solicitud actualizada.", [
+            $this->logger()->info("Solicitud actualizada.", [
                 'id' => $id
             ]);
 
@@ -78,7 +75,7 @@ class SolicitudRequisicionService
 
     public function find(int $id): SolicitudRequisicionDTO
     {
-        Log::channel($this->logContext->channel())->info("Consultando detalle de solicitud.", [
+        $this->logger()->info("Consultando detalle de solicitud.", [
             'id' => $id
         ]);
 
@@ -90,7 +87,7 @@ class SolicitudRequisicionService
 
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
-        Log::channel($this->logContext->channel())->info("Consultando colección paginada de solicitudes");
+        $this->logger()->info("Consultando colección paginada de solicitudes");
 
         return $this->handle(function () use ($perPage) {
             $paginator = SolicitudRequisicion::paginate($perPage);
@@ -105,7 +102,7 @@ class SolicitudRequisicionService
 
     public function delete(int $id): void
     {
-        Log::channel($this->logContext->channel())->info("Iniciando eliminación de solicitud.", [
+        $this->logger()->info("Iniciando eliminación de solicitud.", [
             'id' => $id
         ]);
 
@@ -120,7 +117,7 @@ class SolicitudRequisicionService
                 $model->delete();
             });
 
-            Log::channel($this->logContext->channel())->info("Solicitud eliminada.", [
+            $this->logger()->info("Solicitud eliminada.", [
                 'id' => $id
             ]);
         }, 'SolicitudRequisicionService@delete');
