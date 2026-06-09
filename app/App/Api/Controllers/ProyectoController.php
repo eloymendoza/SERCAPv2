@@ -4,7 +4,7 @@ namespace App\App\Api\Controllers;
 
 use App\Logging\LogContext;
 use App\App\Api\Resources\ProyectoResource;
-use App\Domain\Proyectos\Services\ProyectoService;
+use App\Domain\Catalogos\Services\ProyectoService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**

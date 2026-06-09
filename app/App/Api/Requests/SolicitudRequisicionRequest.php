@@ -4,7 +4,7 @@ namespace App\App\Api\Requests;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Domain\Proyectos\Models\Proyecto;
+use App\Domain\Catalogos\Models\Proyecto;
 use App\Domain\Requisiciones\Enums\TipoContrato;
 
 /**
