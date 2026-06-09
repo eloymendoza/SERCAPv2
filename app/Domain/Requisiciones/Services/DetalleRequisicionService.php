@@ -2,10 +2,8 @@
 
 namespace App\Domain\Requisiciones\Services;
 
-use App\Logging\LogContext;
 use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Domain\Requisiciones\Models\DetalleRequisicion;
 use App\Domain\Requisiciones\DTOs\DetalleRequisicionDTO;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -16,8 +14,7 @@ class DetalleRequisicionService
     use HandlesProcess;
 
     public function __construct(
-        private readonly DetalleRequisicionMapper $mapper,
-        private readonly LogContext $logContext
+        private readonly DetalleRequisicionMapper $mapper
     ) {}
 
     protected function getLogChannel(): string
@@ -30,7 +27,7 @@ class DetalleRequisicionService
      */
     public function create(DetalleRequisicionDTO $dto, int $requisicionId): DetalleRequisicionDTO
     {
-        Log::channel($this->logContext->channel())->info("Registrando detalle de requisición.", [
+        $this->logger()->info("Registrando detalle de requisición.", [
             'requisicion_id' => $requisicionId,
             'puesto_id' => $dto->puestoId
         ]);
@@ -44,7 +41,7 @@ class DetalleRequisicionService
 
     public function update(int $id, DetalleRequisicionDTO $dto): DetalleRequisicionDTO
         {
-        Log::channel($this->logContext->channel())->info("Iniciando actualización de detalle.", [
+        $this->logger()->info("Iniciando actualización de detalle.", [
             'id' => $id
         ]);
 
@@ -57,7 +54,7 @@ class DetalleRequisicionService
                 return $this->mapper->toDTO($model);
             });
 
-            Log::channel($this->logContext->channel())->info("Detalle actualizado.", [
+            $this->logger()->info("Detalle actualizado.", [
                 'id' => $id
             ]);
 
@@ -67,7 +64,7 @@ class DetalleRequisicionService
 
     public function find(int $id): DetalleRequisicionDTO
     {
-        Log::channel($this->logContext->channel())->info("Consultando detalle.", [
+        $this->logger()->info("Consultando detalle.", [
             'id' => $id
         ]);
 
@@ -79,7 +76,7 @@ class DetalleRequisicionService
 
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
-        Log::channel($this->logContext->channel())->info("Consultando colección paginada de detalles");
+        $this->logger()->info("Consultando colección paginada de detalles");
 
         return $this->handle(function () use ($perPage) {
             $paginator = DetalleRequisicion::paginate($perPage);
@@ -94,7 +91,7 @@ class DetalleRequisicionService
 
     public function delete(int $id): void
     {
-        Log::channel($this->logContext->channel())->info("Iniciando eliminación de detalle.", [
+        $this->logger()->info("Iniciando eliminación de detalle.", [
             'id' => $id
         ]);
 
@@ -104,7 +101,7 @@ class DetalleRequisicionService
                 $model->delete();
             });
 
-            Log::channel($this->logContext->channel())->info("Detalle eliminado.", [
+            $this->logger()->info("Detalle eliminado.", [
                 'id' => $id
             ]);
         }, 'DetalleRequisicionService@delete');

@@ -2,9 +2,7 @@
 
 namespace App\Domain\Workflows\Services;
 
-use App\Logging\LogContext;
 use App\Traits\HandlesProcess;
-use Illuminate\Support\Facades\Log;
 use App\Infrastructure\Clients\WorkflowClient;
 use App\Domain\Workflows\DTOs\WorkflowInstanceDTO;
 use App\Domain\Workflows\Mappers\WorkflowMapper;
@@ -15,8 +13,7 @@ class WorkflowService
 
     public function __construct(
         private readonly WorkflowClient $client,
-        private readonly WorkflowMapper $mapper,
-        private readonly LogContext $logContext
+        private readonly WorkflowMapper $mapper
     ) {}
 
     protected function getLogChannel(): string
@@ -26,7 +23,7 @@ class WorkflowService
 
     public function iniciarInstancia(int $id, array $payload): WorkflowInstanceDTO
     {
-        Log::channel($this->resolveChannel())->info("Iniciando instancia workflow para ID: {$id}", ['payload' => $payload]);
+        $this->logger()->info("Iniciando instancia workflow para ID: {$id}", ['payload' => $payload]);
 
         return $this->handle(function () use ($id, $payload) {
             $response = $this->client->post('/instancias/iniciar/', $payload);
@@ -36,7 +33,7 @@ class WorkflowService
 
     public function aprobarPaso(int $id, array $payload): WorkflowInstanceDTO
     {
-        Log::channel($this->resolveChannel())->info("Aprobando paso workflow para ID: {$id}", ['payload' => $payload]);
+        $this->logger()->info("Aprobando paso workflow para ID: {$id}", ['payload' => $payload]);
 
         return $this->handle(function () use ($id, $payload) {
             $response = $this->client->post('/firmantes/aprobar/', $payload);
@@ -46,7 +43,7 @@ class WorkflowService
 
     public function rechazarPaso(int $id, array $payload): WorkflowInstanceDTO
     {
-        Log::channel($this->resolveChannel())->info("Rechazando paso workflow para ID: {$id}", ['payload' => $payload]);
+        $this->logger()->info("Rechazando paso workflow para ID: {$id}", ['payload' => $payload]);
 
         return $this->handle(function () use ($id, $payload) {
             $response = $this->client->post('/firmantes/rechazar/', $payload);
@@ -56,7 +53,7 @@ class WorkflowService
 
     public function cancelarInstancia(int $id, array $payload): WorkflowInstanceDTO
     {
-        Log::channel($this->resolveChannel())->info("Cancelando instancia workflow para ID: {$id}", ['payload' => $payload]);
+        $this->logger()->info("Cancelando instancia workflow para ID: {$id}", ['payload' => $payload]);
 
         return $this->handle(function () use ($id, $payload) {
             $response = $this->client->post('/instancias/cancelar/', $payload);
@@ -66,7 +63,7 @@ class WorkflowService
 
     public function reiniciarInstancia(int $id, array $payload): WorkflowInstanceDTO
     {
-        Log::channel($this->resolveChannel())->info("Reiniciando instancia workflow para ID: {$id}", ['payload' => $payload]);
+        $this->logger()->info("Reiniciando instancia workflow para ID: {$id}", ['payload' => $payload]);
 
         return $this->handle(function () use ($id, $payload) {
             $response = $this->client->post('/instancias/reiniciar/', $payload);

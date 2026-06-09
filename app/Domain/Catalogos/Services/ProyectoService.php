@@ -2,19 +2,15 @@
 
 namespace App\Domain\Catalogos\Services;
 
-use App\Logging\LogContext;
 use App\Traits\HandlesProcess;
-use Illuminate\Support\Facades\Log;
-use App\Domain\Catalogos\Models\Proyecto;
 use Illuminate\Support\Collection;
+use App\Domain\Catalogos\Models\Proyecto;
 
 class ProyectoService
 {
     use HandlesProcess;
 
-    public function __construct(
-        private readonly LogContext $logContext
-    ) {}
+    public function __construct() {}
 
     protected function getLogChannel(): string
     {
@@ -28,7 +24,7 @@ class ProyectoService
      */
     public function getActive(): Collection
     {
-        Log::channel($this->logContext->channel())->info("Consultando catálogo de proyectos activos");
+        $this->logger()->info("Consultando catálogo de proyectos activos");
 
         return $this->handle(function () {
             return Proyecto::where('activoProyecto', true)->get();
