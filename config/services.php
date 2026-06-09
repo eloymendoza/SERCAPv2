@@ -44,4 +44,9 @@ return [
         'default_email_domain' => env('DEFAULT_EMAIL_DOMAIN', 'grupo-iai.com.mx'),
     ],
 
+    'workflow' => [
+        'base_url' => env('API_WF_URL'),
+        'token' => env('TOKEN_WF'),
+    ],
+
 ];

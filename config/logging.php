@@ -172,6 +172,14 @@ return [
             'level'  => env('LOG_LEVEL', 'debug'),
             'days'   => env('LOG_DAILY_DAYS', 30),
         ],
+
+        'workflow' => [
+            'driver' => 'custom',
+            'via'    => DynamicLogger::class,
+            'name'   => 'workflow',
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => env('LOG_DAILY_DAYS', 30),
+        ],
     ],
 
 ];
