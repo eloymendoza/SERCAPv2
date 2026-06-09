@@ -27,7 +27,7 @@ class DetalleRequisicionService
      */
     public function create(DetalleRequisicionDTO $dto, int $requisicionId): DetalleRequisicionDTO
     {
-        $this->logger()->info("Registrando detalle de requisición.", [
+        $this->logger()->info("Procesando creación de detalle de requisición", [
             'requisicion_id' => $requisicionId,
             'puesto_id' => $dto->puestoId
         ]);

@@ -28,7 +28,7 @@ class RequisicionService
      */
     public function create(RequisicionDTO $dto, int $solicitudId): RequisicionDTO
     {
-        $this->logger()->info("Procesando creación de requisición y detalles.", [
+        $this->logger()->info("Procesando creación de requisición", [
             'solicitud_id' => $solicitudId
         ]);
 
