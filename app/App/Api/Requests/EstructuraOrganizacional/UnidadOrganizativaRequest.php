@@ -27,7 +27,7 @@ class UnidadOrganizativaRequest extends FormRequest
             'nombre_corto' => 'nullable|string|max:150',
             'rfc'          => 'nullable|string|max:20',
             'encargado_id' => 'nullable|integer',
-            'estado'       => 'nullable|boolean',
+            'estado'       => 'nullable|string|in:Activo,Inactivo,Borrador',
         ];
     }
 }

@@ -25,9 +25,7 @@ class UnidadOrganizativa extends Model
         'estado'
     ];
 
-    protected $casts = [
-        'estado' => 'boolean',
-    ];
+
 
     /**
      * Resuelve la unidad jerárquica superior de la que depende operativamente.

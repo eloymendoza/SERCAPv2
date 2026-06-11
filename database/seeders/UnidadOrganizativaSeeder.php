@@ -13,9 +13,14 @@ class UnidadOrganizativaSeeder extends Seeder
      */
     public function run(): void
     {
+        // Purga integral del catálogo previa a la resiembra
+        DB::table('unidades_organizativas')->update(['parent_id' => null]);
+        DB::table('unidades_organizativas')->delete();
+
         DB::transaction(function () {
             $estructura = [
                 'ADMINISTRACIÓN Y FINANZAS' => [
+                    'abreviatura' => 'AF',
                     'gerencias' => [
                         'FINANZAS' => [
                             'CUENTAS POR COBRAR',
@@ -36,6 +41,7 @@ class UnidadOrganizativaSeeder extends Seeder
                     ],
                 ],
                 'CALIDAD, AMBIENTAL, SEGURIDAD Y SALUD' => [
+                    'abreviatura' => 'CA',
                     'areas_directas' => [
                         'CALIDAD, AMBIENTAL, SEGURIDAD Y SALUD',
                         'CONTROL DE CALIDAD',
@@ -45,6 +51,7 @@ class UnidadOrganizativaSeeder extends Seeder
                     ],
                 ],
                 'CONSTRUCCIÓN Y MANTENIMIENTO' => [
+                    'abreviatura' => 'CM',
                     'gerencias' => [
                         'TÉCNICO' => [],
                     ],
@@ -57,27 +64,34 @@ class UnidadOrganizativaSeeder extends Seeder
                         'VEHÍCULOS Y MAQUINARIA',
                     ],
                 ],
-                'DIRECTOR GENERAL' => [],
-                'INNOVACIÓN EN INGENIERÍA' => [],
+                'DIRECCIÓN GENERAL' => [
+                    'abreviatura' => 'DG',
+                ],
+                'INNOVACIÓN EN INGENIERÍA' => [
+                    'abreviatura' => 'II',
+                ],
             ];
 
             foreach ($estructura as $direccionNombre => $datosDireccion) {
-                $direccion = UnidadOrganizativa::firstOrCreate(
-                    ['nombre' => $direccionNombre, 'nivel' => 1],
-                    ['estado' => true]
+                $direccion = UnidadOrganizativa::updateOrCreate(
+                    ['nombre' => $direccionNombre, 'nivel' => 'direccion'],
+                    [
+                        'estado' => 'Activo',
+                        'abreviatura' => $datosDireccion['abreviatura'] ?? null
+                    ]
                 );
 
                 if (isset($datosDireccion['gerencias'])) {
                     foreach ($datosDireccion['gerencias'] as $gerenciaNombre => $areas) {
                         $gerencia = UnidadOrganizativa::firstOrCreate(
-                            ['nombre' => $gerenciaNombre, 'parent_id' => $direccion->id, 'nivel' => 2],
-                            ['estado' => true]
+                            ['nombre' => $gerenciaNombre, 'parent_id' => $direccion->id, 'nivel' => 'gerencia'],
+                            ['estado' => 'Activo']
                         );
 
                         foreach ($areas as $areaNombre) {
                             UnidadOrganizativa::firstOrCreate(
-                                ['nombre' => $areaNombre, 'parent_id' => $gerencia->id, 'nivel' => 3],
-                                ['estado' => true]
+                                ['nombre' => $areaNombre, 'parent_id' => $gerencia->id, 'nivel' => 'area'],
+                                ['estado' => 'Activo']
                             );
                         }
                     }
@@ -86,8 +100,8 @@ class UnidadOrganizativaSeeder extends Seeder
                 if (isset($datosDireccion['areas_directas'])) {
                     foreach ($datosDireccion['areas_directas'] as $areaNombre) {
                         UnidadOrganizativa::firstOrCreate(
-                            ['nombre' => $areaNombre, 'parent_id' => $direccion->id, 'nivel' => 3],
-                            ['estado' => true]
+                            ['nombre' => $areaNombre, 'parent_id' => $direccion->id, 'nivel' => 'area'],
+                            ['estado' => 'Activo']
                         );
                     }
                 }

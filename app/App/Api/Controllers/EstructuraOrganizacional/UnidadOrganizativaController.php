@@ -2,6 +2,7 @@
 
 namespace App\App\Api\Controllers\EstructuraOrganizacional;
 
+use App\Logging\LogContext;
 use Illuminate\Http\JsonResponse;
 use App\App\Api\Controllers\Controller;
 use App\App\Api\Requests\EstructuraOrganizacional\UnidadOrganizativaRequest;
@@ -12,8 +13,11 @@ use App\Domain\EstructuraOrganizacional\Services\UnidadOrganizativaService;
 class UnidadOrganizativaController extends Controller
 {
     public function __construct(
-        private readonly UnidadOrganizativaService $service
-    ) {}
+        private readonly UnidadOrganizativaService $service,
+        private readonly LogContext $logContext
+    ) {
+        $this->logContext->setChannel('estructura_organizacional');
+    }
 
     /**
      * Orquesta el listado integral o paginado del recurso de dominio.

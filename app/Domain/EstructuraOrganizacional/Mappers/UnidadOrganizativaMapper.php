@@ -22,9 +22,9 @@ class UnidadOrganizativaMapper
             rfc: $model->rfc,
             encargadoId: $model->encargado_id,
             estado: $model->estado,
-            parent: clone $model->relationLoaded('parent') && $model->parent ? $this->toDTO($model->parent) : null,
-            children: clone $model->relationLoaded('children') ? $model->children->map(fn($c) => $this->toDTO($c))->toArray() : null,
-            encargado: clone $model->relationLoaded('encargado') && $model->encargado ? $model->encargado->toArray() : null
+            parent: $model->relationLoaded('parent') && $model->parent ? $this->toDTO($model->parent) : null,
+            children: $model->relationLoaded('children') ? $model->children->map(fn($c) => $this->toDTO($c))->toArray() : null,
+            encargado: $model->relationLoaded('encargado') && $model->encargado ? $model->encargado->toArray() : null
         );
     }
 
