@@ -173,6 +173,14 @@ return [
             'days'   => env('LOG_DAILY_DAYS', 30),
         ],
 
+        'estructura_organizacional' => [
+            'driver' => 'custom',
+            'via'    => DynamicLogger::class,
+            'name'   => 'estructura_organizacional',
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => env('LOG_DAILY_DAYS', 30),
+        ],
+
         'workflow' => [
             'driver' => 'custom',
             'via'    => DynamicLogger::class,
