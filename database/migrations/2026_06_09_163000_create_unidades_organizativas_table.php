@@ -28,7 +28,7 @@ return new class extends Migration
 
             $table->foreignId('encargado_id')->nullable();
 
-            $table->boolean('estado')->default(true);
+            $table->string('estado', 50)->default('Activo')->comment('Activo, Inactivo, Borrador');
             
             $table->timestamps();
             $table->softDeletes();
