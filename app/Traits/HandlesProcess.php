@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use Throwable;
-use App\Logging\LogContext;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\BaseApiException;
 use App\Exceptions\ServiceException;
@@ -14,23 +13,7 @@ use App\Exceptions\Infrastructure\DatabaseInfrastructureException;
 
 trait HandlesProcess
 {
-    /**
-     * Define el canal de logs a utilizar.
-     */
-    abstract protected function getLogChannel(): string;
-
-    /**
-     * Resuelve el canal desde el LogContext actual, o utiliza el canal definido
-     * en el servicio si no hay un contexto activo (ej. comandos Artisan o Jobs).
-     */
-    private function resolveChannel(): string
-    {
-        try {
-            return app(LogContext::class)->channel();
-        } catch (\Throwable) {
-            return $this->getLogChannel();
-        }
-    }
+    use InteractsWithLogContext;
 
     /**
      * Traduce excepciones técnicas a excepciones de dominio o infraestructura.
@@ -62,7 +45,7 @@ trait HandlesProcess
             );
         }
         catch (ModelNotFoundException $e) {
-            Log::channel($channel)->error("[MODEL_NOT_FOUND] {$context}: {$e->getMessage()}", [
+            Log::channel($channel)->warning("[MODEL_NOT_FOUND] {$context}: {$e->getMessage()}", [
                 'model' => $e->getModel(),
                 'ids'   => $e->getIds(),
                 'trace' => $e->getTraceAsString()

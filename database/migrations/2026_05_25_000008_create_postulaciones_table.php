@@ -19,14 +19,14 @@ return new class extends Migration
             $table->foreignId('detalle_requisicion_id')
                 ->constrained('detalle_requisiciones')
                 ->cascadeOnDelete();
-            $table->string('tipo_movimiento')->comment('Calculado: Nuevo Ingreso, Reingreso, Mov. Interno');
+            $table->string('tipo_movimiento')->comment('Calculado: nuevo_ingreso, reingreso, movimiento_interno');
             $table->dateTime('fecha_inicio_sla_entrevista', 7)->nullable()->comment('SLA 3 o 5 días hábiles');
             $table->string('resultado_entrevista')->nullable();
             $table->string('resultado_examen_tecnico')->nullable();
             $table->string('resultado_medico')->nullable();
             $table->string('resultado_psicometrico')->nullable();
             $table->string('notas_autorizacion_excepcional')->nullable();
-            $table->string('estado')->comment('Preseleccionado, En_Entrevista, En_Examenes, Autorizacion_Excepcional, Rechazado, Seleccionado');
+            $table->string('estado')->comment('preseleccionado, en_entrevista, en_examenes, autorizacion_excepcional, rechazado, seleccionado');
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });

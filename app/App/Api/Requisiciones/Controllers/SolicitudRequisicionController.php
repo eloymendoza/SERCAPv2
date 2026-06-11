@@ -1,12 +1,13 @@
 <?php
 
-namespace App\App\Api\Controllers;
+namespace App\App\Api\Requisiciones\Controllers;
 
 use App\Logging\LogContext;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
-use App\App\Api\Requests\SolicitudRequisicionRequest;
-use App\App\Api\Resources\SolicitudRequisicionResource;
+use App\App\Api\Controller;
+use App\App\Api\Requisiciones\Requests\SolicitudRequisicionRequest;
+use App\App\Api\Requisiciones\Resources\SolicitudRequisicionResource;
 use App\Domain\Requisiciones\Services\SolicitudRequisicionService;
 
 /**

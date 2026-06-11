@@ -26,6 +26,7 @@ class PerfilPuesto extends Model
      */
     protected $fillable = [
         'puesto_id',
+        'solicitud_id',
         'id_documento',
         'nivel_organizacional',
         'identificacion',
@@ -75,5 +76,13 @@ class PerfilPuesto extends Model
     public function puesto(): BelongsTo
     {
         return $this->belongsTo(Puesto::class, 'puesto_id');
+    }
+
+    /**
+     * Retorna la solicitud que autoriza la creación o modificación de este perfil.
+     */
+    public function solicitud(): BelongsTo
+    {
+        return $this->belongsTo(SolicitudPerfilPuesto::class, 'solicitud_id');
     }
 }

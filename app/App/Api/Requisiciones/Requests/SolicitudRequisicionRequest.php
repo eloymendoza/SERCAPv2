@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Api\Requests;
+namespace App\App\Api\Requisiciones\Requests;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,7 +28,7 @@ class SolicitudRequisicionRequest extends FormRequest
         $id = $this->route('solicitud_requisicion') ?? $this->input('id');
 
         return [
-            'folio' => ['nullable','string','max:255',Rule::unique('solicitud_requisiciones', 'folio')->ignore($id),],
+            'folio' => ['nullable','string','max:255'],
             'proyecto_id' => ['nullable','integer',],
             'id_instancia_workflow' => ['nullable','integer',],
             'solicitante_id' => ['nullable','integer',],
@@ -51,7 +51,6 @@ class SolicitudRequisicionRequest extends FormRequest
             'folio.required' => 'El campo :attribute es obligatorio.',
             'folio.string' => 'El campo :attribute debe ser una cadena de texto.',
             'folio.max' => 'El campo :attribute debe tener menos de :max caracteres.',
-            'folio.unique' => 'El :attribute ingresado ya se encuentra registrado.',
             
             'direccion_id.required' => 'El campo :attribute es obligatorio.',
             'direccion_id.integer' => 'El campo :attribute debe ser un número entero.',

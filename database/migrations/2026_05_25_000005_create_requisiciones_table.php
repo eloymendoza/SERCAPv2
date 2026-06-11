@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('folio')->nullable()->comment('Ej: RPIACDS99926-1');
             $table->integer('tipo')->nullable()->comment('0 corporativo, 1 CLV');
             $table->string('observaciones')->nullable();
-            $table->string('estado')->default('Borrador')->comment('Borrador, Pendiente_Perfil, Abierta, En_Proceso, Cierre_Parcial, Validacion_Admin, Cubierta, Cancelada');
+            $table->string('estado')->default('borrador')->comment('borrador, pendiente_perfil, abierta, en_proceso, cierre_parcial, validacion_admin, cubierta, cancelada');
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });

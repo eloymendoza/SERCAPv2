@@ -57,7 +57,24 @@ class MakeDomainCommand extends Command
             File::put("{$path}/.gitkeep", "");
         }
 
-        $this->info("Dominio '{$name}' creado exitosamente con su estructura base.");
+        $this->info("Estructura de dominio '{$name}' creada exitosamente.");
+
+        $apiPath = app_path("App/Api/{$name}");
+        $apiFolders = [
+            'Controllers',
+            'Requests',
+            'Resources'
+        ];
+
+        File::makeDirectory($apiPath, 0755, true);
+
+        foreach ($apiFolders as $folder) {
+            $path = "{$apiPath}/{$folder}";
+            File::makeDirectory($path, 0755, true);
+            File::put("{$path}/.gitkeep", "");
+        }
+
+        $this->info("Estructura de API para '{$name}' creada exitosamente.");
         return Command::SUCCESS;
     }
 }

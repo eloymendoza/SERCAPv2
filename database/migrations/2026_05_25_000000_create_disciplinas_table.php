@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 150);
             $table->string('abreviatura', 50)->nullable();
-            $table->boolean('estado')->default(true);
+            $table->string('estado')->default('activo')->comment('activo, inactivo');
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });

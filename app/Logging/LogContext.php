@@ -34,6 +34,15 @@ class LogContext
         $this->path      = $request->path();
     }
 
+    /** Inicializa el contexto para procesos asíncronos (ej. colas) donde no hay Request. */
+    public function initializeAsync(string $requestId, string $channel, string $jobName): void
+    {
+        $this->requestId = $requestId;
+        $this->channel   = $channel;
+        $this->method    = 'QUEUE';
+        $this->path      = $jobName;
+    }
+
     /**
      * Fija el canal de log del dominio actual.
      * Llamar exclusivamente desde el constructor del Controller propietario del flujo.
