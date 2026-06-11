@@ -1,12 +1,12 @@
 <?php
 
-namespace App\App\Api\Controllers\EstructuraOrganizacional;
+namespace App\App\Api\EstructuraOrganizacional\Controllers;
 
 use App\Logging\LogContext;
 use Illuminate\Http\JsonResponse;
-use App\App\Api\Controllers\Controller;
-use App\App\Api\Requests\EstructuraOrganizacional\UnidadOrganizativaRequest;
-use App\App\Api\Resources\EstructuraOrganizacional\UnidadOrganizativaResource;
+use App\App\Api\Controller;
+use App\App\Api\EstructuraOrganizacional\Requests\UnidadOrganizativaRequest;
+use App\App\Api\EstructuraOrganizacional\Resources\UnidadOrganizativaResource;
 use App\Domain\EstructuraOrganizacional\DTOs\UnidadOrganizativaDTO;
 use App\Domain\EstructuraOrganizacional\Services\UnidadOrganizativaService;
 

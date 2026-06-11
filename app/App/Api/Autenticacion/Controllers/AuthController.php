@@ -1,13 +1,14 @@
 <?php
 
-namespace App\App\Api\Controllers;
+namespace App\App\Api\Autenticacion\Controllers;
 
 
 use App\Logging\LogContext;
 use App\Domain\Autenticacion\Services\AuthService;
 use Illuminate\Http\JsonResponse;
-use App\App\Api\Requests\LoginRequest;
-use App\App\Api\Resources\UserResource;
+use App\App\Api\Autenticacion\Requests\LoginRequest;
+use App\App\Api\Autenticacion\Resources\UserResource;
+use App\App\Api\Controller;
 
 /**
  * Orquestación de autenticación.
@@ -15,6 +16,7 @@ use App\App\Api\Resources\UserResource;
  * Gestiona el ciclo de vida de la sesión (login, logout, verificación) 
  * consumiendo servicios de backend y sincronizando el estado local.
  */
+
 class AuthController extends Controller
 {
     /**
