@@ -1,10 +1,10 @@
 <?php
 
-namespace App\App\Api\Requests;
+namespace App\App\Api\GestorCVs\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreAspiranteRequest extends FormRequest
+class AspiranteRequest extends FormRequest
 {
     /**
      * Determina si el usuario está autorizado a hacer esta solicitud.
@@ -106,7 +106,7 @@ class StoreAspiranteRequest extends FormRequest
     {
         return [
             // Datos personales
-            'nombres.required'         => 'El nombre es obligatorio.',
+            'nombres.required'         => 'El campo nombres es obligatorio.',
             'apellidoPaterno.required' => 'El apellido paterno es obligatorio.',
             'apellidoMaterno.required' => 'El apellido materno es obligatorio.',
             'telefono.required'        => 'El teléfono es obligatorio.',

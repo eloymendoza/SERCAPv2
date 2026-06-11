@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Domain\GestorCV\Models;
 
 use App\Domain\Requisiciones\Models\Aspirante;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +19,7 @@ class ConocimientoTecnicoAspirante extends Model
      *
      * @var string
      */
-    protected $table = 'conocimiento_tecnico_aspirantes';
+    protected $table = 'conocimientos_tecnicos_aspirantes';
 
     /**
      * Los atributos que son asignables en masa.

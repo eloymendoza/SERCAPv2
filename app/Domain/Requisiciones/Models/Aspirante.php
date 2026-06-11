@@ -2,11 +2,11 @@
 
 namespace App\Domain\Requisiciones\Models;
 
-use App\Models\CatalogoIdiomas;
-use App\Models\CertificadoAspirante;
-use App\Models\ConocimientoTecnicoAspirante;
-use App\Models\EducacionAspirante;
-use App\Models\ExperienciaAspirante;
+use App\Domain\GestorCV\Models\CatalogoIdiomas;
+use App\Domain\GestorCV\Models\CertificadoAspirante;
+use App\Domain\GestorCV\Models\ConocimientoTecnicoAspirante;
+use App\Domain\GestorCV\Models\EducacionAspirante;
+use App\Domain\GestorCV\Models\ExperienciaAspirante;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -64,7 +64,7 @@ class Aspirante extends Model
     /**
      * Retorna las experiencias laborales del aspirante.
      */
-    public function experiencia(): HasMany
+    public function experiencias(): HasMany
     {
         return $this->hasMany(ExperienciaAspirante::class, 'aspirante_id');
     }
@@ -80,7 +80,7 @@ class Aspirante extends Model
     /**
      * Retorna los certificados del aspirante.
      */
-    public function certificado(): HasMany
+    public function certificados(): HasMany
     {
         return $this->hasMany(CertificadoAspirante::class, 'aspirante_id');
     }
@@ -88,7 +88,7 @@ class Aspirante extends Model
     /**
      * Retorna los idiomas del aspirante.
      */
-    public function idioma(): BelongsToMany
+    public function idiomas(): BelongsToMany
     {
         return $this->belongsToMany(
             CatalogoIdiomas::class,
@@ -102,7 +102,7 @@ class Aspirante extends Model
     /**
      * Retorna los conocimientos técnicos del aspirante.
      */
-    public function conocimientoTecnico(): HasMany
+    public function conocimientosTecnicos(): HasMany
     {
         return $this->hasMany(ConocimientoTecnicoAspirante::class, 'aspirante_id');
     }
