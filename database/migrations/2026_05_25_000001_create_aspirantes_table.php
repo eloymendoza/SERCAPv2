@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('nombres');
             $table->string('apellido_paterno');
             $table->string('apellido_materno');
-            $table->string('email');
-            $table->string('telefono');
+            $table->string('email')->nullable();
+            $table->string('telefono')->nullable();
             $table->string('observaciones')->nullable();
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
