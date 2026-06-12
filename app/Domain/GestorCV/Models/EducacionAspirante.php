@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Domain\GestorCV\Models;
 
 use App\Domain\Requisiciones\Models\Aspirante;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class EducacionAspirante extends Model
 {
-    use SoftDeletes;
+    // use SoftDeletes;
     /**
      * El nombre de la tabla asociada al modelo.
      *
@@ -41,5 +41,13 @@ class EducacionAspirante extends Model
     public function aspirante(): BelongsTo
     {
         return $this->belongsTo(Aspirante::class, 'aspirante_id');
+    }
+
+    /**
+     * Retorna el nivel de estudio para esta educación mediante nivel_estudio_id.
+     */
+    public function nivelEstudio(): BelongsTo
+    {
+        return $this->belongsTo(CatalogoNivelEstudios::class, 'nivel_estudio_id');
     }
 }
