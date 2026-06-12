@@ -3,7 +3,7 @@
 namespace App\App\Api\GestorCVs\Controllers;
 
 use App\App\Api\Controller;
-use App\App\Api\GestorCVs\Requests\AspiranteRequest;
+use App\App\Api\Requests\AspiranteRequest;
 use App\Domain\GestorCV\Mappers\AspiranteMapper;
 use App\Domain\GestorCV\Services\AspiranteService;
 use App\Domain\Requisiciones\Models\Aspirante;
