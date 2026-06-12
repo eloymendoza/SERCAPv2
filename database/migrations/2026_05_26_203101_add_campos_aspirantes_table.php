@@ -32,8 +32,8 @@ return new class extends Migration
             $table->string('nombres', 100)->change();
             $table->string('apellido_paterno', 100)->change();
             $table->string('apellido_materno', 100)->change();
-            $table->string('telefono', 15)->change();
-            $table->string('email', 100)->change();
+            $table->string('telefono', 15)->nullable()->change();
+            $table->string('email', 100)->nullable()->change();
         });
     }
 
@@ -58,8 +58,8 @@ return new class extends Migration
             $table->string('nombres', 255)->change();
             $table->string('apellido_paterno', 255)->change();
             $table->string('apellido_materno', 255)->change();
-            $table->string('telefono', 255)->change();
-            $table->string('email', 255)->change();
+            $table->string('telefono', 255)->nullable()->change();
+            $table->string('email', 255)->nullable()->change();
             
             // Eliminar los campos que agregaste
             $table->dropColumn([
