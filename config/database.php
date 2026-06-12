@@ -113,6 +113,19 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'SERCAPv1' => [
+            'driver' => env('DB_DRIVER', 'sqlsrv'),
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST'),
+            'port' => env('DB_PORT'),
+            'database' => env('DB_LEGACY_DATABASE', 'SERCAP'),
+            'username' => env('DB_USERNAME'),
+            'password' => env('DB_PASSWORD'),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
+
         'SERCAPv2' => [
             'driver' => env('DB_DRIVER', 'sqlsrv'),
             'url' => env('DB_URL'),
@@ -126,14 +139,14 @@ return [
             'prefix_indexes' => true,
         ],
 
-        'costos_contpaq' => [
+        'Costosv2' => [
             'driver' => env('DB_DRIVER', 'sqlsrv'),
-            'url' => env('DB_COSTOS_URL'),
-            'host' => env('DB_COSTOS_HOST'),
-            'port' => env('DB_COSTOS_PORT'),
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST'),
+            'port' => env('DB_PORT'),
             'database' => env('DB_COSTOS_DATABASE'),
-            'username' => env('DB_COSTOS_USERNAME'),
-            'password' => env('DB_COSTOS_PASSWORD', ''),
+            'username' => env('DB_USERNAME'),
+            'password' => env('DB_PASSWORD'),
             'charset' => env('DB_COSTOS_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
