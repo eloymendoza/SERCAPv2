@@ -13,19 +13,15 @@ return new class extends Migration
     {
         Schema::table('aspirantes', function (Blueprint $table) {
             // campos complementarios
-            $table->enum('tipo_aspirante', ['nuevo_aspirante', 'personal_activo', 'personal_anterior'])
-                ->default('nuevo_aspirante')
+            $table->string('tipo_aspirante')
                 ->after('email');
-            $table->integer('Id_personal')
-                ->nullable()
-                ->after('tipo_aspirante'); // referencia lógica a la info de SERCAP legacy
             $table->integer('ubicacion_id')
                 ->nullable()
-                ->after('Id_personal'); // referencia lógica a BD de ubicaciones
+                ->after('tipo_aspirante'); // referencia lógica a BD de ubicaciones
             $table->text('resumen')
                 ->nullable()
                 ->after('ubicacion_id');
-            $table->enum('estado_aspirante', ['nuevo', 'en_revision', 'reclutado', 'rechazado', 'contratado'])
+            $table->string('estado_aspirante')
                 ->after('resumen');
 
             // delimitando campos
@@ -42,17 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlsrv') {
-            // SQL Server requiere eliminar los CHECK constraints generados por los enum() antes de poder borrar las columnas
-            \Illuminate\Support\Facades\DB::statement("
-                DECLARE @sql NVARCHAR(MAX) = N'';
-                SELECT @sql += N'ALTER TABLE aspirantes DROP CONSTRAINT ' + name + ';'
-                FROM sys.check_constraints
-                WHERE parent_object_id = OBJECT_ID('aspirantes');
-                EXEC sp_executesql @sql;
-            ");
-        }
-
         Schema::table('aspirantes', function (Blueprint $table) {
              // Revertir cambios de longitud (volver a los valores originales)
             $table->string('nombres', 255)->change();
@@ -64,7 +49,6 @@ return new class extends Migration
             // Eliminar los campos que agregaste
             $table->dropColumn([
                 'tipo_aspirante',
-                'Id_personal', 
                 'ubicacion_id',
                 'resumen',
                 'estado_aspirante'
