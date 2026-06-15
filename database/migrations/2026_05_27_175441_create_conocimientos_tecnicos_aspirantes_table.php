@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('aspirante_id');
             $table->string('nombre', 100);
-            $table->enum('categoria', ['lenguaje', 'framework', 'herramienta', 'metodologia', 'sin_clasificar']);
+            $table->string('categoria');
             
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);

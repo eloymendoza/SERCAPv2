@@ -22,9 +22,10 @@ return new class extends Migration
             // unsigned small int para no tener que asignar dia/mes inventados al ser date
             $table->unsignedSmallInteger('anio_fin')->nullable();
 
-            $table->enum('estado_educacion', ['en_curso', 'concluido_sin_titulo', 'titulado', 'incompleto'])->default('titulado');
+            $table->string('estado_educacion');
 
             $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
 
             $table->foreign('aspirante_id')
                 ->references('id')->on('aspirantes')

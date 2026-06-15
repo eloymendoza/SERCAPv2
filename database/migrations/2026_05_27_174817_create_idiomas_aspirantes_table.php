@@ -15,7 +15,7 @@ return new class extends Migration
             // PK compuesta (idioma_id + aspirante_id)
             $table->unsignedBigInteger('idioma_id');
             $table->unsignedBigInteger('aspirante_id');
-            $table->enum('nivel', ['basico', 'intermedio', 'avanzado', 'nativo'])->default('intermedio');
+            $table->string('nivel');
  
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
