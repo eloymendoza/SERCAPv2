@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nombre', 50);
             $table->string('codigo_iso', 5)->unique();
             $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
         });
 
         DB::table('catalogo_idiomas')->insert([
