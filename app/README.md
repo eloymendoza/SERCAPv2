@@ -126,6 +126,12 @@ Lógica de autorización vinculada a un modelo específico.
 - **🟢 Cuándo usar:** Para decidir si un usuario en sesión tiene permisos para ver, editar o eliminar un registro en particular (ej. `RequisicionPolicy`).
 - **🔴 Cuándo NO usar:** Para validar que los datos enviados en un formulario sean correctos (eso es de los `Requests`), ni para lógica de negocio genérica.
 
+### Rules (`Rules/`)
+Objetos de validación o políticas de negocio, separados estrictamente por su responsabilidad arquitectónica.
+- **🟢 Cuándo usar en la API (`app/App/Api/{Dominio}/Rules`):** Para validaciones estructurales del payload HTTP, formatos específicos (ej. RFC, CURP) o validaciones simples en base de datos. Operan en los FormRequests y responden con un error `422`.
+- **🟢 Cuándo usar en el Dominio (`app/Domain/{Dominio}/Rules`):** Para encapsular invariantes de negocio consumibles desde cualquier vía (HTTP, Consola, Jobs). Protegen el estado interno de las entidades y lanzan excepciones de dominio en caso de falla.
+- **🔴 Cuándo NO usar:** Nunca uses reglas de la API (FormRequests) para orquestar reglas de negocio críticas, ni uses reglas del Dominio para validar formatos de texto de entrada.
+
 ### Traits (`Traits/`)
 Funciones reusables vía herencia horizontal (Mixins).
 - **🟢 Cuándo usar:** Lógica repetitiva muy atada a componentes del framework que comparten varios modelos de un mismo dominio (ej. `HasEstadoAutorizacion`).
