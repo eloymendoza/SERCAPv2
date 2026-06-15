@@ -36,8 +36,10 @@ class RequisicionService
             $data = $this->mapper->toPersistenceArray($dto, $solicitudId);
             $model = Requisicion::create($data);
             
-            if ($dto->detalle) {
-                $this->detalleService->create($dto->detalle, $model->id);
+            if (!empty($dto->detalles)) {
+                foreach ($dto->detalles as $detalleDTO) {
+                    $this->detalleService->create($detalleDTO, $model->id);
+                }
             }
 
             $model->load('detalles');

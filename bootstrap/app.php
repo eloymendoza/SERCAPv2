@@ -6,13 +6,14 @@ use Illuminate\Http\JsonResponse;
 use App\Exceptions\BaseApiException;
 use Illuminate\Foundation\Application;
 use App\App\Api\Middleware\SecurityHeaders;
+use Illuminate\Auth\AuthenticationException;
+use App\App\Api\Middleware\VerifyDjangoToken;
+use Illuminate\Validation\ValidationException;
+use App\App\Api\Middleware\InitializeLogContext;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Auth\AuthenticationException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\App\Api\Middleware\VerifyDjangoToken;
-use App\App\Api\Middleware\InitializeLogContext;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -47,6 +48,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 $statusCode = $response->getStatusCode();
                 $errorCode = 'INTERNAL_ERROR';
                 $message = $e->getMessage() ?: 'Ocurrió un error en el servidor.';
+                $details = [];
+
+                if ($e instanceof ValidationException) {
+                    $statusCode = 422;
+                    $errorCode = 'VALIDATION_ERROR';
+                    $message = 'Los datos proporcionados no superaron la validación.';
+                    $details = $e->errors();
+                }
 
                 if ($e instanceof AuthenticationException) {
                     $statusCode = 401;
@@ -71,7 +80,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     'error' => [
                         'code'    => $errorCode,
                         'message' => $message,
-                        'details' => []
+                        'details' => $details
                     ]
                 ], $statusCode);
             }

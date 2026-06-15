@@ -27,7 +27,8 @@ class MigrateLegacyPersonalCommand extends Command
             return Command::FAILURE;
         }
 
-        $query = TPersonal::query();
+        $ids = [11062, 11018, 11172, 10970, 10510, 1476, 2235, 1509, 11055, 11094, 10850, 11021, 11081, 10962];
+        $query = TPersonal::whereIn('Id_personal', $ids);
         $total = $query->count();
         $this->info("Total de registros a evaluar: {$total}");
 
@@ -57,6 +58,7 @@ class MigrateLegacyPersonalCommand extends Command
                         'apellido_materno' => $formatStr($personal->AMaterno_ps) ?? 'X',
                         'email'            => $email,
                         'telefono'         => $telefono,
+                        'tipo_aspirante'   => 'personal_activo',
                         'estado_aspirante' => 'nuevo'
                     ];
 

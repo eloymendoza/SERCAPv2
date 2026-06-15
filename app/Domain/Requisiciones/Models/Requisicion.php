@@ -59,4 +59,12 @@ class Requisicion extends Model
     {
         return $this->hasMany(DetalleRequisicion::class, 'requisicion_id');
     }
+
+    /**
+     * Accessor dinámico: Calcula el total de vacantes agrupando los detalles de esta requisición.
+     */
+    public function getTotalVacantesAttribute(): int
+    {
+        return $this->detalles()->sum('cantidad_solicitada');
+    }
 }

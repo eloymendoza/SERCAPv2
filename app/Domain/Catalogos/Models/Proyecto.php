@@ -11,7 +11,7 @@ class Proyecto extends Model
      *
      * @var string
      */
-    protected $connection = 'costos_contpaq';
+    protected $connection = 'Costosv2';
 
     protected $table = 'proyecto';
 

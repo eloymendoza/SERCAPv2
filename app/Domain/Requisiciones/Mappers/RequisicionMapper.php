@@ -22,9 +22,11 @@ class RequisicionMapper
      */
     public function toDTO(Requisicion $model): RequisicionDTO
     {
-        $detalleDTO = null;
+        $detallesDTO = null;
         if ($model->relationLoaded('detalles') && $model->detalles->isNotEmpty()) {
-            $detalleDTO = $this->detalleMapper->toDTO($model->detalles->first());
+            $detallesDTO = $model->detalles->map(function ($detalle) {
+                return $this->detalleMapper->toDTO($detalle);
+            })->all();
         }
 
         return new RequisicionDTO(
@@ -34,7 +36,7 @@ class RequisicionMapper
             tipo: $model->tipo,
             observaciones: $model->observaciones,
             estado: $model->estado,
-            detalle: $detalleDTO
+            detalles: $detallesDTO
         );
     }
 

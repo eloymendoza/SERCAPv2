@@ -6,6 +6,8 @@ use App\Domain\Requisiciones\Enums\RequisicionEstado;
 
 /**
  * Contenedor de datos inmutable para transferir información de la Requisicion.
+ * 
+ * @property \App\Domain\Requisiciones\DTOs\DetalleRequisicionDTO[]|null $detalles
  */
 class RequisicionDTO
 {
@@ -19,7 +21,8 @@ class RequisicionDTO
         public readonly int $tipo,
         public readonly ?string $observaciones,
         public readonly ?RequisicionEstado $estado,
-        public readonly ?DetalleRequisicionDTO $detalle
+        /** @var array<\App\Domain\Requisiciones\DTOs\DetalleRequisicionDTO>|null */
+        public readonly ?array $detalles
     ) {}
 
     /**
@@ -36,8 +39,19 @@ class RequisicionDTO
             'tipo' => $this->tipo,
             'observaciones' => $this->observaciones,
             'estado' => $this->estado?->value,
-            'detalle' => $this->detalle?->toArray(),
+            'detalles' => $this->detalles ? array_map(fn($d) => $d->toArray(), $this->detalles) : null,
+            'total_vacantes' => $this->getTotalVacantes(),
         ];
+    }
+
+    /**
+     * Calcula dinámicamente el total de vacantes sumando las cantidades solicitadas en cada detalle.
+     */
+    public function getTotalVacantes(): int
+    {
+        if (empty($this->detalles)) return 0;
+        
+        return array_reduce($this->detalles, fn($carry, $item) => $carry + ($item->cantidadSolicitada ?? 0), 0);
     }
 
     /**
@@ -63,7 +77,9 @@ class RequisicionDTO
             tipo: (int) ($data['tipo'] ?? 1),
             observaciones: $data['observaciones'] ?? null,
             estado: $estado,
-            detalle: isset($data['detalle']) ? DetalleRequisicionDTO::fromArray($data['detalle']) : null
+            detalles: isset($data['detalle']) && is_array($data['detalle']) 
+                ? array_map(fn($d) => DetalleRequisicionDTO::fromArray($d), $data['detalle']) 
+                : null
         );
     }
 }

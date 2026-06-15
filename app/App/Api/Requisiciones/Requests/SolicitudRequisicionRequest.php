@@ -3,9 +3,13 @@
 namespace App\App\Api\Requisiciones\Requests;
 
 use Illuminate\Validation\Rule;
-use Illuminate\Foundation\Http\FormRequest;
 use App\Domain\Catalogos\Models\Proyecto;
+use Illuminate\Foundation\Http\FormRequest;
+use App\Domain\Requisiciones\Models\Aspirante;
 use App\Domain\Requisiciones\Enums\TipoContrato;
+use App\Domain\Catalogos\Models\TabuladorSalario;
+use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
 
 /**
  * Valida los datos recibidos para la creación o edición de una SolicitudRequisicion.
@@ -37,7 +41,11 @@ class SolicitudRequisicionRequest extends FormRequest
                 Rule::exists(Proyecto::class, 'idProyecto')->where('activoProyecto', true),
             ],
             'id_instancia_workflow' => ['nullable','integer',],
-            'solicitante_id' => ['nullable','integer',],
+            'solicitante_id' => [
+                'nullable',
+                'integer',
+                Rule::exists(Aspirante::class, 'id'),
+            ],
             'direccion_id' => ['required','integer',],
             'gerencia_id' => ['required','integer',],
             'coordinacion_id' => ['nullable','integer',],
@@ -47,17 +55,39 @@ class SolicitudRequisicionRequest extends FormRequest
             'requisicion' => ['nullable', 'array'],
             'requisicion.tipo' => ['nullable', 'integer'],
             'requisicion.detalle' => ['nullable', 'array'],
-            'requisicion.detalle.puesto_id' => ['required_with:requisicion.detalle', 'integer'],
-            'requisicion.detalle.cantidad_solicitada' => ['required_with:requisicion.detalle', 'integer', 'min:1'],
-            'requisicion.detalle.disciplina_id' => ['required_with:requisicion.detalle', 'integer'],
-            'requisicion.detalle.tipo_contrato' => ['required_with:requisicion.detalle', Rule::enum(TipoContrato::class)],
-            'requisicion.detalle.tabulador_sueldo' => ['required_with:requisicion.detalle', 'numeric'],
-            'requisicion.detalle.turno_horas' => ['required_with:requisicion.detalle'],
-            'requisicion.detalle.fecha_inicio' => ['required_with:requisicion.detalle', 'date'],
-            'requisicion.detalle.fecha_termino' => ['nullable', 'date', 'after_or_equal:requisicion.detalle.fecha_inicio'],
-            'requisicion.detalle.fecha_limite_requerimiento' => ['required_with:requisicion.detalle', 'date'],
-            'requisicion.detalle.empleados_propuestos' => ['nullable', 'array'],
-            'requisicion.detalle.empleados_propuestos.*' => ['integer'],
+            'requisicion.detalle.*.puesto_id' => ['required_with:requisicion.detalle', 'integer'],
+            'requisicion.detalle.*.cantidad_solicitada' => ['required_with:requisicion.detalle', 'integer', 'min:1'],
+            'requisicion.detalle.*.disciplina_id' => ['required_with:requisicion.detalle', 'integer'],
+            'requisicion.detalle.*.tipo_contrato' => ['required_with:requisicion.detalle', Rule::enum(TipoContrato::class)],
+            'requisicion.detalle.*.tabulador_id' => [
+                'required_with:requisicion.detalle', 
+                'integer',
+                Rule::exists(TabuladorSalario::class, 'id')
+            ],
+            'requisicion.detalle.*.sueldo_asignado' => [
+                'required_with:requisicion.detalle', 
+                'numeric',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    $index = explode('.', $attribute)[2];
+                    $tabuladorId = $this->input("requisicion.detalle.{$index}.tabulador_id");
+                    
+                    if ($tabuladorId) {
+                        $tabulador = TabuladorSalario::find($tabuladorId);
+                        if ($tabulador) {
+                            if ($value < $tabulador->sueldo_minimo || $value > $tabulador->sueldo_maximo) {
+                                $posicion = (int)$index + 1;
+                                $fail("El sueldo asignado en la vacante #{$posicion} debe estar estrictamente entre \$ {$tabulador->sueldo_minimo} y \$ {$tabulador->sueldo_maximo}.");
+                            }
+                        }
+                    }
+                }
+            ],
+            'requisicion.detalle.*.turno_horas' => ['required_with:requisicion.detalle'],
+            'requisicion.detalle.*.fecha_inicio' => ['required_with:requisicion.detalle', 'date'],
+            'requisicion.detalle.*.fecha_termino' => ['nullable', 'date', 'after_or_equal:requisicion.detalle.*.fecha_inicio'],
+            'requisicion.detalle.*.fecha_limite_requerimiento' => ['required_with:requisicion.detalle', 'date'],
+            'requisicion.detalle.*.empleados_propuestos' => ['nullable', 'array'],
+            'requisicion.detalle.*.empleados_propuestos.*' => ['integer'],
         ];
     }
 
@@ -88,6 +118,7 @@ class SolicitudRequisicionRequest extends FormRequest
 
             'id_instancia_workflow.integer' => 'El campo :attribute debe ser un número entero.',
             'solicitante_id.integer' => 'El campo :attribute debe ser un número entero.',
+            'solicitante_id.exists' => 'El :attribute especificado no existe.',
             'estado.Illuminate\Validation\Rules\Enum' => 'El :attribute seleccionado no es válido.',
         ];
     }
@@ -112,21 +143,19 @@ class SolicitudRequisicionRequest extends FormRequest
         ];
     }
 
-    public function toDTO(?int $id = null): \App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO
+    public function toDTO(?int $id = null): SolicitudRequisicionDTO
     {
         $data = $this->validated();
         if ($id !== null) {
             $data['id'] = $id;
         }
 
-        $dto = \App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO::fromArray($data);
+        $dto = SolicitudRequisicionDTO::fromArray($data);
 
         if (($data['accion'] ?? null) === 'emitir') {
-            $dto = $dto->withEstado(\App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado::EN_PROCESO);
+            $dto = $dto->withEstado(SolicitudRequisicionEstado::EN_PROCESO);
         }
 
         return $dto;
     }
-
-
 }

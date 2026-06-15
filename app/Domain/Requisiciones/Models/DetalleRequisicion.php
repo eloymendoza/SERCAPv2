@@ -31,7 +31,8 @@ class DetalleRequisicion extends Model
         'puesto_id',
         'cantidad_solicitada',
         'disciplina_id',
-        'tabulador_sueldo',
+        'tabulador_id',
+        'sueldo_asignado',
         'turno_horas',
         'tipo_contrato',
         'fecha_inicio',
@@ -46,7 +47,7 @@ class DetalleRequisicion extends Model
     protected function casts(): array
     {
         return [
-            'tabulador_sueldo' => 'decimal:2',
+            'sueldo_asignado' => 'decimal:2',
             'tipo_contrato' => TipoContrato::class,
             'fecha_inicio' => 'date',
             'fecha_termino' => 'date',
