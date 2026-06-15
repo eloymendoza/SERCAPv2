@@ -35,8 +35,6 @@ class Disciplina extends Model
      */
     protected function casts(): array
     {
-        return [
-            'estado' => 'boolean',
-        ];
+        return [];
     }
 }

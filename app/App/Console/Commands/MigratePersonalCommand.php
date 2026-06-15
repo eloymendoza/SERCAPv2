@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\DB;
 use App\Domain\Legacy\Models\TPersonal;
 use App\Domain\Requisiciones\Models\Aspirante;
 
-class MigrateLegacyPersonalCommand extends Command
+class MigratePersonalCommand extends Command
 {
-    protected $signature = 'migrate:legacy-personal';
+    protected $signature = 'migrate:personal';
 
     protected $description = 'Migra los datos del personal activo (TPersonal) desde V1 hacia Aspirantes en V2 (ETL Upsert)';
 

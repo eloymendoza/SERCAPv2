@@ -1,0 +1,129 @@
+<?php
+
+namespace App\App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+
+class MigrateUnidadesOrganizativasCommand extends Command
+{
+    protected $signature = 'migrate:unidades-organizativas';
+
+    protected $description = 'ETL: Migra datos jerárquicos desde la vista legacy vAreas hacia unidades_organizativas';
+
+    public function handle()
+    {
+        $this->info('Conectando con bdidiai.dbo.vAreas...');
+
+        // Query principal siguiendo las reglas de extracción exactas
+        $areas = DB::table('bdidiai.dbo.vAreas')
+            ->where('borrado', 0)
+            ->where(function ($query) {
+                $query->whereBetween('idArea', [186, 190])
+                      ->orWhere('idArea', '>=', 231);
+            })
+            ->orderBy('idArea') // Fundamental para insertar padres antes que hijos y evitar error FK
+            ->get();
+
+        if ($areas->isEmpty()) {
+            $this->warn('No se encontraron registros activos en la vista de origen.');
+            return self::FAILURE;
+        }
+
+        $total = $areas->count();
+        $this->info("Registros extraídos: {$total}. Iniciando mapeo jerárquico...");
+
+        $bar = $this->output->createProgressBar($total);
+        $bar->start();
+
+        $gerenciasSaltadas = [];
+        $registrosAInsertar = [];
+
+        // Fase 1: Análisis en memoria (Construcción del árbol)
+        foreach ($areas as $row) {
+            $nombre = trim($row->nombre);
+            
+            // 1. Descarte estricto de nodos inválidos ("N/A") en cualquier nivel
+            if ($nombre === 'N/A' || $nombre === 'NA') {
+                if ($row->idArea == $row->idGerencia) {
+                    // Es una gerencia fantasma, guardamos registro para heredar hijos a la dirección
+                    $gerenciasSaltadas[$row->idArea] = $row->idDireccion;
+                }
+                $bar->advance();
+                continue; // Omitimos la inserción por completo
+            }
+
+            $nivel = '';
+            $parentId = null;
+
+            // 2. Determinación de Nivel Estricto y Asignación de Padre
+            if ($row->idArea == $row->idDireccion && is_null($row->idGerencia) && is_null($row->idDepartamento)) {
+                $nivel = 'direccion';
+                $parentId = null;
+            } elseif ($row->idArea == $row->idGerencia && is_null($row->idDepartamento)) {
+                $nivel = 'gerencia';
+                $parentId = $row->idDireccion;
+            } else {
+                $nivel = 'area'; // Cualquier hoja final es área
+                // Si el padre inmediato fue una gerencia descartada, nos colgamos de la dirección
+                $parentId = $gerenciasSaltadas[$row->idGerencia] ?? $row->idGerencia;
+            }
+
+            // 3. Resolución de Encargado (Omitido por requerimiento del usuario)
+            $encargadoId = null;
+
+            // 4. Armado de payload
+            $registrosAInsertar[] = [
+                'id'           => $row->idArea,
+                'parent_id'    => $parentId,
+                'nivel'        => $nivel,
+                'nombre'       => $nombre,
+                'abreviatura'  => $row->abreviatura,
+                'nombre_corto' => $row->nombreCorto,
+                'rfc'          => $row->rfc,
+                'encargado_id' => $encargadoId,
+                'estado'       => 'Activo', // Estado unificado
+                'created_at'   => now()->format('Y-m-d\TH:i:s.v'), // Formato ISO explícito
+                'updated_at'   => now()->format('Y-m-d\TH:i:s.v'),
+            ];
+
+            $bar->advance();
+        }
+
+        $bar->finish();
+        $this->newLine();
+
+        $totValidos = count($registrosAInsertar);
+        $this->info("Filtrado completado. Se procesarán {$totValidos} nodos válidos.");
+        $barInsert = $this->output->createProgressBar($totValidos);
+        $barInsert->start();
+
+        // Fase 2: Persistencia Física en BD con Identity Insert
+        DB::unprepared('SET IDENTITY_INSERT unidades_organizativas ON');
+
+        try {
+            foreach ($registrosAInsertar as $data) {
+                $exists = DB::table('unidades_organizativas')->where('id', $data['id'])->exists();
+
+                if (!$exists) {
+                    DB::table('unidades_organizativas')->insert($data);
+                } else {
+                    $updateData = $data;
+                    unset($updateData['id']);
+                    unset($updateData['created_at']);
+                    
+                    DB::table('unidades_organizativas')->where('id', $data['id'])->update($updateData);
+                }
+                $barInsert->advance();
+            }
+        } finally {
+            DB::unprepared('SET IDENTITY_INSERT unidades_organizativas OFF');
+        }
+
+        $barInsert->finish();
+        $this->newLine();
+        $this->info('Migración jerárquica finalizada con éxito.');
+
+        return self::SUCCESS;
+    }
+}

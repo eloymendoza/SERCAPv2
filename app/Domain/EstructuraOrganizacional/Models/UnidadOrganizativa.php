@@ -14,6 +14,8 @@ class UnidadOrganizativa extends Model
 
     protected $table = 'unidades_organizativas';
 
+    protected $dateFormat = 'Y-m-d\TH:i:s.v';
+
     protected $fillable = [
         'parent_id',
         'nivel',
