@@ -22,7 +22,11 @@ return new class extends Migration
             $table->foreignId('disciplina_id')
                 ->nullable()
                 ->constrained('disciplinas');
-            $table->decimal('tabulador_sueldo', 12, 2);
+            $table->foreignId('tabulador_id')
+                ->constrained('tabulador_salario')
+                ->comment('Compensación económica global');
+            $table->decimal('sueldo_asignado', 12, 2)
+                ->comment('Sueldo exacto definido por DIR/GA/JP/LI dentro del rango del tabulador');
             $table->string('turno_horas');
             $table->string('tipo_contrato')->comment('obra_determinada, tiempo_determinado, tiempo_indeterminado');
             $table->date('fecha_inicio')->nullable();
