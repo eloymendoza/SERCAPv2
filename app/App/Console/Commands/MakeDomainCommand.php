@@ -43,6 +43,7 @@ class MakeDomainCommand extends Command
             'Models',
             'Notifications',
             'Policies',
+            'Rules',
             'Services',
             'Traits'
         ];
@@ -63,7 +64,8 @@ class MakeDomainCommand extends Command
         $apiFolders = [
             'Controllers',
             'Requests',
-            'Resources'
+            'Resources',
+            'Rules'
         ];
 
         File::makeDirectory($apiPath, 0755, true);
