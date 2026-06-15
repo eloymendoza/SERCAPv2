@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 150)->unique();
             $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
         });
 
         DB::table('catalogo_nivel_estudios')->insert([
