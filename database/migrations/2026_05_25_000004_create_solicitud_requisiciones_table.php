@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('folio')->nullable()->comment('Ej: SRPIACDS-001');
             $table->unsignedBigInteger('solicitante_id')->nullable()->comment('id_empleado (DIR, GA, JP o LI)');
+            $table->unsignedBigInteger('elaborador_id')->nullable()->comment('id_empleado');
             $table->unsignedBigInteger('proyecto_id')->nullable()
                 ->comment('Referencia lógica a id_proyecto de BD Costosv2');
             $table->unsignedBigInteger('id_instancia_workflow')->nullable()

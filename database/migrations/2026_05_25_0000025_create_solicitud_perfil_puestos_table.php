@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('solicitud_perfil_puestos', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('solicitante_id')->comment('id_empleado (DIR, GA, JP o LI)');
+            $table->unsignedBigInteger('elaborador_id')->nullable()->comment('id_empleado');
             $table->unsignedBigInteger('id_instancia_workflow')->nullable()
                 ->comment('Referencia lógica a BD externa para gestión de firmas');
             $table->unsignedBigInteger('direccion_id');
