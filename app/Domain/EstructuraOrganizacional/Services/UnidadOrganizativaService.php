@@ -44,13 +44,12 @@ class UnidadOrganizativaService
     /**
      * Sincroniza la mutación de estado o jerarquía en el registro orgánico.
      */
-    public function update(int $id, UnidadOrganizativaDTO $dto): UnidadOrganizativaDTO
+    public function update(UnidadOrganizativa $model, UnidadOrganizativaDTO $dto): UnidadOrganizativaDTO
     {
-        $this->logger()->info("Actualizando atributos jerárquicos.", ['id' => $id]);
+        $this->logger()->info("Actualizando atributos jerárquicos.", ['id' => $model->id]);
 
-        return $this->handle(function () use ($id, $dto) {
-            $updatedDto = DB::transaction(function () use ($id, $dto) {
-                $model = UnidadOrganizativa::findOrFail($id);
+        return $this->handle(function () use ($model, $dto) {
+            $updatedDto = DB::transaction(function () use ($model, $dto) {
                 // Evitamos sobrescribir con null si no venía en el request, pero asumimos DTO completo aquí.
                 $data = array_filter($this->mapper->toPersistenceArray($dto), function($v) { return !is_null($v); });
                 
@@ -62,7 +61,7 @@ class UnidadOrganizativaService
                 return $this->mapper->toDTO($model);
             });
 
-            $this->logger()->info("Unidad organizativa mutada exitosamente.", ['id' => $id]);
+            $this->logger()->info("Unidad organizativa mutada exitosamente.", ['id' => $model->id]);
             return $updatedDto;
         }, 'UnidadOrganizativaService@update');
     }
@@ -70,10 +69,10 @@ class UnidadOrganizativaService
     /**
      * Resuelve las relaciones inmediatas (responsable y ancestro) del recurso.
      */
-    public function find(int $id): UnidadOrganizativaDTO
+    public function find(UnidadOrganizativa $model): UnidadOrganizativaDTO
     {
-        return $this->handle(function () use ($id) {
-            $model = UnidadOrganizativa::with(['parent', 'encargado'])->findOrFail($id);
+        return $this->handle(function () use ($model) {
+            $model->loadMissing(['parent', 'encargado']);
             return $this->mapper->toDTO($model);
         }, 'UnidadOrganizativaService@find');
     }
@@ -97,15 +96,15 @@ class UnidadOrganizativaService
     /**
      * Declara la baja lógica (SoftDelete) del nodo evitando romper el historial transaccional.
      */
-    public function delete(int $id): void
+    public function delete(UnidadOrganizativa $model): void
     {
-        $this->logger()->info("Iniciando baja de registro organizacional.", ['id' => $id]);
+        $this->logger()->info("Iniciando baja de registro organizacional.", ['id' => $model->id]);
 
-        $this->handle(function () use ($id) {
-            DB::transaction(function () use ($id) {
-                UnidadOrganizativa::findOrFail($id)->delete();
+        $this->handle(function () use ($model) {
+            DB::transaction(function () use ($model) {
+                $model->delete();
             });
-            $this->logger()->info("Registro dado de baja lógica.", ['id' => $id]);
+            $this->logger()->info("Registro dado de baja lógica.", ['id' => $model->id]);
         }, 'UnidadOrganizativaService@delete');
     }
 }

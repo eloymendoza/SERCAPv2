@@ -3,11 +3,12 @@
 namespace App\App\Api\EstructuraOrganizacional\Controllers;
 
 use App\Logging\LogContext;
-use Illuminate\Http\JsonResponse;
 use App\App\Api\Controller;
+use Illuminate\Http\JsonResponse;
+use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
+use App\Domain\EstructuraOrganizacional\DTOs\UnidadOrganizativaDTO;
 use App\App\Api\EstructuraOrganizacional\Requests\UnidadOrganizativaRequest;
 use App\App\Api\EstructuraOrganizacional\Resources\UnidadOrganizativaResource;
-use App\Domain\EstructuraOrganizacional\DTOs\UnidadOrganizativaDTO;
 use App\Domain\EstructuraOrganizacional\Services\UnidadOrganizativaService;
 
 class UnidadOrganizativaController extends Controller
@@ -51,9 +52,9 @@ class UnidadOrganizativaController extends Controller
     /**
      * Retorna el detalle jerárquico instanciando el Service Locator del nodo.
      */
-    public function show(int $id): JsonResponse
+    public function show(UnidadOrganizativa $unidad): JsonResponse
     {
-        $dto = $this->service->find($id);
+        $dto = $this->service->find($unidad);
         
         return response()->json(new UnidadOrganizativaResource($dto));
     }
@@ -61,10 +62,10 @@ class UnidadOrganizativaController extends Controller
     /**
      * Canaliza los campos validados para la actualización segmentada del nodo.
      */
-    public function update(UnidadOrganizativaRequest $request, int $id): JsonResponse
+    public function update(UnidadOrganizativaRequest $request, UnidadOrganizativa $unidad): JsonResponse
     {
         $dto = UnidadOrganizativaDTO::fromRequest($request->validated());
-        $updatedDto = $this->service->update($id, $dto);
+        $updatedDto = $this->service->update($unidad, $dto);
         
         return response()->json(new UnidadOrganizativaResource($updatedDto));
     }
@@ -72,9 +73,9 @@ class UnidadOrganizativaController extends Controller
     /**
      * Ejecuta el desprendimiento lógico (destroy) abstrayendo la transacción.
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(UnidadOrganizativa $unidad): JsonResponse
     {
-        $this->service->delete($id);
+        $this->service->delete($unidad);
         
         return response()->json(null, 204);
     }
