@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('estado', 50)->default('Activo')->comment('Activo, Inactivo, Borrador');
             
             $table->timestamps(7);
-            $table->softDeletes(7);
+            $table->softDeletes('deleted_at', 7);
         });
     }
 
