@@ -27,7 +27,7 @@ class MigratePersonalCommand extends Command
             return Command::FAILURE;
         }
 
-        $ids = [11062, 11018, 11172, 10970, 10510, 1476, 2235, 1509, 11055, 11094, 10850, 11021, 11081, 10962];
+        $ids = [11062, 11018, 11172, 10970, 10510, 1476, 2235, 1509, 11055, 11094, 10850, 11021, 11081, 10962, 2059, 3002, 4908, 6052, 6197, 1133];
         $query = TPersonal::whereIn('Id_personal', $ids);
         $total = $query->count();
         $this->info("Total de registros a evaluar: {$total}");

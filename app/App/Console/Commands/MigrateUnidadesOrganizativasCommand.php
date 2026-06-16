@@ -69,8 +69,18 @@ class MigrateUnidadesOrganizativasCommand extends Command
                 $parentId = $gerenciasSaltadas[$row->idGerencia] ?? $row->idGerencia;
             }
 
-            // 3. Resolución de Encargado (Omitido por requerimiento del usuario)
-            $encargadoId = null;
+            // 3. Asignación de encargados específicos
+            $encargadoId = match ((int) $row->idArea) {
+                186 => 1476,
+                187 => 2059,
+                188 => 3002,
+                189 => 4908,
+                190 => 6052,
+                231 => 6197,
+                232 => 11021,
+                250 => 1133,
+                default => null,
+            };
 
             // 4. Armado de payload
             $registrosAInsertar[] = [
