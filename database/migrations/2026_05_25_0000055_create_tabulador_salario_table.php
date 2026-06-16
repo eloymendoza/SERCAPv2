@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('sueldo_maximo', 12, 2)->comment('Límite superior del rango');
             $table->string('estado')->default('activo')->comment('activo, inactivo');
             $table->timestamps(7);
+            $table->softDeletes('deleted_at', 7);
         });
     }
 
