@@ -9,6 +9,7 @@ use App\App\Api\Controller;
 use App\App\Api\Requisiciones\Requests\SolicitudRequisicionRequest;
 use App\App\Api\Requisiciones\Resources\SolicitudRequisicionResource;
 use App\Domain\Requisiciones\Services\SolicitudRequisicionService;
+use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 
 /**
  * Controlador de API para gestionar el recurso de Solicitudes de Requisición.
@@ -45,9 +46,9 @@ class SolicitudRequisicionController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    public function show(int $id): SolicitudRequisicionResource
+    public function show(SolicitudRequisicion $solicitud): SolicitudRequisicionResource
     {
-        $dto = $this->service->find($id);
+        $dto = $this->service->find($solicitud);
 
         return new SolicitudRequisicionResource($dto);
     }
@@ -55,10 +56,10 @@ class SolicitudRequisicionController extends Controller
     /**
      * Procesa la actualización de los datos de una solicitud existente.
      */
-    public function update(SolicitudRequisicionRequest $request, int $id): SolicitudRequisicionResource
+    public function update(SolicitudRequisicionRequest $request, SolicitudRequisicion $solicitud): SolicitudRequisicionResource
     {
-        $dtoInput = $request->toDTO($id);
-        $dtoOutput = $this->service->update($id, $dtoInput);
+        $dtoInput = $request->toDTO($solicitud->id);
+        $dtoOutput = $this->service->update($solicitud, $dtoInput);
 
         return new SolicitudRequisicionResource($dtoOutput);
     }
@@ -66,9 +67,9 @@ class SolicitudRequisicionController extends Controller
     /**
      * Procesa la eliminación física de una solicitud de requisición.
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(SolicitudRequisicion $solicitud): JsonResponse
     {
-        $this->service->delete($id);
+        $this->service->delete($solicitud);
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }

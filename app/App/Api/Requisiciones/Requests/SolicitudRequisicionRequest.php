@@ -9,6 +9,7 @@ use App\Domain\Requisiciones\Models\Puesto;
 use App\Domain\Requisiciones\Models\Aspirante;
 use App\Domain\Requisiciones\Enums\TipoContrato;
 use App\Domain\Catalogos\Models\TabuladorSalario;
+use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
 use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
 use App\App\Api\Requisiciones\Rules\ValidarRangoSueldoTabulador;
@@ -24,7 +25,11 @@ class SolicitudRequisicionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        if ($solicitud = $this->route('solicitud')) {
+            return $this->user()?->can('update', $solicitud) ?? false;
+        }
+
+        return $this->user()?->can('create', SolicitudRequisicion::class) ?? false;
     }
 
     /**

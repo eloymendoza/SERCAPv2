@@ -50,15 +50,14 @@ class SolicitudRequisicionService
         }, 'SolicitudRequisicionService@create');
     }
 
-    public function update(int $id, SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
+    public function update(SolicitudRequisicion $model, SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
     {
         $this->logger()->info("Iniciando actualización de solicitud.", [
-            'id' => $id
+            'id' => $model->id
         ]);
 
-        return $this->handle(function () use ($id, $dto) {
-            $updatedDto = DB::transaction(function () use ($id, $dto) {
-                $model = SolicitudRequisicion::findOrFail($id);
+        return $this->handle(function () use ($model, $dto) {
+            $updatedDto = DB::transaction(function () use ($model, $dto) {
                 $data = $this->mapper->toUpdatePersistenceArray($dto);
                 
                 $model->update($data);
@@ -66,21 +65,20 @@ class SolicitudRequisicionService
             });
 
             $this->logger()->info("Solicitud actualizada.", [
-                'id' => $id
+                'id' => $model->id
             ]);
 
             return $updatedDto;
         }, 'SolicitudRequisicionService@update');
     }
 
-    public function find(int $id): SolicitudRequisicionDTO
+    public function find(SolicitudRequisicion $model): SolicitudRequisicionDTO
     {
         $this->logger()->info("Consultando detalle de solicitud.", [
-            'id' => $id
+            'id' => $model->id
         ]);
 
-        return $this->handle(function () use ($id) {
-            $model = SolicitudRequisicion::findOrFail($id);
+        return $this->handle(function () use ($model) {
             return $this->mapper->toDTO($model);
         }, 'SolicitudRequisicionService@find');
     }
@@ -100,16 +98,14 @@ class SolicitudRequisicionService
         }, 'SolicitudRequisicionService@paginate');
     }
 
-    public function delete(int $id): void
+    public function delete(SolicitudRequisicion $model): void
     {
         $this->logger()->info("Iniciando eliminación de solicitud.", [
-            'id' => $id
+            'id' => $model->id
         ]);
 
-        $this->handle(function () use ($id) {
-            DB::transaction(function () use ($id) {
-                $model = SolicitudRequisicion::findOrFail($id);
-                
+        $this->handle(function () use ($model) {
+            DB::transaction(function () use ($model) {
                 if ($model->requisicion) {
                     $this->requisicionService->delete($model->requisicion->id);
                 }
@@ -118,7 +114,7 @@ class SolicitudRequisicionService
             });
 
             $this->logger()->info("Solicitud eliminada.", [
-                'id' => $id
+                'id' => $model->id
             ]);
         }, 'SolicitudRequisicionService@delete');
     }

@@ -5,8 +5,10 @@ namespace App\Providers;
 use App\Logging\LogContext;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Queue\Events\JobProcessing;
+
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +26,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Interceptar validaciones de permisos para leer de la sesión
+        Gate::before(function ($user, $ability) {
+            $permisos = session('permisos', []);
+            if (array_key_exists($ability, $permisos)) {
+                return true;
+            }
+        });
+
+        // Registrar políticas de acceso del dominio
+        Gate::policy(
+            \App\Domain\Requisiciones\Models\SolicitudRequisicion::class,
+            \App\Domain\Requisiciones\Policies\SolicitudRequisicionPolicy::class
+        );
+
         // Forzar HTTPS solo en entorno de producción
         if (config('app.env') === 'production') {
             URL::forceScheme('https');

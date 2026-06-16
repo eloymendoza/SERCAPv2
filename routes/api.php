@@ -9,7 +9,8 @@ use App\App\Api\EstructuraOrganizacional\Controllers\UnidadOrganizativaControlle
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::apiResource('/solicitud-requisiciones', SolicitudRequisicionController::class);
+    Route::apiResource('/solicitud-requisiciones', SolicitudRequisicionController::class)
+        ->parameters(['solicitud-requisiciones' => 'solicitud']);
     Route::apiResource('/unidades-organizativas', UnidadOrganizativaController::class);
     Route::get('/proyectos', [ProyectoController::class, 'index']);
     
