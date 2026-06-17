@@ -23,7 +23,7 @@ class WorkflowClient
     protected function client(): PendingRequest
     {
         return Http::baseUrl($this->baseUrl)
-            ->timeout(10)
+            ->timeout(30)
             ->withHeaders([
                 'Authorization' => 'Token ' . $this->token,
                 'Accept' => 'application/json',

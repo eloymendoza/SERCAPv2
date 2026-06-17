@@ -47,6 +47,8 @@ return [
     'workflow' => [
         'base_url' => env('API_WF_URL'),
         'token' => env('TOKEN_WF'),
+        'gtco_unidad_id' => env('WORKFLOW_GTCO_UNIDAD_ID', 232),
+        'requisicion_workflow_id' => env('WORKFLOW_REQUISICION_ID', 14),
     ],
 
 ];

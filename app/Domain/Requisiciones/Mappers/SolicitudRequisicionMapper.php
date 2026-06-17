@@ -24,6 +24,7 @@ class SolicitudRequisicionMapper
             proyectoId: $model->proyecto_id,
             idInstanciaWorkflow: $model->id_instancia_workflow,
             solicitanteId: $model->solicitante_id,
+            elaboradorId: $model->elaborador_id,
             direccionId: $model->direccion_id,
             gerenciaId: $model->gerencia_id,
             coordinacionId: $model->coordinacion_id,
@@ -45,6 +46,7 @@ class SolicitudRequisicionMapper
             'proyecto_id' => $dto->proyectoId,
             'id_instancia_workflow' => $dto->idInstanciaWorkflow,
             'solicitante_id' => $dto->solicitanteId,
+            'elaborador_id' => $dto->elaboradorId,
             'direccion_id' => $dto->direccionId,
             'gerencia_id' => $dto->gerenciaId,
             'coordinacion_id' => $dto->coordinacionId,
@@ -71,6 +73,14 @@ class SolicitudRequisicionMapper
         
         if ($dto->estado === null && array_key_exists('estado', $data)) {
             unset($data['estado']);
+        }
+
+        if ($dto->idInstanciaWorkflow === null && array_key_exists('id_instancia_workflow', $data)) {
+            unset($data['id_instancia_workflow']);
+        }
+
+        if ($dto->folio === null && array_key_exists('folio', $data)) {
+            unset($data['folio']);
         }
         
         return $data;

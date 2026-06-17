@@ -4,9 +4,11 @@ namespace App\Domain\Requisiciones\Services;
 
 use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\DB;
+use App\Domain\Autenticacion\Models\User;
+use App\Domain\Workflows\Services\OrquestadorWorkflow;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
-use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
 use App\Domain\Requisiciones\Mappers\SolicitudRequisicionMapper;
 
 class SolicitudRequisicionService
@@ -16,6 +18,8 @@ class SolicitudRequisicionService
     public function __construct(
         private readonly SolicitudRequisicionMapper $mapper,
         private readonly RequisicionService $requisicionService,
+        private readonly OrquestadorWorkflow $orquestadorWorkflow,
+        private readonly FirmantesResolver $firmantesResolver,
     ) {}
 
     protected function getLogChannel(): string
@@ -23,14 +27,14 @@ class SolicitudRequisicionService
         return 'requisicion';
     }
 
-    public function create(SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
+    public function create(SolicitudRequisicionDTO $dto, User $elaborador): SolicitudRequisicionDTO
     {
         $this->logger()->info("Iniciando creación de solicitud.", [
             'folio' => $dto->folio
         ]);
 
-        return $this->handle(function () use ($dto) {
-            $createdDto = DB::transaction(function () use ($dto) {
+        return $this->handle(function () use ($dto, $elaborador) {
+            $createdModel = DB::transaction(function () use ($dto, $elaborador) {
                 $data = $this->mapper->toPersistenceArray($dto);
                 $model = SolicitudRequisicion::create($data);
                 
@@ -39,37 +43,101 @@ class SolicitudRequisicionService
                 }
 
                 $model->load('requisicion.detalles');
-                return $this->mapper->toDTO($model);
+
+                if ($dto->accion === 'emitir') {
+                    $resultadoFirmantes = $this->firmantesResolver->resolverParaRequisicion($elaborador, $model);
+                    $this->orquestadorWorkflow->emitir($model, $elaborador, $resultadoFirmantes);
+                }
+
+                return $model;
             });
 
             $this->logger()->info("Solicitud creada.", [
-                'id' => $createdDto->id
+                'id' => $createdModel->id
             ]);
 
-            return $createdDto;
+            return $this->mapper->toDTO($createdModel);
         }, 'SolicitudRequisicionService@create');
     }
 
-    public function update(SolicitudRequisicion $model, SolicitudRequisicionDTO $dto): SolicitudRequisicionDTO
+    public function update(SolicitudRequisicion $model, SolicitudRequisicionDTO $dto, User $elaborador): SolicitudRequisicionDTO
     {
         $this->logger()->info("Iniciando actualización de solicitud.", [
             'id' => $model->id
         ]);
 
-        return $this->handle(function () use ($model, $dto) {
-            $updatedDto = DB::transaction(function () use ($model, $dto) {
+        return $this->handle(function () use ($model, $dto, $elaborador) {
+            $updatedModel = DB::transaction(function () use ($model, $dto, $elaborador) {
                 $data = $this->mapper->toUpdatePersistenceArray($dto);
-                
                 $model->update($data);
-                return $this->mapper->toDTO($model);
+
+                if ($dto->requisicion) {
+                    $this->requisicionService->update($dto->id, $model->id);
+                }
+
+                $model->refresh()->load('requisicion.detalles');
+
+                if ($dto->accion === 'emitir') {
+                    $resultadoFirmantes = $this->firmantesResolver->resolverParaRequisicion($elaborador, $model);
+                    $this->orquestadorWorkflow->emitir($model, $elaborador, $resultadoFirmantes);
+                }
+
+                return $model;
             });
 
             $this->logger()->info("Solicitud actualizada.", [
-                'id' => $model->id
+                'id' => $updatedModel->id
             ]);
 
-            return $updatedDto;
+            return $this->mapper->toDTO($updatedModel);
         }, 'SolicitudRequisicionService@update');
+    }
+
+    /**
+     * Emite una solicitud: resuelve firmantes, invoca workflow si aplica, y transiciona el estado.
+     */
+    // Emitir se mantiene de forma independiente por si necesita llamarse aisladamente
+    public function emitir(User $elaborador, SolicitudRequisicion $solicitud): SolicitudRequisicionDTO
+    {
+        $this->logger()->info("Iniciando emisión de solicitud.", [
+            'id' => $solicitud->id,
+            'elaborador' => $elaborador->id_personal
+        ]);
+
+        return $this->handle(function () use ($elaborador, $solicitud) {
+            $solicitud->load('requisicion.detalles');
+            $resultadoFirmantes = $this->firmantesResolver->resolverParaRequisicion($elaborador, $solicitud);
+
+            return DB::transaction(function () use ($solicitud, $elaborador, $resultadoFirmantes) {
+                $this->orquestadorWorkflow->emitir($solicitud, $elaborador, $resultadoFirmantes);
+                
+                $this->logger()->info("Proceso de emisión completado.", [
+                    'id' => $solicitud->id,
+                    'requiere_workflow' => $resultadoFirmantes['requiere_workflow'],
+                    'estado_final' => $solicitud->estado->value
+                ]);
+
+                return $this->mapper->toDTO($solicitud);
+            });
+        }, 'SolicitudRequisicionService@emitir');
+    }
+
+    /**
+     * Calcula los firmantes que tendría la solicitud sin persistir nada.
+     *
+     * @return array{requiere_workflow: bool, workflow_id: int, firmantes: array}
+     */
+    public function previewAprobadores(SolicitudRequisicion $solicitud): array
+    {
+        $this->logger()->info("Consultando preview de aprobadores.", ['id' => $solicitud->id]);
+
+        return $this->handle(function () use ($solicitud) {
+            $solicitud->load('requisicion.detalles');
+            
+            $elaborador = User::where('id_personal', $solicitud->elaborador_id)->firstOrFail();
+            
+            return $this->firmantesResolver->resolverParaRequisicion($elaborador, $solicitud);
+        }, 'SolicitudRequisicionService@previewAprobadores');
     }
 
     public function find(SolicitudRequisicion $model): SolicitudRequisicionDTO

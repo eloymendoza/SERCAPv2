@@ -33,13 +33,9 @@ class SolicitudRequisicionController extends Controller
         return SolicitudRequisicionResource::collection($paginator);
     }
 
-    /**
-     * Procesa la creación e inserción de una nueva solicitud de requisición.
-     */
     public function store(SolicitudRequisicionRequest $request): JsonResponse
     {
-        $dtoInput = $request->toDTO();
-        $dtoOutput = $this->service->create($dtoInput);
+        $dtoOutput = $this->service->create($request->toDTO(), $request->user());
 
         return response()->json([
             'data' => new SolicitudRequisicionResource($dtoOutput),
@@ -53,14 +49,10 @@ class SolicitudRequisicionController extends Controller
         return new SolicitudRequisicionResource($dto);
     }
 
-    /**
-     * Procesa la actualización de los datos de una solicitud existente.
-     */
-    public function update(SolicitudRequisicionRequest $request, SolicitudRequisicion $solicitud): SolicitudRequisicionResource
+    public function update(SolicitudRequisicionRequest $request, SolicitudRequisicion $solicitud): SolicitudRequisicionResource 
     {
-        $dtoInput = $request->toDTO($solicitud->id);
-        $dtoOutput = $this->service->update($solicitud, $dtoInput);
-
+        $dtoOutput = $this->service->update($solicitud, $request->toDTO($solicitud->id), $request->user());
+        
         return new SolicitudRequisicionResource($dtoOutput);
     }
 
@@ -72,5 +64,15 @@ class SolicitudRequisicionController extends Controller
         $this->service->delete($solicitud);
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Retorna los firmantes que se asignarían si la solicitud se emitiera.
+     */
+    public function previewAprobadores(SolicitudRequisicion $solicitud): JsonResponse
+    {
+        $resultado = $this->service->previewAprobadores($solicitud);
+
+        return response()->json(['data' => $resultado]);
     }
 }

@@ -21,26 +21,6 @@ class WorkflowService
         return 'workflow';
     }
 
-    public function guardarBorrador(int $id, array $payload): WorkflowInstanceDTO
-    {
-        $this->logger()->info("Guardando borrador workflow para ID: {$id}", ['payload' => $payload]);
-
-        return $this->handle(function () use ($id, $payload) {
-            $response = $this->client->post('/instancias/guardar_borrador/', $payload);
-            return $this->mapper->toResponseDTO($response);
-        }, 'WorkflowService@guardarBorrador');
-    }
-
-    public function emitirInstancia(int $id, array $payload): WorkflowInstanceDTO
-    {
-        $this->logger()->info("Emitiendo instancia workflow para ID: {$id}", ['payload' => $payload]);
-
-        return $this->handle(function () use ($id, $payload) {
-            $response = $this->client->post('/instancias/emitir/', $payload);
-            return $this->mapper->toResponseDTO($response);
-        }, 'WorkflowService@emitirInstancia');
-    }
-
     public function iniciarInstancia(int $id, array $payload): WorkflowInstanceDTO
     {
         $this->logger()->info("Iniciando instancia workflow para ID: {$id}", ['payload' => $payload]);

@@ -23,6 +23,8 @@ class SolicitudRequisicionPolicy
      */
     public function update(User $user, SolicitudRequisicion $solicitud): bool
     {
-        return $this->create($user) && $user->id_personal === $solicitud->solicitante_id;
+        return $this->create($user)
+            && ($user->id_personal === $solicitud->elaborador_id
+                || $user->id_personal === $solicitud->solicitante_id);
     }
 }

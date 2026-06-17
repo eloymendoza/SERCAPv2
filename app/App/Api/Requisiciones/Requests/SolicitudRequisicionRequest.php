@@ -11,7 +11,6 @@ use App\Domain\Requisiciones\Enums\TipoContrato;
 use App\Domain\Catalogos\Models\TabuladorSalario;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
-use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
 use App\App\Api\Requisiciones\Rules\ValidarRangoSueldoTabulador;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 
@@ -42,13 +41,11 @@ class SolicitudRequisicionRequest extends FormRequest
         $id = $this->route('solicitud_requisicion') ?? $this->input('id');
 
         return [
-            'folio' => ['nullable','string','max:255'],
             'proyecto_id' => [
                 'nullable',
                 'integer',
                 Rule::exists(Proyecto::class, 'idProyecto')->where('activoProyecto', true),
             ],
-            'id_instancia_workflow' => ['nullable','integer',],
             'solicitante_id' => [
                 'nullable',
                 'integer',
@@ -110,10 +107,6 @@ class SolicitudRequisicionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'folio.required' => 'El campo :attribute es obligatorio.',
-            'folio.string' => 'El campo :attribute debe ser una cadena de texto.',
-            'folio.max' => 'El campo :attribute debe tener menos de :max caracteres.',
-            
             'direccion_id.required' => 'El campo :attribute es obligatorio.',
             'direccion_id.integer' => 'El campo :attribute debe ser un número entero.',
             'direccion_id.exists' => 'La dirección seleccionada no es válida o está inactiva.',
@@ -131,7 +124,6 @@ class SolicitudRequisicionRequest extends FormRequest
             
             'requisicion.detalle.*.puesto_id.exists' => 'El puesto seleccionado no es válido o no pertenece a la dirección solicitada.',
 
-            'id_instancia_workflow.integer' => 'El campo :attribute debe ser un número entero.',
             'solicitante_id.integer' => 'El campo :attribute debe ser un número entero.',
             'solicitante_id.exists' => 'El :attribute especificado no existe.',
             'estado.Illuminate\Validation\Rules\Enum' => 'El :attribute seleccionado no es válido.',
@@ -161,16 +153,12 @@ class SolicitudRequisicionRequest extends FormRequest
     public function toDTO(?int $id = null): SolicitudRequisicionDTO
     {
         $data = $this->validated();
+        $data['elaborador_id'] = $this->user()->id_personal;
+
         if ($id !== null) {
             $data['id'] = $id;
         }
 
-        $dto = SolicitudRequisicionDTO::fromArray($data);
-
-        if (($data['accion'] ?? null) === 'emitir') {
-            $dto = $dto->withEstado(SolicitudRequisicionEstado::EN_PROCESO);
-        }
-
-        return $dto;
+        return SolicitudRequisicionDTO::fromArray($data);
     }
 }

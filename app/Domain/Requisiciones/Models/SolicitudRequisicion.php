@@ -5,12 +5,13 @@ namespace App\Domain\Requisiciones\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Domain\Workflows\Contracts\Workflowable;
 use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
 
 /**
  * Representa la solicitud formal de presupuesto y personal de un proyecto (Workflow de entrada).
  */
-class SolicitudRequisicion extends Model
+class SolicitudRequisicion extends Model implements Workflowable
 {
     use SoftDeletes;
     /**
@@ -39,6 +40,7 @@ class SolicitudRequisicion extends Model
         'proyecto_id',
         'id_instancia_workflow',
         'solicitante_id',
+        'elaborador_id',
         'direccion_id',
         'gerencia_id',
         'coordinacion_id',
@@ -84,5 +86,25 @@ class SolicitudRequisicion extends Model
     public function requisicion(): HasOne
     {
         return $this->hasOne(Requisicion::class, 'solicitud_id');
+    }
+
+    // --- Implementación de Workflowable ---
+
+    public function getIdentificador(): int
+    {
+        return $this->id;
+    }
+
+    public function aplicarWorkflowInstancia(int $idInstanciaWorkflow): void
+    {
+        $this->update([
+            'id_instancia_workflow' => $idInstanciaWorkflow,
+            'estado' => SolicitudRequisicionEstado::EN_PROCESO,
+        ]);
+    }
+
+    public function autoAprobar(): void
+    {
+        $this->update(['estado' => SolicitudRequisicionEstado::TERMINADO]);
     }
 }
