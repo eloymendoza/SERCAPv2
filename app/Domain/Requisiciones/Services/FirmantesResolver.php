@@ -36,8 +36,7 @@ class FirmantesResolver
 
         match ($rol) {
             'director' => $firmantes = $this->resolverFirmantesDirector($totalVacantes),
-            'gerente_proyecto', 'jefe_proyecto' => $firmantes = $this->resolverFirmantesJPGP($solicitud, $totalVacantes),
-            'eap' => $firmantes = $this->resolverFirmantesEAP($solicitud, $totalVacantes),
+            'gerente_proyecto', 'jefe_proyecto', 'eap' => $firmantes = $this->resolverFirmantesEstandar($solicitud, $totalVacantes),
         };
 
         return [
@@ -77,7 +76,7 @@ class FirmantesResolver
      */
     private function resolverFirmantesDirector(int $totalVacantes): array
     {
-        if ($totalVacantes < 10) {
+        if ($totalVacantes <= 10) {
             return [];
         }
 
@@ -87,12 +86,12 @@ class FirmantesResolver
     }
 
     /**
-     * Resuelve firmantes cuando el elaborador es JP o GP.
+     * Resuelve firmantes por defecto (JP, GP, EAP).
      *
      * Firmante 1: Director del área. Firmante 2: GTCO (si aplica).
      * @return array<int, array{Id_personal: int, orden: int}>
      */
-    private function resolverFirmantesJPGP(SolicitudRequisicion $solicitud, int $totalVacantes): array
+    private function resolverFirmantesEstandar(SolicitudRequisicion $solicitud, int $totalVacantes): array
     {
         $directorId = $this->resolverDirectorArea($solicitud->direccion_id);
 
@@ -100,26 +99,7 @@ class FirmantesResolver
             ['Id_personal' => $directorId, 'orden' => 1],
         ];
 
-        if ($totalVacantes >= 10) {
-            $firmantes[] = ['Id_personal' => $this->resolverGTCO(), 'orden' => 2];
-        }
-
-        return $firmantes;
-    }
-
-    /**
-     * Resuelve firmantes cuando el elaborador tiene permiso EAP.
-     *
-     * Firmante 1: solicitante_id. Firmante 2: GTCO (si aplica).
-     * @return array<int, array{Id_personal: int, orden: int}>
-     */
-    private function resolverFirmantesEAP(SolicitudRequisicion $solicitud, int $totalVacantes): array
-    {
-        $firmantes = [
-            ['Id_personal' => $solicitud->solicitante_id, 'orden' => 1],
-        ];
-
-        if ($totalVacantes >= 10) {
+        if ($totalVacantes > 10) {
             $firmantes[] = ['Id_personal' => $this->resolverGTCO(), 'orden' => 2];
         }
 
