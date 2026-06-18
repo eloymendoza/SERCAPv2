@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('folio_secuencias', function (Blueprint $table) {
             $table->string('base_folio', 50)->primary();
             $table->unsignedInteger('consecutivo')->default(0);
-            $table->timestamps();
+            $table->timestamps(7);
         });
     }
 
