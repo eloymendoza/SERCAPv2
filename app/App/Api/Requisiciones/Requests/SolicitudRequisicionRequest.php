@@ -3,14 +3,15 @@
 namespace App\App\Api\Requisiciones\Requests;
 
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 use App\Domain\Catalogos\Models\Proyecto;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Domain\Requisiciones\Models\Puesto;
-use App\Domain\Requisiciones\Models\Aspirante;
 use App\Domain\Requisiciones\Enums\TipoContrato;
 use App\Domain\Catalogos\Models\TabuladorSalario;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
+use App\App\Api\Requisiciones\Rules\ValidarVinculoProyecto;
 use App\App\Api\Requisiciones\Rules\ValidarRangoSueldoTabulador;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 
@@ -49,7 +50,10 @@ class SolicitudRequisicionRequest extends FormRequest
             'solicitante_id' => [
                 'nullable',
                 'integer',
-                Rule::exists(Aspirante::class, 'id'),
+                new ValidarVinculoProyecto(
+                    $this->input('direccion_id'),
+                    $this->input('proyecto_id')
+                ),
             ],
             'direccion_id' => [
                 'required',
@@ -160,5 +164,46 @@ class SolicitudRequisicionRequest extends FormRequest
         }
 
         return SolicitudRequisicionDTO::fromArray($data);
+    }
+
+    /**
+     * Hooks de validación posteriores.
+     * Garantiza que el usuario autenticado (elaborador) tenga permisos sobre el proyecto/área específica.
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                $user = $this->user();
+                if (!$user || $user->can('EAP')) {
+                    return;
+                }
+
+                $direccionId = $this->input('direccion_id');
+                $proyectoId = $this->input('proyecto_id');
+                $isLinked = false;
+
+                if ($direccionId) {
+                    $direccion = UnidadOrganizativa::find($direccionId);
+                    if ($direccion && (int)$direccion->encargado_id === (int)$user->id_personal) {
+                        $isLinked = true;
+                    }
+                }
+
+                if (!$isLinked && $proyectoId) {
+                    $proyecto = Proyecto::find($proyectoId);
+                    if ($proyecto && (trim($proyecto->gerenteProyecto) === trim($user->name) || trim($proyecto->jefeProyecto) === trim($user->name))) {
+                        $isLinked = true;
+                    }
+                }
+
+                if (!$isLinked) {
+                    $validator->errors()->add(
+                        'permisos', 
+                        'El usuario actual no tiene los permisos suficientes. Debe ser EAP, o fungir como Director, Gerente o Jefe del proyecto/área especificados.'
+                    );
+                }
+            }
+        ];
     }
 }

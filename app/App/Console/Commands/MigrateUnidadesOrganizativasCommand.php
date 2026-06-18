@@ -38,6 +38,7 @@ class MigrateUnidadesOrganizativasCommand extends Command
 
         $gerenciasSaltadas = [];
         $registrosAInsertar = [];
+        $abreviaturasUsadas = [];
 
         // Fase 1: Análisis en memoria (Construcción del árbol)
         foreach ($areas as $row) {
@@ -82,13 +83,36 @@ class MigrateUnidadesOrganizativasCommand extends Command
                 default => null,
             };
 
-            // 4. Armado de payload
+            // 4. Generación y control de colisiones de Abreviatura
+            $abreviatura = trim($row->abreviatura ?? '');
+            
+            if (empty($abreviatura)) {
+                $baseAbrev = $this->generarIniciales($nombre);
+            } else {
+                $baseAbrev = mb_substr($abreviatura, 0, 2);
+            }
+
+            $abreviatura = $baseAbrev;
+            $contador = 1;
+            while (in_array($abreviatura, $abreviaturasUsadas, true)) {
+                $primeraLetra = mb_substr($baseAbrev, 0, 1);
+                if ($contador < 10) {
+                    $abreviatura = $primeraLetra . $contador;
+                } else {
+                    $abreviatura = $primeraLetra . chr(55 + $contador); // 10 = A, 11 = B...
+                }
+                $contador++;
+            }
+            
+            $abreviaturasUsadas[] = $abreviatura;
+
+            // 5. Armado de payload
             $registrosAInsertar[] = [
                 'id'           => $row->idArea,
                 'parent_id'    => $parentId,
                 'nivel'        => $nivel,
                 'nombre'       => $nombre,
-                'abreviatura'  => $row->abreviatura,
+                'abreviatura'  => $abreviatura,
                 'nombre_corto' => $row->nombreCorto,
                 'rfc'          => $row->rfc,
                 'encargado_id' => $encargadoId,
@@ -135,5 +159,33 @@ class MigrateUnidadesOrganizativasCommand extends Command
         $this->info('Migración jerárquica finalizada con éxito.');
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Extrae las iniciales del nombre ignorando conectores comunes.
+     */
+    private function generarIniciales(string $nombre): string
+    {
+        $palabras = explode(' ', mb_strtoupper(trim($nombre)));
+        $omitir = ['DE', 'Y', 'LA', 'EL', 'LOS', 'LAS', 'EN', 'POR', 'CON', 'PARA', 'A', 'AL', 'DEL'];
+        $iniciales = '';
+
+        foreach ($palabras as $p) {
+            $p = preg_replace('/[^A-ZÑÁÉÍÓÚ]/u', '', $p);
+            if (!empty($p) && !in_array($p, $omitir)) {
+                $iniciales .= mb_substr($p, 0, 1);
+                if (mb_strlen($iniciales) === 2) {
+                    break;
+                }
+            }
+        }
+
+        if (mb_strlen($iniciales) < 2 && mb_strlen($nombre) >= 2) {
+            $p = preg_replace('/[^A-ZÑÁÉÍÓÚ]/u', '', mb_strtoupper(trim($nombre)));
+            $iniciales = mb_substr($p, 0, 2);
+        }
+
+        $resultado = empty($iniciales) ? 'ND' : $iniciales;
+        return mb_substr($resultado, 0, 2);
     }
 }

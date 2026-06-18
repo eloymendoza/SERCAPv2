@@ -31,7 +31,7 @@ class TruncateRequisicionesCommand extends Command
             $models = [
                 new DetalleRequisicion(),
                 new Requisicion(),
-                new SolicitudRequisicion(),
+                new SolicitudRequisicion()
             ];
 
             foreach ($models as $model) {

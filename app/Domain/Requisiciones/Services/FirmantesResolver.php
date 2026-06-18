@@ -3,6 +3,7 @@
 namespace App\Domain\Requisiciones\Services;
 
 use App\Domain\Autenticacion\Models\User;
+use App\Domain\Catalogos\Models\Proyecto;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 
@@ -30,7 +31,7 @@ class FirmantesResolver
      */
     public function resolverParaRequisicion(User $elaborador, SolicitudRequisicion $solicitud): array
     {
-        $rol = $this->determinarRol($elaborador);
+        $rol = $this->determinarRol($elaborador, $solicitud);
         $totalVacantes = $this->calcularTotalVacantes($solicitud);
         $firmantes = [];
 
@@ -47,22 +48,30 @@ class FirmantesResolver
     }
 
     /**
-     * Determina el rol operativo del elaborador en orden de prioridad.
+     * Determina el rol operativo del elaborador validando su vínculo con el proyecto o área de la solicitud.
      *
      * Director tiene prioridad sobre cualquier otro rol para garantizar auto-aprobación.
      */
-    private function determinarRol(User $elaborador): string
+    private function determinarRol(User $elaborador, SolicitudRequisicion $solicitud): string
     {
-        if ($elaborador->isDirector()) {
-            return 'director';
+        if ($solicitud->direccion_id) {
+            $direccion = UnidadOrganizativa::find($solicitud->direccion_id);
+            if ($direccion && (int)$direccion->encargado_id === (int)$elaborador->id_personal) {
+                return 'director';
+            }
         }
 
-        if ($elaborador->isGerenteProyecto()) {
-            return 'gerente_proyecto';
-        }
+        if ($solicitud->proyecto_id) {
+            $proyecto = Proyecto::find($solicitud->proyecto_id);
+            if ($proyecto) {
+                if (trim($proyecto->gerenteProyecto) === trim($elaborador->name)) {
+                    return 'gerente_proyecto';
+                }
 
-        if ($elaborador->isJefeProyecto()) {
-            return 'jefe_proyecto';
+                if (trim($proyecto->jefeProyecto) === trim($elaborador->name)) {
+                    return 'jefe_proyecto';
+                }
+            }
         }
 
         return 'eap';

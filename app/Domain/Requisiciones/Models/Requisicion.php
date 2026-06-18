@@ -2,18 +2,20 @@
 
 namespace App\Domain\Requisiciones\Models;
 
+use App\Traits\GeneratesFolio;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Domain\Requisiciones\Enums\RequisicionEstado;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
 
 /**
  * Representa la requisición autorizada (Folio Padre) que agrupa las vacantes operativas.
  */
 class Requisicion extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, GeneratesFolio;
     /**
      * El nombre de la tabla asociada al modelo.
      *
@@ -35,7 +37,23 @@ class Requisicion extends Model
     ];
 
     /**
-     * Retorna el tipado automático de los campos de la tabla.
+     * Asigna explícitamente el folio definitivo (Folio Padre) a la requisición.
+     */
+    public function asignarFolioDefinitivo(): void
+    {
+        if (empty($this->folio)) {
+            $solicitud = $this->solicitud;
+            $abreviaturaCompuesta = ($solicitud?->direccion?->abreviatura ?? '') . 
+                                    ($solicitud?->gerencia?->abreviatura ?? '') . 
+                                    ($solicitud?->coordinacion?->abreviatura ?? '');
+            
+            $this->folio = $this->generarFolioConsecutivo('P', $abreviaturaCompuesta, '-');
+            $this->save();
+        }
+    }
+
+    /**
+     * Configura el tipado nativo de los atributos del modelo.
      */
     protected function casts(): array
     {
@@ -45,7 +63,7 @@ class Requisicion extends Model
     }
 
     /**
-     * Retorna la solicitud original que dio origen a esta requisición.
+     * Recupera la solicitud origen asociada a la requisición.
      */
     public function solicitud(): BelongsTo
     {
@@ -53,7 +71,7 @@ class Requisicion extends Model
     }
 
     /**
-     * Retorna los desgloses o detalles de plazas solicitados en esta requisición.
+     * Recupera el desglose de plazas operativas requeridas.
      */
     public function detalles(): HasMany
     {
@@ -61,7 +79,7 @@ class Requisicion extends Model
     }
 
     /**
-     * Accessor dinámico: Calcula el total de vacantes agrupando los detalles de esta requisición.
+     * Calcula la sumatoria total de vacantes con base en los detalles registrados.
      */
     public function getTotalVacantesAttribute(): int
     {

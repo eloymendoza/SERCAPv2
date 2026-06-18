@@ -2,18 +2,22 @@
 
 namespace App\Domain\Requisiciones\Models;
 
+use App\Traits\GeneratesFolio;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Domain\Workflows\Contracts\Workflowable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
+use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
+
 
 /**
  * Representa la solicitud formal de presupuesto y personal de un proyecto (Workflow de entrada).
  */
 class SolicitudRequisicion extends Model implements Workflowable
 {
-    use SoftDeletes;
+    use SoftDeletes, GeneratesFolio;
     /**
      * El nombre de la tabla asociada al modelo.
      *
@@ -48,30 +52,10 @@ class SolicitudRequisicion extends Model implements Workflowable
         'estado',
     ];
 
-    /**
-     * Inicializa los eventos del modelo para la generación automática del folio.
-     */
-    protected static function booted(): void
-    {
-        static::creating(function (SolicitudRequisicion $model) {
-            if (empty($model->folio) && $model->estado !== SolicitudRequisicionEstado::BORRADOR) {
-                $year = date('Y');
-                $random = mt_rand(10000, 99999);
-                $model->folio = sprintf('SR-%s-%05d', $year, $random);
-            }
-        });
 
-        static::updating(function (SolicitudRequisicion $model) {
-            if (empty($model->folio) && $model->estado !== SolicitudRequisicionEstado::BORRADOR) {
-                $year = date('Y');
-                $random = mt_rand(10000, 99999);
-                $model->folio = sprintf('SR-%s-%05d', $year, $random);
-            }
-        });
-    }
 
     /**
-     * Retorna el tipado automático de los campos de la tabla.
+     * Configura el tipado nativo de los atributos del modelo.
      */
     protected function casts(): array
     {
@@ -81,30 +65,82 @@ class SolicitudRequisicion extends Model implements Workflowable
     }
 
     /**
-     * Retorna la requisición originada a partir de esta solicitud.
+     * Recupera la requisición dependiente generada a partir de esta solicitud.
      */
     public function requisicion(): HasOne
     {
         return $this->hasOne(Requisicion::class, 'solicitud_id');
     }
 
+    /**
+     * Recupera la dirección organizativa solicitante.
+     */
+    public function direccion(): BelongsTo
+    {
+        return $this->belongsTo(UnidadOrganizativa::class, 'direccion_id');
+    }
+
+    /**
+     * Recupera la gerencia organizativa solicitante.
+     */
+    public function gerencia(): BelongsTo
+    {
+        return $this->belongsTo(UnidadOrganizativa::class, 'gerencia_id');
+    }
+
+    /**
+     * Recupera la coordinación organizativa solicitante.
+     */
+    public function coordinacion(): BelongsTo
+    {
+        return $this->belongsTo(UnidadOrganizativa::class, 'coordinacion_id');
+    }
+
     // --- Implementación de Workflowable ---
 
+    /**
+     * Provee el identificador principal requerido por el contrato Workflowable.
+     */
     public function getIdentificador(): int
     {
         return $this->id;
     }
 
+    /**
+     * Vincula el identificador del motor de workflow y transiciona el estado a en proceso.
+     */
     public function aplicarWorkflowInstancia(int $idInstanciaWorkflow): void
     {
+        $this->asignarFoliosDefinitivos();
+
         $this->update([
             'id_instancia_workflow' => $idInstanciaWorkflow,
             'estado' => SolicitudRequisicionEstado::EN_PROCESO,
         ]);
     }
 
+    /**
+     * Finaliza la solicitud aprobándola automáticamente ante la ausencia de firmantes obligatorios.
+     */
     public function autoAprobar(): void
     {
+        $this->asignarFoliosDefinitivos();
+
         $this->update(['estado' => SolicitudRequisicionEstado::TERMINADO]);
+    }
+
+    /**
+     * Orquesta la asignación de folios consecutivos una vez que la solicitud es emitida.
+     */
+    private function asignarFoliosDefinitivos(): void
+    {
+        if (empty($this->folio)) {
+            $abreviatura = $this->direccion?->abreviatura ?? 'XX';
+            $this->folio = $this->generarFolioConsecutivo('RP', $abreviatura);
+        }
+
+        if ($this->requisicion && empty($this->requisicion->folio)) {
+            $this->requisicion->asignarFolioDefinitivo();
+        }
     }
 }

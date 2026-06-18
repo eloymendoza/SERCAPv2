@@ -2,6 +2,7 @@
 
 namespace App\Domain\Requisiciones\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -52,6 +53,8 @@ class PerfilPuesto extends Model
         'fecha_autorizacion',
         'estado',
     ];
+
+
 
     /**
      * Retorna el tipado automático de los campos de la tabla.
