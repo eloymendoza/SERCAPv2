@@ -186,9 +186,19 @@ class AuthService
 
     private function completeLogout(): void
     {
-        Auth::logout();
-        Session::invalidate();
-        Session::regenerateToken();
+        $user = Auth::user();
+        if ($user && method_exists($user, 'currentAccessToken') && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        if (method_exists(Auth::guard(), 'logout')) {
+            Auth::logout();
+        }
+
+        if (\Illuminate\Support\Facades\Session::isStarted()) {
+            \Illuminate\Support\Facades\Session::invalidate();
+            \Illuminate\Support\Facades\Session::regenerateToken();
+        }
     }
 
     private function getAuthenticatedSession(): array

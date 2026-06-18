@@ -46,8 +46,8 @@ trait GeneratesFolio
                 DB::table('folio_secuencias')->insert([
                     'base_folio' => $baseFolio,
                     'consecutivo' => 1,
-                    'created_at' => now()->format('Y-m-d\TH:i:s.v'),
-                    'updated_at' => now()->format('Y-m-d\TH:i:s.v'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
                 
                 return 1;
