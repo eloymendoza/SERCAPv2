@@ -5,7 +5,6 @@ namespace App\Domain\Autenticacion\Services;
 use App\Logging\LogContext;
 use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Domain\Autenticacion\Models\User;
@@ -46,7 +45,7 @@ class AuthService
      */
     public function authenticate(AuthDTO $dto): UserDTO
     {
-        Log::channel($this->logContext->channel())->info("Iniciando autenticación.", [
+        $this->logger()->info("Iniciando autenticación.", [
             'username' => $dto->username
         ]);
         
@@ -58,7 +57,7 @@ class AuthService
             }
 
             $data = $response->json();
-            Log::channel($this->logContext->channel())->info("Autenticación exitosa.", [
+            $this->logger()->info("Autenticación exitosa.", [
                 'data' => $data
             ]);
 
@@ -75,7 +74,7 @@ class AuthService
             $this->logContext->setUsername($userDtoResult->username);
 
             $fullDto = $userDto->withId($userDtoResult->id);
-            Log::channel($this->logContext->channel())->info("Sesión local sincronizada.", [
+            $this->logger()->info("Sesión local sincronizada.", [
                 'data' => $fullDto
             ]);
 
@@ -93,7 +92,7 @@ class AuthService
      */
     public function logout(): void
     {
-        Log::channel($this->logContext->channel())->info("Iniciando cierre de sesión.");
+        $this->logger()->info("Iniciando cierre de sesión.");
 
         $this->handle(function () {
             $username = Auth::user()?->username;
@@ -101,9 +100,9 @@ class AuthService
             if ($username) {
                 $response = $this->authClient->invalidateToken($username);
                 if ($response->successful() && ($response->json()['status'] ?? '') === 'Success') {
-                    Log::channel($this->logContext->channel())->info("Token externo inactivado.");
+                    $this->logger()->info("Token externo inactivado.");
                 } else {
-                    Log::channel($this->logContext->channel())->error("Fallo al inactivar token externo.");
+                    $this->logger()->error("Fallo al inactivar token externo.");
                 }
             }
 
@@ -118,11 +117,11 @@ class AuthService
      */
     public function checkSession(): UserDTO
     {
-        Log::channel($this->logContext->channel())->info("Consultando sesión activa.");
+        $this->logger()->info("Consultando sesión activa.");
         
         return $this->handle(function () {
             $sessionData = $this->getAuthenticatedSession();
-            Log::channel($this->logContext->channel())->info("Sesión local recuperada.", [
+            $this->logger()->info("Sesión local recuperada.", [
                 'data' => $sessionData
             ]);
             return $this->userMapper->toDTO($sessionData);
@@ -149,7 +148,7 @@ class AuthService
             $isValid = $response->successful() && ($response->json()['message'] ?? '') === 'Success';
 
             if (!$isValid) {
-                Log::channel($this->logContext->channel())->error("Token externo inválido.", [
+                $this->logger()->error("Token externo inválido.", [
                     'response' => $response->json()
                 ]);
             }
@@ -187,9 +186,19 @@ class AuthService
 
     private function completeLogout(): void
     {
-        Auth::logout();
-        Session::invalidate();
-        Session::regenerateToken();
+        $user = Auth::user();
+        if ($user && method_exists($user, 'currentAccessToken') && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        if (method_exists(Auth::guard(), 'logout')) {
+            Auth::logout();
+        }
+
+        if (\Illuminate\Support\Facades\Session::isStarted()) {
+            \Illuminate\Support\Facades\Session::invalidate();
+            \Illuminate\Support\Facades\Session::regenerateToken();
+        }
     }
 
     private function getAuthenticatedSession(): array

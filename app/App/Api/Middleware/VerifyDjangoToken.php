@@ -44,9 +44,19 @@ class VerifyDjangoToken
                 if (!$this->authService->verifyToken($username)) {
                     Log::channel($this->logContext->channel())->warning("Middleware: Sesión invalidada por token expirado/inválido: {$username}");
 
-                    Auth::logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
+                    $user = Auth::user();
+                    if ($user && method_exists($user, 'currentAccessToken') && $user->currentAccessToken()) {
+                        $user->currentAccessToken()->delete();
+                    }
+
+                    if (method_exists(Auth::guard(), 'logout')) {
+                        Auth::logout();
+                    }
+
+                    if ($request->hasSession()) {
+                        $request->session()->invalidate();
+                        $request->session()->regenerateToken();
+                    }
                     
                     throw AuthException::invalidCredentials('Tu sesión ha expirado.');
                 }
