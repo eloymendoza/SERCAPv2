@@ -199,6 +199,33 @@ class SolicitudRequisicionService
     }
 
     /**
+     * Procesa el rechazo de un paso del workflow para la solicitud dada.
+     *
+     * Delega la operación al WorkflowService y sincroniza el estado local
+     * con el estado global de la instancia devuelto por Django.
+     */
+    public function rechazar(User $firmante, SolicitudRequisicion $solicitud, ?string $observaciones = null): SolicitudRequisicionDTO
+    {
+        $this->logger()->info("Iniciando rechazo de solicitud.", [
+            'id'            => $solicitud->id,
+            'id_instancia'  => $solicitud->id_instancia_workflow,
+            'firmante'      => $firmante->id_personal,
+        ]);
+
+        return $this->handle(function () use ($firmante, $solicitud, $observaciones) {
+            $workflowResponse = $this->orquestadorWorkflow->rechazarPaso($solicitud, $firmante, $observaciones);
+
+            $this->logger()->info("Rechazo procesado.", [
+                'id'            => $solicitud->id,
+                'estado_django' => $workflowResponse->estado,
+                'estado_local'  => $solicitud->estado->value,
+            ]);
+
+            return $this->mapper->toDTO($solicitud->fresh());
+        }, 'SolicitudRequisicionService@rechazar');
+    }
+
+    /**
      * Calcula los firmantes que tendría la solicitud sin persistir nada.
      *
      * @return array{requiere_workflow: bool, workflow_id: int, firmantes: array}

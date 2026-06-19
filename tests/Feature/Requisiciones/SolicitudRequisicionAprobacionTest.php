@@ -40,7 +40,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
             'id_instancia_workflow' => null
         ]);
 
-        $response = $this->actingAs($user)->postJson("/api/solicitud-requisiciones/{$solicitud->id}/aprobar", []);
+        $response = $this->actingAs($user)->postJson("/api/requisiciones/solicitudes/{$solicitud->id}/aprobar", []);
 
         $response->assertStatus(403);
     });
@@ -71,7 +71,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
 
         $this->app->instance(WorkflowService::class, $mockWorkflow);
 
-        $response = $this->actingAs($user)->postJson("/api/solicitud-requisiciones/{$solicitud->id}/aprobar", [
+        $response = $this->actingAs($user)->postJson("/api/requisiciones/solicitudes/{$solicitud->id}/aprobar", [
             'observaciones' => 'OK'
         ]);
 
@@ -125,7 +125,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
 
         $this->app->instance(WorkflowService::class, $mockWorkflow);
 
-        $response = $this->actingAs($user)->postJson("/api/solicitud-requisiciones/{$solicitud->id}/aprobar", [
+        $response = $this->actingAs($user)->postJson("/api/requisiciones/solicitudes/{$solicitud->id}/aprobar", [
             'observaciones' => 'Todo en orden'
         ]);
 

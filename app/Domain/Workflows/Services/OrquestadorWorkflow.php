@@ -18,7 +18,7 @@ class OrquestadorWorkflow
     ) {}
 
     /**
-     * Emite el modelo al workflow o lo auto-aprueba según la resolución de firmantes.
+     * Orquesta la emisión del modelo al workflow o lo auto-aprueba según la resolución de firmantes.
      *
      * @param Workflowable $modelo El modelo que será emitido.
      * @param User $elaborador Usuario que ejecuta la emisión.
@@ -59,6 +59,32 @@ class OrquestadorWorkflow
             'id_firmante'   => $firmanteActual['id'],
             'Id_personal'   => $firmante->id_personal,
             'observaciones' => $observaciones,
+        ]);
+
+        $modelo->sincronizarEstadoWorkflow($workflowResponse->estado);
+
+        return $workflowResponse;
+    }
+
+    /**
+     * Orquesta el rechazo de un paso del workflow para el modelo dado.
+     *
+     * @param Workflowable $modelo El modelo que será actualizado.
+     * @param User $firmante Usuario que ejecuta el rechazo.
+     * @param string|null $observaciones Observaciones opcionales del firmante.
+     * @return \App\Domain\Workflows\DTOs\WorkflowInstanceDTO
+     */
+    public function rechazarPaso(Workflowable $modelo, User $firmante, ?string $observaciones = null): WorkflowInstanceDTO
+    {
+        $firmanteActual = $this->workflowService->obtenerFirmanteActual(
+            $modelo->getIdentificadorInstancia()
+        );
+
+        $workflowResponse = $this->workflowService->rechazarPaso($modelo->getIdentificador(), [
+            'id_instancia'  => $modelo->getIdentificadorInstancia(),
+            'id_firmante'   => $firmanteActual['id'],
+            'Id_personal'   => $firmante->id_personal,
+            'comentario' => $observaciones,
         ]);
 
         $modelo->sincronizarEstadoWorkflow($workflowResponse->estado);

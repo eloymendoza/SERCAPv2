@@ -8,21 +8,32 @@ use App\App\Api\Requisiciones\Controllers\SolicitudRequisicionController;
 use App\App\Api\EstructuraOrganizacional\Controllers\UnidadOrganizativaController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-
-    Route::apiResource('/solicitud-requisiciones', SolicitudRequisicionController::class)
-        ->parameters(['solicitud-requisiciones' => 'solicitud']);
-
-    Route::get('/solicitud-requisiciones/{solicitud}/preview-aprobadores', [SolicitudRequisicionController::class, 'previewAprobadores']);
-    Route::post('/solicitud-requisiciones/{solicitud}/aprobar', [SolicitudRequisicionController::class, 'aprobar']);
-
-    Route::apiResource('/unidades-organizativas', UnidadOrganizativaController::class)
-        ->parameters(['unidades-organizativas' => 'unidad']);
-        
-    Route::get('/proyectos', [ProyectoController::class, 'index']);
     
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::middleware(['verify.django'])->group(function () {
         Route::get('/me', [AuthController::class, 'checkSession']);
+    });
+
+    Route::prefix('requisiciones')->group(function () {
+        
+        Route::apiResource('/solicitudes', SolicitudRequisicionController::class)
+            ->parameters(['solicitudes' => 'solicitud']);
+
+        Route::prefix('solicitudes/{solicitud}')->group(function () {
+            Route::get('preview-aprobadores', [SolicitudRequisicionController::class, 'previewAprobadores']);
+            Route::post('aprobar', [SolicitudRequisicionController::class, 'aprobar']);
+            Route::post('rechazar', [SolicitudRequisicionController::class, 'rechazar']);
+        });
+        
+    });
+
+    Route::prefix('catalogos')->group(function () {
+        
+        Route::apiResource('/unidades-organizativas', UnidadOrganizativaController::class)
+            ->parameters(['unidades-organizativas' => 'unidad']);
+            
+        Route::get('/proyectos', [ProyectoController::class, 'index']);
+        
     });
 });
 

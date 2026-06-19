@@ -90,4 +90,18 @@ class SolicitudRequisicionController extends Controller
 
         return response()->json(['data' => new SolicitudRequisicionResource($dto)]);
     }
+
+    /**
+     * Procesa el rechazo del paso activo del workflow para la solicitud dada.
+     */
+    public function rechazar(AprobarSolicitudRequest $request, SolicitudRequisicion $solicitud): JsonResponse
+    {
+        $dto = $this->service->rechazar(
+            $request->user(),
+            $solicitud,
+            $request->input('observaciones')
+        );
+
+        return response()->json(['data' => new SolicitudRequisicionResource($dto)]);
+    }
 }

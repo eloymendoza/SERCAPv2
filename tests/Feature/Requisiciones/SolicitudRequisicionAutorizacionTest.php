@@ -273,7 +273,7 @@ describe('Integración HTTP (Request y Endpoint)', function () {
         $this->actingAs($user);
 
         // Enviar proyecto_id inexistente (999)
-        $response = $this->postJson('/api/solicitud-requisiciones', [
+        $response = $this->postJson('/api/requisiciones/solicitudes', [
             'direccion_id' => $direccion->id,
             'proyecto_id' => 999,
         ]);
@@ -312,7 +312,7 @@ describe('Integración HTTP (Request y Endpoint)', function () {
         $this->actingAs($user);
 
         // Intentar crear sin tener vínculo
-        $response = $this->postJson('/api/solicitud-requisiciones', [
+        $response = $this->postJson('/api/requisiciones/solicitudes', [
             'direccion_id' => $direccion->id,
             'proyecto_id' => null,
         ]);
