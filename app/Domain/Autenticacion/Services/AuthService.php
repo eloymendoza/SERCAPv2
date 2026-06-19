@@ -53,7 +53,19 @@ class AuthService
             $response = $this->authClient->authenticate($dto->username, $dto->password);
 
             if (!$response->successful()) {
-                throw AuthException::invalidCredentials('Credenciales inválidas o error de conexión.');
+                $this->logger()->error("Fallo de autenticación en Django", [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+
+                $data = $response->json();
+                $errorDetail = $data['error'] ?? $data['message'] ?? 'Credenciales inválidas o error de conexión.';
+
+                if ($response->status() === 403 || $response->status() === 404 || str_contains(strtolower($errorDetail), 'permiso')) {
+                    throw AuthException::accessDenied($errorDetail);
+                }
+
+                throw AuthException::invalidCredentials($errorDetail);
             }
 
             $data = $response->json();

@@ -20,4 +20,16 @@ class AuthException extends DomainException
     {
         return new self($message);
     }
+
+    /**
+     * @param string $message
+     * @return self
+     */
+    public static function accessDenied(string $message = 'El usuario no tiene permisos para acceder al sistema.'): self
+    {
+        $exception = new self($message);
+        $exception->errorCode = 'AUTH_ACCESS_DENIED';
+        $exception->statusCode = 403;
+        return $exception;
+    }
 }
