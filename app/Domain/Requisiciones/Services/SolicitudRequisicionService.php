@@ -5,10 +5,12 @@ namespace App\Domain\Requisiciones\Services;
 use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\DB;
 use App\Domain\Autenticacion\Models\User;
+use App\Domain\Workflows\Services\WorkflowService;
 use App\Domain\Workflows\Services\OrquestadorWorkflow;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
 use App\Domain\Requisiciones\Mappers\SolicitudRequisicionMapper;
 
 class SolicitudRequisicionService
@@ -20,6 +22,7 @@ class SolicitudRequisicionService
         private readonly RequisicionService $requisicionService,
         private readonly OrquestadorWorkflow $orquestadorWorkflow,
         private readonly FirmantesResolverService $firmantesResolver,
+        private readonly WorkflowService $workflowService,
     ) {}
 
     protected function getLogChannel(): string
@@ -93,53 +96,6 @@ class SolicitudRequisicionService
         }, 'SolicitudRequisicionService@update');
     }
 
-    /**
-     * Emite una solicitud: resuelve firmantes, invoca workflow si aplica, y transiciona el estado.
-     */
-    // Emitir se mantiene de forma independiente por si necesita llamarse aisladamente
-    public function emitir(User $elaborador, SolicitudRequisicion $solicitud): SolicitudRequisicionDTO
-    {
-        $this->logger()->info("Iniciando emisión de solicitud.", [
-            'id' => $solicitud->id,
-            'elaborador' => $elaborador->id_personal
-        ]);
-
-        return $this->handle(function () use ($elaborador, $solicitud) {
-            $solicitud->load('requisicion.detalles');
-            $resultadoFirmantes = $this->firmantesResolver->resolverParaRequisicion($elaborador, $solicitud);
-
-            return DB::transaction(function () use ($solicitud, $elaborador, $resultadoFirmantes) {
-                $this->orquestadorWorkflow->emitir($solicitud, $elaborador, $resultadoFirmantes);
-                
-                $this->logger()->info("Proceso de emisión completado.", [
-                    'id' => $solicitud->id,
-                    'requiere_workflow' => $resultadoFirmantes['requiere_workflow'],
-                    'estado_final' => $solicitud->estado->value
-                ]);
-
-                return $this->mapper->toDTO($solicitud);
-            });
-        }, 'SolicitudRequisicionService@emitir');
-    }
-
-    /**
-     * Calcula los firmantes que tendría la solicitud sin persistir nada.
-     *
-     * @return array{requiere_workflow: bool, workflow_id: int, firmantes: array}
-     */
-    public function previewAprobadores(SolicitudRequisicion $solicitud): array
-    {
-        $this->logger()->info("Consultando preview de aprobadores.", ['id' => $solicitud->id]);
-
-        return $this->handle(function () use ($solicitud) {
-            $solicitud->load('requisicion.detalles');
-            
-            $elaborador = User::where('id_personal', $solicitud->elaborador_id)->firstOrFail();
-            
-            return $this->firmantesResolver->resolverParaRequisicion($elaborador, $solicitud);
-        }, 'SolicitudRequisicionService@previewAprobadores');
-    }
-
     public function find(SolicitudRequisicion $model): SolicitudRequisicionDTO
     {
         $this->logger()->info("Consultando detalle de solicitud.", [
@@ -185,5 +141,78 @@ class SolicitudRequisicionService
                 'id' => $model->id
             ]);
         }, 'SolicitudRequisicionService@delete');
+    }
+
+    /**
+     * Emite una solicitud: resuelve firmantes, invoca workflow si aplica, y transiciona el estado.
+     */
+    public function emitir(User $elaborador, SolicitudRequisicion $solicitud): SolicitudRequisicionDTO
+    {
+        $this->logger()->info("Iniciando emisión de solicitud.", [
+            'id' => $solicitud->id,
+            'elaborador' => $elaborador->id_personal
+        ]);
+
+        return $this->handle(function () use ($elaborador, $solicitud) {
+            $solicitud->load('requisicion.detalles');
+            $resultadoFirmantes = $this->firmantesResolver->resolverParaRequisicion($elaborador, $solicitud);
+
+            return DB::transaction(function () use ($solicitud, $elaborador, $resultadoFirmantes) {
+                $this->orquestadorWorkflow->emitir($solicitud, $elaborador, $resultadoFirmantes);
+                
+                $this->logger()->info("Proceso de emisión completado.", [
+                    'id' => $solicitud->id,
+                    'requiere_workflow' => $resultadoFirmantes['requiere_workflow'],
+                    'estado_final' => $solicitud->estado->value
+                ]);
+
+                return $this->mapper->toDTO($solicitud);
+            });
+        }, 'SolicitudRequisicionService@emitir');
+    }
+
+    /**
+     * Procesa la aprobación de un paso del workflow para la solicitud dada.
+     *
+     * Delega la operación al WorkflowService y sincroniza el estado local
+     * con el estado global de la instancia devuelto por Django.
+     */
+    public function aprobar(User $firmante, SolicitudRequisicion $solicitud, ?string $observaciones = null): SolicitudRequisicionDTO
+    {
+        $this->logger()->info("Iniciando aprobación de solicitud.", [
+            'id'            => $solicitud->id,
+            'id_instancia'  => $solicitud->id_instancia_workflow,
+            'firmante'      => $firmante->id_personal,
+        ]);
+
+        return $this->handle(function () use ($firmante, $solicitud, $observaciones) {
+            $workflowResponse = $this->orquestadorWorkflow->aprobarPaso($solicitud, $firmante, $observaciones);
+
+            $this->logger()->info("Aprobación procesada.", [
+                'id'            => $solicitud->id,
+                'estado_django' => $workflowResponse->estado,
+                'estado_local'  => $solicitud->estado->value,
+            ]);
+
+            return $this->mapper->toDTO($solicitud->fresh());
+        }, 'SolicitudRequisicionService@aprobar');
+    }
+
+    /**
+     * Calcula los firmantes que tendría la solicitud sin persistir nada.
+     *
+     * @return array{requiere_workflow: bool, workflow_id: int, firmantes: array}
+     */
+    public function previewAprobadores(SolicitudRequisicion $solicitud): array
+    {
+        $this->logger()->info("Consultando preview de aprobadores.", ['id' => $solicitud->id]);
+
+        return $this->handle(function () use ($solicitud) {
+            $solicitud->load('requisicion.detalles');
+            
+            $elaborador = User::where('id_personal', $solicitud->elaborador_id)->firstOrFail();
+            
+            return $this->firmantesResolver->resolverParaRequisicion($elaborador, $solicitud);
+        }, 'SolicitudRequisicionService@previewAprobadores');
     }
 }

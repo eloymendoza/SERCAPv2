@@ -5,6 +5,7 @@ namespace App\Domain\Workflows\Services;
 use App\Domain\Autenticacion\Models\User;
 use App\Domain\Workflows\Contracts\Workflowable;
 use App\Domain\Workflows\Services\WorkflowService;
+use App\Domain\Workflows\DTOs\WorkflowInstanceDTO;
 
 /**
  * Motor genérico encargado de la emisión de entidades hacia el Workflow (Django).
@@ -37,5 +38,31 @@ class OrquestadorWorkflow
         ]);
 
         $modelo->aplicarWorkflowInstancia($workflowResponse->idInstancia);
+    }
+
+    /**
+     * Orquesta la aprobación de un paso del workflow para el modelo dado.
+     *
+     * @param Workflowable $modelo El modelo que será actualizado.
+     * @param User $firmante Usuario que ejecuta la firma.
+     * @param string|null $observaciones Observaciones opcionales del firmante.
+     * @return \App\Domain\Workflows\DTOs\WorkflowInstanceDTO
+     */
+    public function aprobarPaso(Workflowable $modelo, User $firmante, ?string $observaciones = null): WorkflowInstanceDTO
+    {
+        $firmanteActual = $this->workflowService->obtenerFirmanteActual(
+            $modelo->getIdentificadorInstancia()
+        );
+
+        $workflowResponse = $this->workflowService->aprobarPaso($modelo->getIdentificador(), [
+            'id_instancia'  => $modelo->getIdentificadorInstancia(),
+            'id_firmante'   => $firmanteActual['id'],
+            'Id_personal'   => $firmante->id_personal,
+            'observaciones' => $observaciones,
+        ]);
+
+        $modelo->sincronizarEstadoWorkflow($workflowResponse->estado);
+
+        return $workflowResponse;
     }
 }

@@ -3,15 +3,17 @@
 namespace App\Domain\Requisiciones\Policies;
 
 use App\Domain\Autenticacion\Models\User;
+use App\Domain\Workflows\Services\WorkflowService;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\ContextoAutorizacionDTO;
-
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
 use App\Domain\Requisiciones\Services\VinculoContextualService;
 
 class SolicitudRequisicionPolicy
 {
     public function __construct(
-        protected VinculoContextualService $vinculoService
+        protected VinculoContextualService $vinculoService,
+        protected WorkflowService $workflowService,
     ) {}
 
     /**
@@ -38,5 +40,24 @@ class SolicitudRequisicionPolicy
     public function update(User $user, SolicitudRequisicion $solicitud): bool
     {
         return $user->id_personal === $solicitud->elaborador_id;
+    }
+
+    /**
+     * Determina si el usuario es el firmante activo de la instancia en Django.
+     *
+     * La solicitud debe estar en estado en_proceso y Django debe confirmar
+     * que el turno de firma corresponde al usuario que ejecuta la acción.
+     */
+    public function aprobar(User $user, SolicitudRequisicion $solicitud): bool
+    {
+        if ($solicitud->estado !== SolicitudRequisicionEstado::EN_PROCESO) {
+            return false;
+        }
+
+        $firmanteActual = $this->workflowService->obtenerFirmanteActual(
+            $solicitud->id_instancia_workflow
+        );
+
+        return isset($firmanteActual['Id_personal']) && (int) $firmanteActual['Id_personal'] === (int) $user->id_personal;
     }
 }

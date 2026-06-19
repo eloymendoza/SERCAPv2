@@ -21,4 +21,13 @@ interface Workflowable
      * Transiciona la solicitud directamente a un estado auto-aprobado (saltándose el workflow).
      */
     public function autoAprobar(): void;
+    /**
+     * Retorna el identificador de la instancia de workflow asociada.
+     */
+    public function getIdentificadorInstancia(): int;
+
+    /**
+     * Sincroniza el estado local del modelo basado en el estado devuelto por el motor de workflows (Django).
+     */
+    public function sincronizarEstadoWorkflow(string $estadoDjango): void;
 }

@@ -4,8 +4,8 @@ namespace App\Domain\Workflows\Services;
 
 use App\Traits\HandlesProcess;
 use App\Infrastructure\Clients\WorkflowClient;
-use App\Domain\Workflows\DTOs\WorkflowInstanceDTO;
 use App\Domain\Workflows\Mappers\WorkflowMapper;
+use App\Domain\Workflows\DTOs\WorkflowInstanceDTO;
 
 class WorkflowService
 {
@@ -29,6 +29,22 @@ class WorkflowService
             $response = $this->client->post('/instancias/iniciar/', $payload);
             return $this->mapper->toResponseDTO($response);
         }, 'WorkflowService@iniciarInstancia');
+    }
+
+    /**
+     * Consulta el firmante activo de una instancia de workflow en Django.
+     *
+     * @return array{Id_personal: int, orden: int, ...}
+     */
+    public function obtenerFirmanteActual(int $idInstancia): array
+    {
+        $this->logger()->info("Consultando firmante actual para instancia: {$idInstancia}");
+
+        return $this->handle(function () use ($idInstancia) {
+            return $this->client->post('/instancias/firmante_actual/', [
+                'id_instancia' => $idInstancia,
+            ]);
+        }, 'WorkflowService@obtenerFirmanteActual');
     }
 
     public function aprobarPaso(int $id, array $payload): WorkflowInstanceDTO

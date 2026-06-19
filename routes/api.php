@@ -14,6 +14,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->parameters(['solicitud-requisiciones' => 'solicitud']);
 
     Route::get('/solicitud-requisiciones/{solicitud}/preview-aprobadores', [SolicitudRequisicionController::class, 'previewAprobadores']);
+    Route::post('/solicitud-requisiciones/{solicitud}/aprobar', [SolicitudRequisicionController::class, 'aprobar']);
 
     Route::apiResource('/unidades-organizativas', UnidadOrganizativaController::class)
         ->parameters(['unidades-organizativas' => 'unidad']);

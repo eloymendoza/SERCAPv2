@@ -6,10 +6,11 @@ use App\Logging\LogContext;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use App\App\Api\Controller;
+use App\Domain\Requisiciones\Models\SolicitudRequisicion;
+use App\App\Api\Requisiciones\Requests\AprobarSolicitudRequest;
+use App\Domain\Requisiciones\Services\SolicitudRequisicionService;
 use App\App\Api\Requisiciones\Requests\SolicitudRequisicionRequest;
 use App\App\Api\Requisiciones\Resources\SolicitudRequisicionResource;
-use App\Domain\Requisiciones\Services\SolicitudRequisicionService;
-use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 
 /**
  * Controlador de API para gestionar el recurso de Solicitudes de Requisición.
@@ -74,5 +75,19 @@ class SolicitudRequisicionController extends Controller
         $resultado = $this->service->previewAprobadores($solicitud);
 
         return response()->json(['data' => $resultado]);
+    }
+
+    /**
+     * Procesa la aprobación del paso activo del workflow para la solicitud dada.
+     */
+    public function aprobar(AprobarSolicitudRequest $request, SolicitudRequisicion $solicitud): JsonResponse
+    {
+        $dto = $this->service->aprobar(
+            $request->user(),
+            $solicitud,
+            $request->input('observaciones')
+        );
+
+        return response()->json(['data' => new SolicitudRequisicionResource($dto)]);
     }
 }

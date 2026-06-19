@@ -143,4 +143,27 @@ class SolicitudRequisicion extends Model implements Workflowable
             $this->requisicion->asignarFolioDefinitivo();
         }
     }
+
+    /**
+     * Retorna el identificador de la instancia de workflow asociada.
+     */
+    public function getIdentificadorInstancia(): int
+    {
+        return $this->id_instancia_workflow;
+    }
+
+    /**
+     * Sincroniza el estado local del modelo basado en el estado devuelto por Django.
+     */
+    public function sincronizarEstadoWorkflow(string $estadoDjango): void
+    {
+        $estadoLocal = match (strtolower($estadoDjango)) {
+            'terminado' => SolicitudRequisicionEstado::TERMINADO,
+            'rechazado' => SolicitudRequisicionEstado::RECHAZADO,
+            'cancelado' => SolicitudRequisicionEstado::CANCELADO,
+            default     => SolicitudRequisicionEstado::EN_PROCESO,
+        };
+
+        $this->update(['estado' => $estadoLocal]);
+    }
 }
