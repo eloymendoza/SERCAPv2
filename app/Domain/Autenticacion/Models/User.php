@@ -2,11 +2,11 @@
 
 namespace App\Domain\Autenticacion\Models;
 
-use App\Domain\Catalogos\Models\Proyecto;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
+use App\Domain\Requisiciones\DTOs\ContextoAutorizacionDTO;
+use App\Domain\Requisiciones\Services\VinculoContextualService;
 
 class User extends Authenticatable
 {
@@ -49,43 +49,30 @@ class User extends Authenticatable
         ];
     }
 
+    // --- Vinculación contextual ---
+
     /**
-     * Determina si el usuario es director en la estructura organizativa.
+     * Determina si el usuario es el encargado de una dirección organizativa específica.
      */
-    public function isDirector(): bool
+    public function esDireccionEncargada(int $direccionId): bool
     {
-        return UnidadOrganizativa::where('encargado_id', $this->id_personal)
-            ->where('nivel', 'direccion')
-            ->exists();
+        return app(VinculoContextualService::class)->esDireccionEncargada($this, $direccionId);
     }
 
     /**
-     * Determina si el usuario es gerente en la estructura organizativa.
+     * Determina si el usuario funge como gerente o jefe de un proyecto específico activo.
      */
-    public function isGerente(): bool
+    public function esVinculadoProyecto(int $proyectoId): bool
     {
-        return UnidadOrganizativa::where('encargado_id', $this->id_personal)
-            ->where('nivel', 'gerencia')
-            ->exists();
+        return app(VinculoContextualService::class)->esVinculadoProyecto($this, $proyectoId);
     }
 
     /**
-     * Determina si el usuario funge como gerente de algún proyecto activo.
+     * Determina si el usuario tiene vínculo operativo con la dirección o proyecto dados.
      */
-    public function isGerenteProyecto(): bool
+    public function tieneVinculoContextual(?int $direccionId, ?int $proyectoId): bool
     {
-        return Proyecto::where('activoProyecto', true)
-            ->where('gerenteProyecto', $this->name)
-            ->exists();
-    }
-
-    /**
-     * Determina si el usuario funge como jefe de algún proyecto activo.
-     */
-    public function isJefeProyecto(): bool
-    {
-        return Proyecto::where('activoProyecto', true)
-            ->where('jefeProyecto', $this->name)
-            ->exists();
+        $contexto = new ContextoAutorizacionDTO($this, $direccionId, $proyectoId);
+        return app(VinculoContextualService::class)->tieneVinculoContextual($contexto);
     }
 }

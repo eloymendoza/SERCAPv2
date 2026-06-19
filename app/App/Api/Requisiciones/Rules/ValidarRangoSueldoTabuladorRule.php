@@ -7,7 +7,7 @@ use App\Domain\Catalogos\Models\TabuladorSalario;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class ValidarRangoSueldoTabulador implements ValidationRule, DataAwareRule
+class ValidarRangoSueldoTabuladorRule implements ValidationRule, DataAwareRule
 {
     protected array $data = [];
 

@@ -19,7 +19,7 @@ class SolicitudRequisicionService
         private readonly SolicitudRequisicionMapper $mapper,
         private readonly RequisicionService $requisicionService,
         private readonly OrquestadorWorkflow $orquestadorWorkflow,
-        private readonly FirmantesResolver $firmantesResolver,
+        private readonly FirmantesResolverService $firmantesResolver,
     ) {}
 
     protected function getLogChannel(): string

@@ -13,7 +13,7 @@ use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
  * Las reglas dependen del rol del elaborador y del total de vacantes de la requisición.
  * GTCO se resuelve desde el encargado de la UO configurada en services.workflow.gtco_unidad_id.
  */
-class FirmantesResolver
+class FirmantesResolverService
 {
     private readonly int $gtcoUnidadId;
     private readonly int $workflowId;

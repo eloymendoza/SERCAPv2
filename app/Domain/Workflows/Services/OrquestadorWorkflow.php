@@ -21,7 +21,7 @@ class OrquestadorWorkflow
      *
      * @param Workflowable $modelo El modelo que será emitido.
      * @param User $elaborador Usuario que ejecuta la emisión.
-     * @param array{requiere_workflow: bool, workflow_id: int, firmantes: array} $resolucionFirmantes Array generado por un FirmantesResolver.
+     * @param array{requiere_workflow: bool, workflow_id: int, firmantes: array} $resolucionFirmantes Array generado por un FirmantesResolverService.
      */
     public function emitir(Workflowable $modelo, User $elaborador, array $resolucionFirmantes): void
     {

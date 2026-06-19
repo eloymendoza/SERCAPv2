@@ -4,27 +4,39 @@ namespace App\Domain\Requisiciones\Policies;
 
 use App\Domain\Autenticacion\Models\User;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
+use App\Domain\Requisiciones\DTOs\ContextoAutorizacionDTO;
+
+use App\Domain\Requisiciones\Services\VinculoContextualService;
 
 class SolicitudRequisicionPolicy
 {
+    public function __construct(
+        protected VinculoContextualService $vinculoService
+    ) {}
+
     /**
-     * Determine whether the user can create models.
+     * Determina si el usuario puede crear una solicitud de requisición.
+     *
+     * EAP opera sin restricción contextual. Los demás roles deben tener vínculo
+     * directo con la dirección o proyecto especificados en la solicitud.
      */
-    public function create(User $user): bool
+    public function create(User $user, ?int $direccionId = null, ?int $proyectoId = null): bool
     {
-        return $user->can('EAP') 
-            || $user->isDirector() 
-            || $user->isGerenteProyecto() 
-            || $user->isJefeProyecto();
+        if ($user->can('EAP')) {
+            return true;
+        }
+
+        $contexto = new ContextoAutorizacionDTO($user, $direccionId, $proyectoId);
+        return $this->vinculoService->tieneVinculoContextual($contexto);
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Determina si el usuario puede modificar una solicitud de requisición.
+     *
+     * Solo el elaborador original puede editar; el solicitante no tiene este derecho.
      */
     public function update(User $user, SolicitudRequisicion $solicitud): bool
     {
-        return $this->create($user)
-            && ($user->id_personal === $solicitud->elaborador_id
-                || $user->id_personal === $solicitud->solicitante_id);
+        return $user->id_personal === $solicitud->elaborador_id;
     }
 }

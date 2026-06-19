@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\DTOs;
 
-use App\DTOs\UserDTO;
+use App\Domain\Autenticacion\DTOs\UserDTO;
 
 /**
  * Pruebas de unidad para UserDTO.
