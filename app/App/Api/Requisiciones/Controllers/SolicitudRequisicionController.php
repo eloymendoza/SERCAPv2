@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\App\Api\Controller;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\App\Api\Requisiciones\Requests\AprobarSolicitudRequest;
+use App\App\Api\Requisiciones\Requests\ReiniciarSolicitudRequest;
 use App\Domain\Requisiciones\Services\SolicitudRequisicionService;
 use App\App\Api\Requisiciones\Requests\SolicitudRequisicionRequest;
 use App\App\Api\Requisiciones\Resources\SolicitudRequisicionResource;
@@ -97,6 +98,20 @@ class SolicitudRequisicionController extends Controller
     public function rechazar(AprobarSolicitudRequest $request, SolicitudRequisicion $solicitud): JsonResponse
     {
         $dto = $this->service->rechazar(
+            $request->user(),
+            $solicitud,
+            $request->input('observaciones')
+        );
+
+        return response()->json(['data' => new SolicitudRequisicionResource($dto)]);
+    }
+
+    /**
+     * Procesa la reemision de una solicitud de requisición previamente rechazada.
+     */
+    public function reiniciar(ReiniciarSolicitudRequest $request, SolicitudRequisicion $solicitud): JsonResponse
+    {
+        $dto = $this->service->reiniciar(
             $request->user(),
             $solicitud,
             $request->input('observaciones')

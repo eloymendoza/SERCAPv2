@@ -226,6 +226,35 @@ class SolicitudRequisicionService
     }
 
     /**
+     * Procesa la reemision de una solicitud de requisición previamente rechazada.
+     *
+     * Delega la operación al WorkflowService y sincroniza el estado local
+     * con el estado global de la instancia devuelto por Django.
+     */
+    public function reiniciar(User $firmante, SolicitudRequisicion $solicitud, ?string $observaciones = null): SolicitudRequisicionDTO
+    {
+        $this->logger()->info("Iniciando reemision de solicitud.", [
+            'id'            => $solicitud->id,
+            'id_instancia'  => $solicitud->id_instancia_workflow,
+            'firmante'      => $firmante->id_personal,
+        ]);
+
+        return $this->handle(function () use ($firmante, $solicitud, $observaciones) {
+            $resolucionFirmantes = $this->firmantesResolver->resolverParaRequisicion($firmante, $solicitud);
+
+            $workflowResponse = $this->orquestadorWorkflow->reiniciar($solicitud, $firmante, $resolucionFirmantes, $observaciones);
+
+            $this->logger()->info("Reemision procesada.", [
+                'id'            => $solicitud->id,
+                'estado_django' => $workflowResponse->estado,
+                'estado_local'  => $solicitud->estado->value,
+            ]);
+
+            return $this->mapper->toDTO($solicitud->fresh());
+        }, 'SolicitudRequisicionService@reemitir');
+    }
+
+    /**
      * Calcula los firmantes que tendría la solicitud sin persistir nada.
      *
      * @return array{requiere_workflow: bool, workflow_id: int, firmantes: array}

@@ -91,4 +91,35 @@ class OrquestadorWorkflow
 
         return $workflowResponse;
     }
+
+    /**
+     * Orquesta la reemision de un paso del workflow para el modelo dado.
+     *
+     * @param Workflowable $modelo El modelo que será actualizado.
+     * @param User $firmante Usuario que ejecuta la reemision.
+     * @param array $resolucionFirmantes La resolución de firmantes en caso de que cambien.
+     * @param string|null $observaciones Observaciones opcionales del firmante.
+     * @return \App\Domain\Workflows\DTOs\WorkflowInstanceDTO
+     */
+    public function reiniciar(Workflowable $modelo, User $firmante, array $resolucionFirmantes, ?string $observaciones = null): WorkflowInstanceDTO
+    {
+        $payload = [
+            'id_instancia' => (int) $modelo->getIdentificadorInstancia(),
+            'Id_personal'  => (int) $firmante->id_personal,
+        ];
+
+        if (!empty($resolucionFirmantes['firmantes'])) {
+            $payload['firmantes'] = $resolucionFirmantes['firmantes'];
+        }
+
+        if ($observaciones !== null) {
+            $payload['observaciones'] = $observaciones;
+        }
+
+        $workflowResponse = $this->workflowService->reiniciarInstancia($modelo->getIdentificador(), $payload);
+
+        $modelo->sincronizarEstadoWorkflow($workflowResponse->estado);
+
+        return $workflowResponse;
+    }
 }

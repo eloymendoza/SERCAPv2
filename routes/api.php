@@ -23,6 +23,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('preview-aprobadores', [SolicitudRequisicionController::class, 'previewAprobadores']);
             Route::post('aprobar', [SolicitudRequisicionController::class, 'aprobar']);
             Route::post('rechazar', [SolicitudRequisicionController::class, 'rechazar']);
+            Route::post('reiniciar', [SolicitudRequisicionController::class, 'reiniciar']);
         });
         
     });

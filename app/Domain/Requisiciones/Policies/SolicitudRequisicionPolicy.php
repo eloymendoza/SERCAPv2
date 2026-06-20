@@ -60,4 +60,13 @@ class SolicitudRequisicionPolicy
 
         return isset($firmanteActual['Id_personal']) && (int) $firmanteActual['Id_personal'] === (int) $user->id_personal;
     }
+
+    /**
+     * Determina si el usuario puede reiniciar una solicitud de requisición rechazada.
+     */
+    public function reiniciar(User $user, SolicitudRequisicion $solicitud): bool
+    {
+        return $solicitud->estado === SolicitudRequisicionEstado::RECHAZADO
+            && (int) $user->id_personal === (int) $solicitud->elaborador_id;
+    }
 }

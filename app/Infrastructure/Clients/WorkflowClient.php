@@ -3,6 +3,7 @@
 namespace App\Infrastructure\Clients;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\PendingRequest;
 use App\Domain\Workflows\Exceptions\WorkflowCommunicationException;
 
@@ -38,8 +39,15 @@ class WorkflowClient
     public function post(string $endpoint, array $payload): array
     {
         try {
+            Log::channel('workflow')->info("Peticion a Workflow [{$endpoint}]", ['payload' => $payload]);
+            
             $response = $this->client()->post($endpoint, $payload);
             
+            Log::channel('workflow')->info("Respuesta de Workflow [{$endpoint}]", [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+
             if (!$response->successful()) {
                 $errorBody = $response->body();
                 throw new WorkflowCommunicationException(
@@ -51,7 +59,6 @@ class WorkflowClient
             
             return $response->json() ?? [];
         } catch (\Exception $e) {
-            // Re-throw as Domain Exception to be captured by HandlesProcess
             if ($e instanceof WorkflowCommunicationException) {
                 throw $e;
             }
