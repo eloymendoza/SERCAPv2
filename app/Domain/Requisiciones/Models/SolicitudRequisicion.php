@@ -8,13 +8,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Domain\Workflows\Contracts\Workflowable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
-
+use App\Domain\Requisiciones\Observers\SolicitudRequisicionObserver;
 
 /**
  * Representa la solicitud formal de presupuesto y personal de un proyecto (Workflow de entrada).
  */
+#[ObservedBy(SolicitudRequisicionObserver::class)]
 class SolicitudRequisicion extends Model implements Workflowable
 {
     use SoftDeletes, GeneratesFolio;

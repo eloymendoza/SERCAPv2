@@ -87,4 +87,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return $response;
         });
-    })->create();
+    })
+    ->withEvents(discover: glob(__DIR__.'/../app/Domain/*/Listeners'))
+    ->create();

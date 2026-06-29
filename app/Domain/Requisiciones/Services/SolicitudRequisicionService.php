@@ -10,7 +10,6 @@ use App\Domain\Workflows\Services\OrquestadorWorkflow;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
-use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
 use App\Domain\Requisiciones\Mappers\SolicitudRequisicionMapper;
 
 class SolicitudRequisicionService
@@ -49,7 +48,11 @@ class SolicitudRequisicionService
 
                 if ($dto->accion === 'emitir') {
                     $resultadoFirmantes = $this->firmantesResolver->resolverParaRequisicion($elaborador, $model);
-                    $this->orquestadorWorkflow->emitir($model, $elaborador, $resultadoFirmantes);
+                    try {
+                        $this->orquestadorWorkflow->emitir($model, $elaborador, $resultadoFirmantes);
+                    } catch (\Throwable $e) {
+                        $this->logger()->error("Fallo al emitir workflow al crear, se guardó como borrador.", ['error' => $e->getMessage()]);
+                    }
                 }
 
                 return $model;
@@ -82,7 +85,11 @@ class SolicitudRequisicionService
 
                 if ($dto->accion === 'emitir') {
                     $resultadoFirmantes = $this->firmantesResolver->resolverParaRequisicion($elaborador, $model);
-                    $this->orquestadorWorkflow->emitir($model, $elaborador, $resultadoFirmantes);
+                    try {
+                        $this->orquestadorWorkflow->emitir($model, $elaborador, $resultadoFirmantes);
+                    } catch (\Throwable $e) {
+                        $this->logger()->error("Fallo al emitir workflow al actualizar, se guardó como borrador.", ['error' => $e->getMessage()]);
+                    }
                 }
 
                 return $model;
@@ -158,7 +165,11 @@ class SolicitudRequisicionService
             $resultadoFirmantes = $this->firmantesResolver->resolverParaRequisicion($elaborador, $solicitud);
 
             return DB::transaction(function () use ($solicitud, $elaborador, $resultadoFirmantes) {
-                $this->orquestadorWorkflow->emitir($solicitud, $elaborador, $resultadoFirmantes);
+                try {
+                    $this->orquestadorWorkflow->emitir($solicitud, $elaborador, $resultadoFirmantes);
+                } catch (\Throwable $e) {
+                    $this->logger()->error("Fallo al emitir workflow, la solicitud permanece como borrador.", ['error' => $e->getMessage()]);
+                }
                 
                 $this->logger()->info("Proceso de emisión completado.", [
                     'id' => $solicitud->id,

@@ -2,12 +2,13 @@
 
 namespace App\App\Console\Commands;
 
-use App\Domain\Requisiciones\Models\DetalleRequisicion;
-use App\Domain\Requisiciones\Models\Requisicion;
-use App\Domain\Requisiciones\Models\SolicitudRequisicion;
+use Throwable;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Throwable;
+use App\Domain\Requisiciones\Models\Vacante;
+use App\Domain\Requisiciones\Models\Requisicion;
+use App\Domain\Requisiciones\Models\DetalleRequisicion;
+use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 
 class TruncateRequisicionesCommand extends Command
 {
@@ -29,6 +30,7 @@ class TruncateRequisicionesCommand extends Command
             DB::beginTransaction();
 
             $models = [
+                new Vacante(),
                 new DetalleRequisicion(),
                 new Requisicion(),
                 new SolicitudRequisicion()
