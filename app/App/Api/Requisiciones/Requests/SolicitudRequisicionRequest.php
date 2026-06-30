@@ -91,9 +91,23 @@ class SolicitudRequisicionRequest extends FormRequest
             'requisicion.tipo' => ['nullable', 'integer'],
             'requisicion.detalle' => ['nullable', 'array'],
             'requisicion.detalle.*.puesto_id' => [
-                'required_with:requisicion.detalle', 
+                'nullable', 
                 'integer', 
                 Rule::exists(Puesto::class, 'id')->where('direccion_id', $this->input('direccion_id'))
+            ],
+            'requisicion.detalle.*.propuesta_nombre' => [
+                'required_without:requisicion.detalle.*.puesto_id',
+                'string',
+                'max:255'
+            ],
+            'requisicion.detalle.*.propuesta_reporta_a' => [
+                'nullable',
+                'integer',
+                Rule::exists(Puesto::class, 'id')->where('direccion_id', $this->input('direccion_id'))
+            ],
+            'requisicion.detalle.*.propuesta_tipo' => [
+                'required_without:requisicion.detalle.*.puesto_id',
+                'integer'
             ],
             'requisicion.detalle.*.cantidad_solicitada' => ['required_with:requisicion.detalle', 'integer', 'min:1'],
             'requisicion.detalle.*.disciplina_id' => ['required_with:requisicion.detalle', 'integer'],

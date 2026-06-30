@@ -13,7 +13,7 @@ class DetalleRequisicionDTO
     public function __construct(
         public readonly ?int $id,
         public readonly ?int $requisicionId,
-        public readonly int $puestoId,
+        public readonly ?int $puestoId,
         public readonly int $cantidadSolicitada,
         public readonly int $disciplinaId,
         public readonly string $tipoContrato,
@@ -23,7 +23,10 @@ class DetalleRequisicionDTO
         public readonly string $fechaInicio,
         public readonly ?string $fechaTermino,
         public readonly string $fechaLimiteRequerimiento,
-        public readonly ?array $empleadosPropuestos
+        public readonly ?array $empleadosPropuestos,
+        public readonly ?string $propuestaNombre = null,
+        public readonly ?int $propuestaReportaA = null,
+        public readonly ?int $propuestaTipo = null
     ) {}
 
     /**
@@ -47,6 +50,9 @@ class DetalleRequisicionDTO
             'fecha_termino' => $this->fechaTermino,
             'fecha_limite_requerimiento' => $this->fechaLimiteRequerimiento,
             'empleados_propuestos' => $this->empleadosPropuestos,
+            'propuesta_nombre' => $this->propuestaNombre,
+            'propuesta_reporta_a' => $this->propuestaReportaA,
+            'propuesta_tipo' => $this->propuestaTipo,
         ];
     }
 
@@ -61,7 +67,7 @@ class DetalleRequisicionDTO
         return new self(
             id: isset($data['id']) ? (int) $data['id'] : null,
             requisicionId: isset($data['requisicion_id']) ? (int) $data['requisicion_id'] : null,
-            puestoId: (int) $data['puesto_id'],
+            puestoId: isset($data['puesto_id']) ? (int) $data['puesto_id'] : null,
             cantidadSolicitada: (int) $data['cantidad_solicitada'],
             disciplinaId: (int) $data['disciplina_id'],
             tipoContrato: (string) $data['tipo_contrato'],
@@ -71,7 +77,10 @@ class DetalleRequisicionDTO
             fechaInicio: (string) $data['fecha_inicio'],
             fechaTermino: $data['fecha_termino'] ?? null,
             fechaLimiteRequerimiento: (string) $data['fecha_limite_requerimiento'],
-            empleadosPropuestos: $data['empleados_propuestos'] ?? null
+            empleadosPropuestos: $data['empleados_propuestos'] ?? null,
+            propuestaNombre: $data['propuesta_nombre'] ?? null,
+            propuestaReportaA: isset($data['propuesta_reporta_a']) ? (int) $data['propuesta_reporta_a'] : null,
+            propuestaTipo: isset($data['propuesta_tipo']) ? (int) $data['propuesta_tipo'] : null
         );
     }
 }

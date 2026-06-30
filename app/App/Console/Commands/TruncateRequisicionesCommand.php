@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Domain\Requisiciones\Models\Vacante;
 use App\Domain\Requisiciones\Models\Requisicion;
 use App\Domain\Requisiciones\Models\DetalleRequisicion;
+use App\Domain\Requisiciones\Models\PropuestaPuesto;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 
 class TruncateRequisicionesCommand extends Command
@@ -30,6 +31,7 @@ class TruncateRequisicionesCommand extends Command
             DB::beginTransaction();
 
             $models = [
+                new PropuestaPuesto(),
                 new Vacante(),
                 new DetalleRequisicion(),
                 new Requisicion(),

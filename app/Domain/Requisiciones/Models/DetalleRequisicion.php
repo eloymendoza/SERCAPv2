@@ -2,11 +2,12 @@
 
 namespace App\Domain\Requisiciones\Models;
 
-use App\Domain\Requisiciones\Enums\TipoContrato;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Domain\Requisiciones\Enums\TipoContrato;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Representa el desglose o partida específica de un puesto solicitado en una requisición.
@@ -93,5 +94,13 @@ class DetalleRequisicion extends Model
     public function postulaciones(): HasMany
     {
         return $this->hasMany(Postulacion::class, 'detalle_requisicion_id');
+    }
+
+    /**
+     * Retorna la propuesta de puesto asociada a este detalle (si aplica).
+     */
+    public function propuestaPuesto(): HasOne
+    {
+        return $this->hasOne(PropuestaPuesto::class, 'detalle_requisicion_id');
     }
 }

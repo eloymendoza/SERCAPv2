@@ -33,7 +33,10 @@ class DetalleRequisicionMapper
             fechaLimiteRequerimiento: $model->fecha_limite_requerimiento?->format('Y-m-d'),
             empleadosPropuestos: is_string($model->empleados_propuestos) 
                 ? explode(',', $model->empleados_propuestos) 
-                : $model->empleados_propuestos
+                : $model->empleados_propuestos,
+            propuestaNombre: $model->relationLoaded('propuestaPuesto') && $model->propuestaPuesto ? $model->propuestaPuesto->nombre_puesto : null,
+            propuestaReportaA: $model->relationLoaded('propuestaPuesto') && $model->propuestaPuesto ? $model->propuestaPuesto->reporta_a_puesto_id : null,
+            propuestaTipo: $model->relationLoaded('propuestaPuesto') && $model->propuestaPuesto ? $model->propuestaPuesto->tipo : null
         );
     }
 

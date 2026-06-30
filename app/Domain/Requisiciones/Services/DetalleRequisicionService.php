@@ -35,6 +35,16 @@ class DetalleRequisicionService
         return $this->handle(function () use ($dto, $requisicionId) {
             $data = $this->mapper->toPersistenceArray($dto, $requisicionId);
             $model = DetalleRequisicion::create($data);
+
+            if ($dto->puestoId === null && $dto->propuestaNombre !== null) {
+                \App\Domain\Requisiciones\Models\PropuestaPuesto::create([
+                    'detalle_requisicion_id' => $model->id,
+                    'nombre_puesto' => $dto->propuestaNombre,
+                    'reporta_a_puesto_id' => $dto->propuestaReportaA,
+                    'tipo' => $dto->propuestaTipo,
+                ]);
+            }
+
             return $this->mapper->toDTO($model);
         }, 'DetalleRequisicionService@create');
     }
@@ -51,6 +61,20 @@ class DetalleRequisicionService
                 $data = $this->mapper->toUpdatePersistenceArray($dto);
                 
                 $model->update($data);
+
+                if ($dto->puestoId === null && $dto->propuestaNombre !== null) {
+                    \App\Domain\Requisiciones\Models\PropuestaPuesto::updateOrCreate(
+                        ['detalle_requisicion_id' => $model->id],
+                        [
+                            'nombre_puesto' => $dto->propuestaNombre,
+                            'reporta_a_puesto_id' => $dto->propuestaReportaA,
+                            'tipo' => $dto->propuestaTipo,
+                        ]
+                    );
+                } elseif ($dto->puestoId !== null) {
+                    \App\Domain\Requisiciones\Models\PropuestaPuesto::where('detalle_requisicion_id', $model->id)->delete();
+                }
+
                 return $this->mapper->toDTO($model);
             });
 
