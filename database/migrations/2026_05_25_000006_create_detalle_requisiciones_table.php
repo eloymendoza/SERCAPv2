@@ -17,6 +17,7 @@ return new class extends Migration
                 ->constrained('requisiciones')
                 ->cascadeOnDelete();
             $table->foreignId('puesto_id')
+                ->nullable()
                 ->constrained('puestos');
             $table->integer('cantidad_solicitada');
             $table->foreignId('disciplina_id')
