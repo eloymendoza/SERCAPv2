@@ -4,6 +4,7 @@ namespace App\Domain\Requisiciones\Services;
 
 use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\DB;
+use App\Domain\Requisiciones\Models\PropuestaPuesto;
 use App\Domain\Requisiciones\Models\DetalleRequisicion;
 use App\Domain\Requisiciones\DTOs\DetalleRequisicionDTO;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -37,7 +38,7 @@ class DetalleRequisicionService
             $model = DetalleRequisicion::create($data);
 
             if ($dto->puestoId === null && $dto->propuestaNombre !== null) {
-                \App\Domain\Requisiciones\Models\PropuestaPuesto::create([
+                PropuestaPuesto::create([
                     'detalle_requisicion_id' => $model->id,
                     'nombre_puesto' => $dto->propuestaNombre,
                     'reporta_a_puesto_id' => $dto->propuestaReportaA,
@@ -63,7 +64,7 @@ class DetalleRequisicionService
                 $model->update($data);
 
                 if ($dto->puestoId === null && $dto->propuestaNombre !== null) {
-                    \App\Domain\Requisiciones\Models\PropuestaPuesto::updateOrCreate(
+                    PropuestaPuesto::updateOrCreate(
                         ['detalle_requisicion_id' => $model->id],
                         [
                             'nombre_puesto' => $dto->propuestaNombre,
@@ -72,7 +73,7 @@ class DetalleRequisicionService
                         ]
                     );
                 } elseif ($dto->puestoId !== null) {
-                    \App\Domain\Requisiciones\Models\PropuestaPuesto::where('detalle_requisicion_id', $model->id)->delete();
+                    PropuestaPuesto::where('detalle_requisicion_id', $model->id)->delete();
                 }
 
                 return $this->mapper->toDTO($model);

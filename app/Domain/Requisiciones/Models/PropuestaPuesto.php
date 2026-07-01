@@ -2,6 +2,7 @@
 
 namespace App\Domain\Requisiciones\Models;
 
+use App\Domain\Puestos\Models\Puesto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

@@ -26,7 +26,7 @@ class DetalleRequisicionDTO
         public readonly ?array $empleadosPropuestos,
         public readonly ?string $propuestaNombre = null,
         public readonly ?int $propuestaReportaA = null,
-        public readonly ?int $propuestaTipo = null
+        public readonly ?string $propuestaTipo = null
     ) {}
 
     /**
@@ -80,7 +80,7 @@ class DetalleRequisicionDTO
             empleadosPropuestos: $data['empleados_propuestos'] ?? null,
             propuestaNombre: $data['propuesta_nombre'] ?? null,
             propuestaReportaA: isset($data['propuesta_reporta_a']) ? (int) $data['propuesta_reporta_a'] : null,
-            propuestaTipo: isset($data['propuesta_tipo']) ? (int) $data['propuesta_tipo'] : null
+            propuestaTipo: isset($data['propuesta_tipo']) ? (string) $data['propuesta_tipo'] : null
         );
     }
 }
