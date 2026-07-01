@@ -6,6 +6,7 @@ use App\App\Api\Proyectos\Controllers\ProyectoController;
 use App\App\Api\GestorCVs\Controllers\AspiranteController;
 use App\App\Api\Requisiciones\Controllers\SolicitudRequisicionController;
 use App\App\Api\EstructuraOrganizacional\Controllers\UnidadOrganizativaController;
+use App\App\Api\Puestos\Controllers\PuestoController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     
@@ -34,6 +35,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             ->parameters(['unidades-organizativas' => 'unidad']);
             
         Route::get('/proyectos', [ProyectoController::class, 'index']);
+        Route::get('/puestos', [PuestoController::class, 'index']);
+        Route::get('/puestos/{puesto}', [PuestoController::class, 'show']);
+        Route::post('/puestos/{puesto}/vincular-sgc', [PuestoController::class, 'vincular']);
         
     });
 });

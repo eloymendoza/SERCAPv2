@@ -188,6 +188,13 @@ return [
             'level'  => env('LOG_LEVEL', 'debug'),
             'days'   => env('LOG_DAILY_DAYS', 30),
         ],
+        'puestos' => [
+            'driver' => 'custom',
+            'via'    => DynamicLogger::class,
+            'name'   => 'puestos',
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => env('LOG_DAILY_DAYS', 30),
+        ],
     ],
 
 ];

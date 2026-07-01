@@ -2,11 +2,12 @@
 
 namespace App\Domain\Puestos\Models;
 
-use App\Domain\Requisiciones\Models\DetalleRequisicion;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Domain\Requisiciones\Models\DetalleRequisicion;
 
 /**
  * Representa la estructura de puestos organizacional jerárquica y recursiva.
@@ -55,6 +56,14 @@ class Puesto extends Model
     public function perfiles(): HasMany
     {
         return $this->hasMany(PerfilPuesto::class, 'puesto_id');
+    }
+
+    /**
+     * Retorna el perfil vinculado al SGC (activo).
+     */
+    public function perfilSgc(): HasOne
+    {
+        return $this->hasOne(PerfilPuesto::class, 'puesto_id')->whereNotNull('id_documento')->latest();
     }
 
     /**
