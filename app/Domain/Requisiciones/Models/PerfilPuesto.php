@@ -5,6 +5,7 @@ namespace App\Domain\Requisiciones\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -29,32 +30,9 @@ class PerfilPuesto extends Model
         'puesto_id',
         'solicitud_id',
         'id_documento',
-        'nivel_organizacional',
-        'identificacion',
-        'revision',
-        'mision_puesto',
-        'funciones_responsabilidades',
-        'relaciones_internas',
-        'relaciones_externas',
-        'autoridades_puesto',
-        'manejo_recursos',
-        'escolaridad_requerida',
-        'otros_conocimientos',
-        'experiencia_laboral',
-        'herramientas_software',
-        'idiomas',
-        'competencias_organizacionales',
-        'competencias_funcionales',
-        'requiere_examen_vista',
-        'requiere_examen_medico',
-        'requiere_examen_psicometrico',
-        'requiere_evaluacion_tecnica',
-        'otros_examenes',
         'fecha_autorizacion',
         'estado',
     ];
-
-
 
     /**
      * Retorna el tipado automático de los campos de la tabla.
@@ -62,13 +40,6 @@ class PerfilPuesto extends Model
     protected function casts(): array
     {
         return [
-            'manejo_recursos' => 'array',
-            'competencias_organizacionales' => 'array',
-            'competencias_funcionales' => 'array',
-            'requiere_examen_vista' => 'boolean',
-            'requiere_examen_medico' => 'boolean',
-            'requiere_examen_psicometrico' => 'boolean',
-            'requiere_evaluacion_tecnica' => 'boolean',
             'fecha_autorizacion' => 'datetime',
         ];
     }
@@ -87,5 +58,13 @@ class PerfilPuesto extends Model
     public function solicitud(): BelongsTo
     {
         return $this->belongsTo(SolicitudPerfilPuesto::class, 'solicitud_id');
+    }
+
+    /**
+     * Retorna los detalles de contenido del perfil.
+     */
+    public function detalle(): HasOne
+    {
+        return $this->hasOne(PerfilPuestoDetalle::class, 'perfil_puesto_id');
     }
 }

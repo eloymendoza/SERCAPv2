@@ -63,4 +63,22 @@ class Puesto extends Model
     {
         return $this->hasMany(DetalleRequisicion::class, 'puesto_id');
     }
+
+    /**
+     * Verifica si el puesto cuenta con un perfil asociado que posea
+     * un id_documento (lo cual indica vinculación con el SGC).
+     */
+    public function tienePerfilVinculadoSGC(): bool
+    {
+        return $this->perfiles()->whereNotNull('id_documento')->exists();
+    }
+
+    /**
+     * Verifica si el puesto tiene un perfil en proceso de creación local
+     * (es decir, existe el registro pero aún no tiene id_documento).
+     */
+    public function tienePerfilLocalEnProceso(): bool
+    {
+        return $this->perfiles()->whereNull('id_documento')->exists();
+    }
 }

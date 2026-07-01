@@ -13,6 +13,11 @@ enum VacanteEstado: string
     case PENDIENTE_PERFIL = 'pendiente_perfil';
 
     /**
+     * Puesto existente que carece de vinculación local con el ID del documento en el SGC.
+     */
+    case PENDIENTE_VINCULACION_SGC = 'pendiente_vinculacion_sgc';
+
+    /**
      * Perfil vigente y asiento vacío disponible para postulaciones.
      */
     case BUSQUEDA_ACTIVA = 'busqueda_activa';
@@ -44,6 +49,7 @@ enum VacanteEstado: string
     {
         return match($this) {
             self::PENDIENTE_PERFIL => 'Pendiente de Perfil',
+            self::PENDIENTE_VINCULACION_SGC => 'Pendiente Vinculación SGC',
             self::BUSQUEDA_ACTIVA => 'Búsqueda Activa',
             self::SELECCIONADA => 'Seleccionada (Anexo B)',
             self::EN_AUDITORIA => 'En Auditoría (Anexo D)',
@@ -59,6 +65,7 @@ enum VacanteEstado: string
     {
         return match($this) {
             self::PENDIENTE_PERFIL => 'light',
+            self::PENDIENTE_VINCULACION_SGC => 'warning',
             self::BUSQUEDA_ACTIVA => 'info',
             self::SELECCIONADA => 'dark',
             self::EN_AUDITORIA => 'warning',

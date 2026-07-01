@@ -29,13 +29,25 @@ class GenerarVacantesRequisicion implements ShouldQueue
 
         DB::transaction(function () use ($requisicion) {
             foreach ($requisicion->detalles as $detalle) {
+                // Determinar el estado inicial de la vacante basado en la situación del puesto
+                $puesto = $detalle->puesto;
+                $estadoInicial = VacanteEstado::PENDIENTE_VINCULACION_SGC->value; // Por defecto si no tiene nada
+
+                if ($puesto) {
+                    if ($puesto->tienePerfilVinculadoSGC()) {
+                        $estadoInicial = VacanteEstado::BUSQUEDA_ACTIVA->value;
+                    } elseif ($puesto->tienePerfilLocalEnProceso()) {
+                        $estadoInicial = VacanteEstado::PENDIENTE_PERFIL->value;
+                    }
+                }
+
                 $vacantesAInsertar = [];
                 $cantidad = (int) $detalle->cantidad_solicitada;
                 
                 for ($i = 0; $i < $cantidad; $i++) {
                     $vacantesAInsertar[] = [
                         'detalle_requisicion_id' => $detalle->id,
-                        'estado' => VacanteEstado::PENDIENTE_PERFIL->value, // Estado inicial por defecto
+                        'estado' => $estadoInicial,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
