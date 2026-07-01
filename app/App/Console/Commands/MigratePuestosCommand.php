@@ -4,7 +4,7 @@ namespace App\App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use App\Domain\Requisiciones\Models\Puesto;
+use App\Domain\Puestos\Models\Puesto;
 
 class MigratePuestosCommand extends Command
 {

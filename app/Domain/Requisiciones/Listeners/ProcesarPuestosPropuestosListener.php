@@ -3,8 +3,8 @@
 namespace App\Domain\Requisiciones\Listeners;
 
 use Illuminate\Support\Facades\DB;
-use App\Domain\Requisiciones\Models\Puesto;
-use App\Domain\Requisiciones\Models\PerfilPuesto;
+use App\Domain\Puestos\Models\Puesto;
+use App\Domain\Puestos\Models\PerfilPuesto;
 use App\Domain\Requisiciones\Models\SolicitudPerfilPuesto;
 use App\Domain\Requisiciones\Events\SolicitudRequisicionAprobada;
 

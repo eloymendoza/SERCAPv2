@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Domain\Requisiciones\Models;
+namespace App\Domain\Puestos\Models;
 
+use App\Domain\Requisiciones\Models\DetalleRequisicion;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

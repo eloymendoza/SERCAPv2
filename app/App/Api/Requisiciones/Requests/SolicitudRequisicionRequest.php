@@ -3,9 +3,9 @@
 namespace App\App\Api\Requisiciones\Requests;
 
 use Illuminate\Validation\Rule;
+use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Catalogos\Models\Proyecto;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Domain\Requisiciones\Models\Puesto;
 use App\Domain\Requisiciones\Enums\TipoContrato;
 use App\Domain\Catalogos\Models\TabuladorSalario;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
