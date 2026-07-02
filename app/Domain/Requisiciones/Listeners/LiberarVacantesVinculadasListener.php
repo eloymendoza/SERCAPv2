@@ -2,13 +2,17 @@
 
 namespace App\Domain\Requisiciones\Listeners;
 
-use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Domain\Requisiciones\Models\Vacante;
+use App\Domain\Requisiciones\Models\Requisicion;
 use App\Domain\Requisiciones\Enums\VacanteEstado;
 use App\Domain\Puestos\Events\PerfilPuestoVinculadoSGC;
+use App\Domain\Requisiciones\Actions\EvaluarEstadoRequisicionAction;
 
-class LiberarVacantesVinculadasListener implements ShouldQueue
+class LiberarVacantesVinculadasListener
 {
+    public function __construct(
+        private readonly EvaluarEstadoRequisicionAction $evaluarEstadoAction
+    ) {}
     /**
      * Intercepta la vinculación de un puesto al SGC para liberar
      * las vacantes que se encontraban bloqueadas.
@@ -17,16 +21,35 @@ class LiberarVacantesVinculadasListener implements ShouldQueue
     {
         $puestoId = $event->perfilPuesto->puesto_id;
 
-        Vacante::whereHas('detalleRequisicion', function ($query) use ($puestoId) {
-            $query->where('puesto_id', $puestoId);
-        })
-        ->whereIn('estado', [
-            VacanteEstado::PENDIENTE_PERFIL->value, 
-            VacanteEstado::PENDIENTE_VINCULACION_SGC->value
-        ])
-        ->update([
-            'estado' => VacanteEstado::BUSQUEDA_ACTIVA->value,
-            'updated_at' => now()
-        ]);
+        // Obtenemos primero las vacantes afectadas para conocer a qué requisiciones pertenecen
+        $vacantesAfectadas = Vacante::with('detalleRequisicion')
+            ->whereHas('detalleRequisicion', function ($query) use ($puestoId) {
+                $query->where('puesto_id', $puestoId);
+            })
+            ->whereIn('estado', [
+                VacanteEstado::PENDIENTE_PERFIL->value, 
+                VacanteEstado::PENDIENTE_VINCULACION_SGC->value
+            ])
+            ->get();
+
+        if ($vacantesAfectadas->isEmpty()) {
+            return;
+        }
+
+        // Actualizamos físicamente el estatus de las vacantes
+        Vacante::whereIn('id', $vacantesAfectadas->pluck('id'))
+            ->update([
+                'estado' => VacanteEstado::BUSQUEDA_ACTIVA->value,
+                'updated_at' => now()
+            ]);
+
+        // Obtenemos los IDs únicos de las requisiciones afectadas
+        $requisicionesIds = $vacantesAfectadas->pluck('detalleRequisicion.requisicion_id')->unique();
+
+        // Reevaluamos el estado global de cada requisición padre
+        $requisiciones = Requisicion::whereIn('id', $requisicionesIds)->get();
+        foreach ($requisiciones as $requisicion) {
+            $this->evaluarEstadoAction->execute($requisicion);
+        }
     }
 }

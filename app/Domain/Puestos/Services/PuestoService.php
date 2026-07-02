@@ -65,7 +65,7 @@ class PuestoService
         $this->logger()->info("Consultando puesto con ID: {$puesto->id}");
 
         return $this->handle(function () use ($puesto) {
-            $puesto->load('perfilSgc');
+            $this->loadRequiredRelations($puesto);
             return $this->mapper->toDTO($puesto);
         }, 'PuestoService@find');
     }
@@ -95,7 +95,7 @@ class PuestoService
             $this->logger()->info("Puesto actualizado.", ['id' => $puesto->id]);
 
             $puesto->refresh();
-            $puesto->load('perfilSgc');
+            $this->loadRequiredRelations($puesto);
             
             return $this->mapper->toDTO($puesto);
         }, 'PuestoService@update');
@@ -115,7 +115,7 @@ class PuestoService
 
             $this->logger()->info("Puesto creado.", ['id' => $puesto->id]);
             
-            $puesto->load('perfilSgc');
+            $this->loadRequiredRelations($puesto);
             return $this->mapper->toDTO($puesto);
         }, 'PuestoService@create');
     }
@@ -129,5 +129,18 @@ class PuestoService
             $this->logger()->info("Puesto eliminado lógicamente.", ['id' => $puesto->id]);
             return $result;
         }, 'PuestoService@delete');
+    }
+
+    /**
+     * Carga las relaciones y métricas requeridas para transformar el modelo a DTO.
+     */
+    private function loadRequiredRelations(Puesto $puesto): void
+    {
+        $puesto->load('perfilSgc');
+        $puesto->loadCount(['detallesRequisicion as urgente' => function($q) {
+            $q->whereHas('vacantes', function($q2) {
+                $q2->where('estado', VacanteEstado::PENDIENTE_VINCULACION_SGC->value);
+            });
+        }]);
     }
 }

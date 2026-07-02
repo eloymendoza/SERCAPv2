@@ -7,9 +7,14 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Domain\Requisiciones\Models\Vacante;
 use App\Domain\Requisiciones\Enums\VacanteEstado;
 use App\Domain\Requisiciones\Events\SolicitudRequisicionAprobada;
+use App\Domain\Requisiciones\Actions\EvaluarEstadoRequisicionAction;
 
 class GenerarVacantesRequisicion implements ShouldQueue
 {
+    public function __construct(
+        private readonly EvaluarEstadoRequisicionAction $evaluarEstadoAction
+    ) {}
+
     /**
      * Intercepta el evento de aprobación de la solicitud de requisición
      * para generar físicamente las vacantes solicitadas en base a las partidas.
@@ -58,5 +63,8 @@ class GenerarVacantesRequisicion implements ShouldQueue
                 }
             }
         });
+
+        // Una vez que las vacantes están físicamente creadas, evaluar el estado global de la requisición.
+        $this->evaluarEstadoAction->execute($requisicion);
     }
 }

@@ -8,6 +8,11 @@ namespace App\Domain\Requisiciones\Enums;
 enum RequisicionEstado: string
 {
     /**
+     * Estado inicial de la requisición
+     */
+    case BORRADOR = 'borrador';
+
+    /**
      * El 100% de las vacantes de la requisición están bloqueadas sin perfil.
      */
     case PENDIENTE_PERFIL = 'pendiente_perfil';
