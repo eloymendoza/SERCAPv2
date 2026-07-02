@@ -35,9 +35,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             ->parameters(['unidades-organizativas' => 'unidad']);
             
         Route::get('/proyectos', [ProyectoController::class, 'index']);
-        Route::get('/puestos', [PuestoController::class, 'index']);
-        Route::get('/puestos/{puesto}', [PuestoController::class, 'show']);
-        Route::post('/puestos/{puesto}/vincular-sgc', [PuestoController::class, 'vincular']);
+        Route::apiResource('puestos', PuestoController::class)
+            ->parameters(['puestos' => 'puesto']);
         
     });
 });

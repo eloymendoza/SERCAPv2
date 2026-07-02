@@ -4,8 +4,11 @@ namespace App\Domain\Puestos\Services;
 
 use App\Traits\HandlesProcess;
 use App\Domain\Puestos\Models\Puesto;
+use App\Domain\Puestos\DTOs\PuestoDTO;
+use App\Domain\Puestos\Mappers\PuestoMapper;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Domain\Requisiciones\Enums\VacanteEstado;
+use App\Domain\Puestos\Actions\VincularPerfilSgcAction;
 
 /**
  * Servicio encargado de gestionar la lógica de negocio y consultas complejas
@@ -15,9 +18,11 @@ class PuestoService
 {
     use HandlesProcess;
 
-    public function __construct()
-    {
-        // Constructor listo para inyectar Mappers o Repositorios en un futuro
+    public function __construct(
+        private readonly PuestoMapper $mapper,
+        private readonly VincularPerfilSgcAction $vincularAction
+    ) {
+        // Constructor con dependencias inyectadas
     }
 
     protected function getLogChannel(): string
@@ -34,8 +39,8 @@ class PuestoService
         $this->logger()->info("Consultando puestos para vinculación SGC (paginado).");
 
         return $this->handle(function () use ($perPage) {
-            return Puesto::query()
-                ->select(['id', 'nombre_puesto', 'tipo'])
+            $paginator = Puesto::query()
+                ->select(['id', 'nombre_puesto', 'tipo', 'direccion_id', 'reporta_a_puesto_id'])
                 ->with('perfilSgc')
                 ->withCount(['detallesRequisicion as urgente' => function($q) {
                     $q->whereHas('vacantes', function($q2) {
@@ -45,16 +50,84 @@ class PuestoService
                 ->orderByDesc('urgente')
                 ->orderBy('nombre_puesto')
                 ->paginate($perPage);
+            
+            // Transformar la colección a DTOs
+            $paginator->getCollection()->transform(function ($puesto) {
+                return $this->mapper->toDTO($puesto);
+            });
+
+            return $paginator;
         }, 'PuestoService@paginate');
     }
 
-    public function find(Puesto $puesto)
+    public function find(Puesto $puesto): PuestoDTO
     {
         $this->logger()->info("Consultando puesto con ID: {$puesto->id}");
 
         return $this->handle(function () use ($puesto) {
             $puesto->load('perfilSgc');
-            return $puesto;
+            return $this->mapper->toDTO($puesto);
         }, 'PuestoService@find');
+    }
+
+    public function update(Puesto $puesto, PuestoDTO $dto): PuestoDTO
+    {
+        $this->logger()->info("Iniciando actualización de puesto.", [
+            'id' => $puesto->id,
+            'dto' => $dto
+        ]);
+
+        return $this->handle(function () use ($puesto, $dto) {
+            $data = $this->mapper->toPersistenceArray($dto);
+            $puesto->update($data);
+
+            if ($dto->idDocumento) {
+                if (!$puesto->tienePerfilVinculadoSGC()) {
+                    $this->vincularAction->execute($puesto, $dto->idDocumento);
+                } else {
+                    $perfilActivo = $puesto->perfilSgc;
+                    if ($perfilActivo && $perfilActivo->id_documento != $dto->idDocumento) {
+                        $perfilActivo->update(['id_documento' => $dto->idDocumento]);
+                    }
+                }
+            }
+
+            $this->logger()->info("Puesto actualizado.", ['id' => $puesto->id]);
+
+            $puesto->refresh();
+            $puesto->load('perfilSgc');
+            
+            return $this->mapper->toDTO($puesto);
+        }, 'PuestoService@update');
+    }
+
+    public function create(PuestoDTO $dto): PuestoDTO
+    {
+        $this->logger()->info("Iniciando creación de puesto.", ['dto' => $dto]);
+
+        return $this->handle(function () use ($dto) {
+            $data = $this->mapper->toPersistenceArray($dto);
+            $puesto = Puesto::create($data);
+
+            if ($dto->idDocumento) {
+                $this->vincularAction->execute($puesto, $dto->idDocumento);
+            }
+
+            $this->logger()->info("Puesto creado.", ['id' => $puesto->id]);
+            
+            $puesto->load('perfilSgc');
+            return $this->mapper->toDTO($puesto);
+        }, 'PuestoService@create');
+    }
+
+    public function delete(Puesto $puesto): bool
+    {
+        $this->logger()->info("Iniciando eliminación de puesto.", ['id' => $puesto->id]);
+
+        return $this->handle(function () use ($puesto) {
+            $result = $puesto->delete();
+            $this->logger()->info("Puesto eliminado lógicamente.", ['id' => $puesto->id]);
+            return $result;
+        }, 'PuestoService@delete');
     }
 }

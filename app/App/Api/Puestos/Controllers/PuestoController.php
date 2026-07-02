@@ -3,19 +3,18 @@
 namespace App\App\Api\Puestos\Controllers;
 
 use App\App\Api\Controller;
-
 use App\Logging\LogContext;
 use Illuminate\Http\JsonResponse;
 use App\Domain\Puestos\Models\Puesto;
+use App\Domain\Puestos\DTOs\PuestoDTO;
 use App\Domain\Puestos\Services\PuestoService;
-use App\Domain\Puestos\Actions\VincularPerfilSgcAction;
-use App\App\Api\Puestos\Requests\VincularPerfilSgcRequest;
+use App\App\Api\Puestos\Requests\PuestoRequest;
+use App\App\Api\Puestos\Resources\PuestoResource;
 
 class PuestoController extends Controller
 {
     public function __construct(
         private readonly PuestoService $puestoService,
-        private readonly VincularPerfilSgcAction $vincularAction,
         private readonly LogContext $logContext
     ) {
         $this->logContext->setChannel('puestos');
@@ -29,7 +28,7 @@ class PuestoController extends Controller
         $paginator = $this->puestoService->paginate(15);
 
         return response()->json([
-            'data' => $paginator->items(),
+            'data' => PuestoResource::collection($paginator->getCollection()),
             'meta' => [
                 'current_page' => $paginator->currentPage(),
                 'last_page'    => $paginator->lastPage(),
@@ -39,25 +38,66 @@ class PuestoController extends Controller
         ]);
     }
 
+    /**
+     * Muestra un puesto específico.
+     */
     public function show(Puesto $puesto){
         $dto = $this->puestoService->find($puesto);
         
         return response()->json([
-            'data' => $dto
+            'data' => new PuestoResource($dto)
         ]);
     }
 
     /**
-     * Vincula un documento SGC oficial a un puesto existente.
+     * Actualiza un puesto existente.
      */
-    public function vincular(Puesto $puesto, VincularPerfilSgcRequest $request): JsonResponse
+    public function update(Puesto $puesto, PuestoRequest $request): JsonResponse
     {
         try {
-            $perfil = $this->vincularAction->execute($puesto, (int) $request->id_documento);
+            $dto = PuestoDTO::fromRequest($request->validated());
+            $updatedDto = $this->puestoService->update($puesto, $dto);
 
             return response()->json([
-                'message' => 'Perfil vinculado correctamente al SGC',
-                'data' => $perfil
+                'data' => new PuestoResource($updatedDto)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    /**
+     * Almacena un puesto nuevo.
+     */
+    public function store(PuestoRequest $request): JsonResponse
+    {
+        try {
+            $dto = PuestoDTO::fromRequest($request->validated());
+            $createdDto = $this->puestoService->create($dto);
+
+            return response()->json([
+                'message' => 'Puesto creado correctamente.',
+                'data' => new PuestoResource($createdDto)
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    /**
+     * Elimina un puesto lógicamente.
+     */
+    public function destroy(Puesto $puesto): JsonResponse
+    {
+        try {
+            $this->puestoService->delete($puesto);
+
+            return response()->json([
+                'message' => 'Puesto eliminado correctamente.'
             ]);
         } catch (\Exception $e) {
             return response()->json([
