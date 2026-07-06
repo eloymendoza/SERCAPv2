@@ -38,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
             \App\Domain\Requisiciones\Models\SolicitudRequisicion::class,
             \App\Domain\Requisiciones\Policies\SolicitudRequisicionPolicy::class
         );
+        Gate::policy(
+            \App\Domain\Puestos\Models\Puesto::class,
+            \App\Domain\Puestos\Policies\PuestoPolicy::class
+        );
 
         // Forzar HTTPS solo en entorno de producción
         if (config('app.env') === 'production') {

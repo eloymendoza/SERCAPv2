@@ -10,6 +10,7 @@ use App\Domain\Puestos\DTOs\PuestoDTO;
 use App\Domain\Puestos\Services\PuestoService;
 use App\App\Api\Puestos\Requests\PuestoRequest;
 use App\App\Api\Puestos\Resources\PuestoResource;
+use Illuminate\Support\Facades\Gate;
 
 class PuestoController extends Controller
 {
@@ -25,6 +26,8 @@ class PuestoController extends Controller
      */
     public function index(): JsonResponse
     {
+        Gate::authorize('viewAny');
+
         $paginator = $this->puestoService->paginate(15);
 
         return response()->json([
@@ -42,6 +45,8 @@ class PuestoController extends Controller
      * Muestra un puesto específico.
      */
     public function show(Puesto $puesto){
+        Gate::authorize('view');
+
         $dto = $this->puestoService->find($puesto);
         
         return response()->json([
@@ -93,6 +98,8 @@ class PuestoController extends Controller
      */
     public function destroy(Puesto $puesto): JsonResponse
     {
+        Gate::authorize('delete');
+
         try {
             $this->puestoService->delete($puesto);
 
