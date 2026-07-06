@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Domain\Requisiciones\Models\DetalleRequisicion;
 
+use App\Domain\Requisiciones\Enums\RequisicionEstado;
+
 /**
  * Representa la estructura de puestos organizacional jerárquica y recursiva.
  */
@@ -90,5 +92,21 @@ class Puesto extends Model
     public function tienePerfilLocalEnProceso(): bool
     {
         return $this->perfiles()->whereNull('id_documento')->exists();
+    }
+
+    /**
+     * Verifica si el puesto está ligado a requisiciones que actualmente
+     * se encuentran en estados activos de reclutamiento.
+     */
+    public function tieneRequisicionesActivas(): bool
+    {
+        return $this->detallesRequisicion()
+            ->whereHas('requisicion', function ($query) {
+                $query->whereIn('estado', [
+                    RequisicionEstado::ABIERTA->value,
+                    RequisicionEstado::EN_PROCESO->value,
+                    RequisicionEstado::CIERRE_PARCIAL->value
+                ]);
+            })->exists();
     }
 }

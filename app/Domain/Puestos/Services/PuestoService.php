@@ -9,6 +9,9 @@ use App\Domain\Puestos\Mappers\PuestoMapper;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Domain\Requisiciones\Enums\VacanteEstado;
 use App\Domain\Puestos\Actions\VincularPerfilSgcAction;
+use App\Domain\Puestos\Rules\Update\ValidarCambioPerfilSlaRule;
+use App\Domain\Puestos\Rules\Delete\ValidarRequisicionesActivasRule;
+use App\Domain\Puestos\Rules\Delete\ValidarPuestosSubordinadosRule;
 
 /**
  * Servicio encargado de gestionar la lógica de negocio y consultas complejas
@@ -20,7 +23,10 @@ class PuestoService
 
     public function __construct(
         private readonly PuestoMapper $mapper,
-        private readonly VincularPerfilSgcAction $vincularAction
+        private readonly VincularPerfilSgcAction $vincularAction,
+        private readonly ValidarCambioPerfilSlaRule $validarCambioPerfilSlaRule,
+        private readonly ValidarRequisicionesActivasRule $validarRequisicionesActivasRule,
+        private readonly ValidarPuestosSubordinadosRule $validarPuestosSubordinadosRule
     ) {
         // Constructor con dependencias inyectadas
     }
@@ -78,6 +84,12 @@ class PuestoService
         ]);
 
         return $this->handle(function () use ($puesto, $dto) {
+            $rules = [ $this->validarCambioPerfilSlaRule ];
+            
+            foreach ($rules as $rule) {
+                $rule->validate($puesto, $dto);
+            }
+
             $data = $this->mapper->toPersistenceArray($dto);
             $puesto->update($data);
 
@@ -125,6 +137,12 @@ class PuestoService
         $this->logger()->info("Iniciando eliminación de puesto.", ['id' => $puesto->id]);
 
         return $this->handle(function () use ($puesto) {
+            $rules = [$this->validarRequisicionesActivasRule, $this->validarPuestosSubordinadosRule];
+            
+            foreach ($rules as $rule) {
+                $rule->validate($puesto);
+            }
+
             $result = $puesto->delete();
             $this->logger()->info("Puesto eliminado lógicamente.", ['id' => $puesto->id]);
             return $result;
