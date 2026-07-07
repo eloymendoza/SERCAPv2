@@ -26,9 +26,10 @@ class PuestoController extends Controller
      */
     public function index(): JsonResponse
     {
-        Gate::authorize('viewAny');
+        Gate::authorize('viewAny', Puesto::class);
 
-        $paginator = $this->puestoService->paginate(15);
+        $perPage = request()->input('per_page', 15);
+        $paginator = $this->puestoService->paginate((int)$perPage);
 
         return response()->json([
             'data' => PuestoResource::collection($paginator->getCollection()),
@@ -45,7 +46,7 @@ class PuestoController extends Controller
      * Muestra un puesto específico.
      */
     public function show(Puesto $puesto){
-        Gate::authorize('view');
+        Gate::authorize('view', $puesto);
 
         $dto = $this->puestoService->find($puesto);
         
@@ -98,7 +99,7 @@ class PuestoController extends Controller
      */
     public function destroy(Puesto $puesto): JsonResponse
     {
-        Gate::authorize('delete');
+        Gate::authorize('delete', $puesto);
 
         try {
             $this->puestoService->delete($puesto);

@@ -3,6 +3,7 @@
 namespace App\Domain\Puestos\Policies;
 
 use App\Domain\Autenticacion\Models\User;
+use App\Domain\Puestos\Models\Puesto;
 
 class PuestoPolicy
 {
@@ -17,7 +18,7 @@ class PuestoPolicy
     /**
      * Determina si el usuario puede ver un puesto específico.
      */
-    public function view(User $user): bool
+    public function view(User $user, Puesto $puesto): bool
     {
         return true;
     }
@@ -33,7 +34,7 @@ class PuestoPolicy
     /**
      * Determina si el usuario puede actualizar un puesto.
      */
-    public function update(User $user): bool
+    public function update(User $user, Puesto $puesto): bool
     {
         return $user->can('ERS');
     }
@@ -41,7 +42,7 @@ class PuestoPolicy
     /**
      * Determina si el usuario puede eliminar un puesto.
      */
-    public function delete(User $user): bool
+    public function delete(User $user, Puesto $puesto): bool
     {
         return $user->can('ERS');
     }
