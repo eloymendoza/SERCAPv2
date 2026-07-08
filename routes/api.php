@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\App\Api\Puestos\Controllers\PuestoController;
+use App\App\Api\Puestos\Controllers\SgcPerfilController;
 use App\App\Api\Autenticacion\Controllers\AuthController;
 use App\App\Api\Proyectos\Controllers\ProyectoController;
 use App\App\Api\GestorCVs\Controllers\AspiranteController;
 use App\App\Api\Requisiciones\Controllers\SolicitudRequisicionController;
 use App\App\Api\EstructuraOrganizacional\Controllers\UnidadOrganizativaController;
-use App\App\Api\Puestos\Controllers\PuestoController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     
@@ -35,6 +36,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             ->parameters(['unidades-organizativas' => 'unidad']);
             
         Route::get('/proyectos', [ProyectoController::class, 'index']);
+        
+        Route::get('/puestos/perfiles-sgc', [SgcPerfilController::class, 'index']);
         Route::apiResource('puestos', PuestoController::class)
             ->parameters(['puestos' => 'puesto']);
         

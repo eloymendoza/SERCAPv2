@@ -51,4 +51,8 @@ return [
         'requisicion_workflow_id' => env('WORKFLOW_REQUISICION_ID', 14),
     ],
 
+    'sgc' => [
+        'base_url' => env('SGC_BASE_URL', 'https://iaidev.grupo-iai.com.mx:335/api/v1/corporativo'),
+    ],
+
 ];
