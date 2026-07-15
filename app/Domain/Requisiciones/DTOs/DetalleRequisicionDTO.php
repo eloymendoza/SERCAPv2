@@ -26,7 +26,9 @@ class DetalleRequisicionDTO
         public readonly ?array $empleadosPropuestos,
         public readonly ?string $propuestaNombre = null,
         public readonly ?int $propuestaReportaA = null,
-        public readonly ?string $propuestaTipo = null
+        public readonly ?string $propuestaTipo = null,
+        /** @var array<\App\Domain\Requisiciones\DTOs\VacanteDTO>|null */
+        public readonly ?array $vacantes = null
     ) {}
 
     /**
@@ -53,6 +55,7 @@ class DetalleRequisicionDTO
             'propuesta_nombre' => $this->propuestaNombre,
             'propuesta_reporta_a' => $this->propuestaReportaA,
             'propuesta_tipo' => $this->propuestaTipo,
+            'vacantes' => $this->vacantes ? array_map(fn($v) => $v->toArray(), $this->vacantes) : null,
         ];
     }
 
@@ -80,7 +83,10 @@ class DetalleRequisicionDTO
             empleadosPropuestos: $data['empleados_propuestos'] ?? null,
             propuestaNombre: $data['propuesta_nombre'] ?? null,
             propuestaReportaA: isset($data['propuesta_reporta_a']) ? (int) $data['propuesta_reporta_a'] : null,
-            propuestaTipo: isset($data['propuesta_tipo']) ? (string) $data['propuesta_tipo'] : null
+            propuestaTipo: isset($data['propuesta_tipo']) ? (string) $data['propuesta_tipo'] : null,
+            vacantes: isset($data['vacantes']) && is_array($data['vacantes'])
+                ? array_map(fn($v) => VacanteDTO::fromArray($v), $data['vacantes'])
+                : null
         );
     }
 }

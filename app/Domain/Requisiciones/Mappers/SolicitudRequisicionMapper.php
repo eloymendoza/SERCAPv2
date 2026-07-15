@@ -10,6 +10,9 @@ use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
  */
 class SolicitudRequisicionMapper
 {
+    public function __construct(
+        private readonly RequisicionMapper $requisicionMapper
+    ) {}
     /**
      * Convierte un modelo SolicitudRequisicion a su respectivo DTO.
      *
@@ -28,8 +31,12 @@ class SolicitudRequisicionMapper
             direccionId: $model->direccion_id,
             gerenciaId: $model->gerencia_id,
             coordinacionId: $model->coordinacion_id,
+            requisicionPadreId: $model->requisicion_padre_id,
             observaciones: $model->observaciones,
-            estado: $model->estado
+            estado: $model->estado,
+            requisicion: $model->relationLoaded('requisicion') && $model->requisicion
+                ? $this->requisicionMapper->toDTO($model->requisicion)
+                : null
         );
     }
 
@@ -50,6 +57,7 @@ class SolicitudRequisicionMapper
             'direccion_id' => $dto->direccionId,
             'gerencia_id' => $dto->gerenciaId,
             'coordinacion_id' => $dto->coordinacionId,
+            'requisicion_padre_id' => $dto->requisicionPadreId,
             'observaciones' => $dto->observaciones,
             'estado' => $dto->estado,
         ];

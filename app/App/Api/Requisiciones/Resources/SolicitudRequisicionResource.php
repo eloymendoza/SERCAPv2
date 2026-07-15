@@ -26,11 +26,13 @@ class SolicitudRequisicionResource extends JsonResource
             'gerencia_id' => $this->gerenciaId,
             'coordinacion_id' => $this->coordinacionId,
             'observaciones' => $this->observaciones,
+            'requisicion_padre_id' => $this->requisicionPadreId,
             'estado' => $this->estado ? [
                 'value' => $this->estado->value,
                 'label' => $this->estado->label(),
                 'color' => $this->estado->color(),
             ] : null,
+            'requisicion' => $this->requisicion ? $this->requisicion->toArray() : null,
         ];
     }
 }

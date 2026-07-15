@@ -36,7 +36,10 @@ class DetalleRequisicionMapper
                 : $model->empleados_propuestos,
             propuestaNombre: $model->relationLoaded('propuestaPuesto') && $model->propuestaPuesto ? $model->propuestaPuesto->nombre_puesto : null,
             propuestaReportaA: $model->relationLoaded('propuestaPuesto') && $model->propuestaPuesto ? $model->propuestaPuesto->reporta_a_puesto_id : null,
-            propuestaTipo: $model->relationLoaded('propuestaPuesto') && $model->propuestaPuesto ? $model->propuestaPuesto->tipo : null
+            propuestaTipo: $model->relationLoaded('propuestaPuesto') && $model->propuestaPuesto ? $model->propuestaPuesto->tipo : null,
+            vacantes: $model->relationLoaded('vacantes') && $model->vacantes->isNotEmpty()
+                ? $model->vacantes->map(fn($v) => new \App\Domain\Requisiciones\DTOs\VacanteDTO($v->id, $v->detalle_requisicion_id, $v->estado))->all()
+                : null
         );
     }
 

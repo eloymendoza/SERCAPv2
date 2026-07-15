@@ -110,6 +110,8 @@ class SolicitudRequisicionService
         ]);
 
         return $this->handle(function () use ($model) {
+            $model->load('requisicion.detalles.vacantes');
+            
             return $this->mapper->toDTO($model);
         }, 'SolicitudRequisicionService@find');
     }

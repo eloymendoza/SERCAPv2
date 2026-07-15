@@ -34,6 +34,7 @@ class Puesto extends Model
         'direccion_id',
         'reporta_a_puesto_id',
         'tipo',
+        'estado',
     ];
 
     /**

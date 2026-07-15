@@ -7,12 +7,15 @@ use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Catalogos\Models\Proyecto;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Domain\Requisiciones\Enums\TipoContrato;
+use App\Domain\Requisiciones\Models\Requisicion;
 use App\Domain\Catalogos\Models\TabuladorSalario;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
 use App\App\Api\Requisiciones\Rules\ValidarVinculoProyectoRule;
+use App\App\Api\Requisiciones\Rules\EnmiendaConCambiosRealesRule;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 use App\App\Api\Requisiciones\Rules\ValidarRangoSueldoTabuladorRule;
+use App\App\Api\Requisiciones\Rules\UnicaRequisicionActivaPorProyectoRule;
 
 /**
  * Valida los datos recibidos para la creación o edición de una SolicitudRequisicion.
@@ -56,10 +59,16 @@ class SolicitudRequisicionRequest extends FormRequest
         $id = $this->route('solicitud_requisicion') ?? $this->input('id');
 
         return [
+            'requisicion_padre_id' => [
+                'nullable',
+                'integer',
+                Rule::exists(Requisicion::class, 'id'),
+            ],
             'proyecto_id' => [
                 'nullable',
                 'integer',
                 Rule::exists(Proyecto::class, 'idProyecto')->where('activoProyecto', true),
+                new UnicaRequisicionActivaPorProyectoRule($this->input('requisicion_padre_id')),
             ],
             'solicitante_id' => [
                 'nullable',
@@ -89,7 +98,11 @@ class SolicitudRequisicionRequest extends FormRequest
             
             'requisicion' => ['nullable', 'array'],
             'requisicion.tipo' => ['nullable', 'integer'],
-            'requisicion.detalle' => ['nullable', 'array'],
+            'requisicion.detalle' => [
+                'nullable', 
+                'array',
+                new EnmiendaConCambiosRealesRule($this->input('requisicion_padre_id'))
+            ],
             'requisicion.detalle.*.puesto_id' => [
                 'nullable', 
                 'integer', 
@@ -179,6 +192,7 @@ class SolicitudRequisicionRequest extends FormRequest
             'coordinacion_id' => 'coordinación',
             'observaciones' => 'observaciones',
             'estado' => 'estado',
+            'requisicion_padre_id' => 'requisición original (enmienda)',
         ];
     }
 
