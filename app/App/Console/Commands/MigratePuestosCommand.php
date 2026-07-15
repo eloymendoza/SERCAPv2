@@ -39,51 +39,59 @@ class MigratePuestosCommand extends Command
         $bar->start();
 
         $migrados = 0;
-        $omitidos = 0;
 
-        DB::transaction(function () use ($categorias, &$migrados, &$omitidos, $bar) {
-            foreach ($categorias as $categoria) {
-                
-                $direccionId = match ((int) $categoria->Direccion_ct) {
-                    5 => 186,
-                    26 => 187,
-                    99 => 188,
-                    70 => 189,
-                    71 => 190,
-                    default => $categoria->Direccion_ct >= 186 ? $categoria->Direccion_ct : null,
-                };
+        DB::transaction(function () use ($categorias, &$migrados, $bar) {
+            DB::unprepared('SET IDENTITY_INSERT puestos ON');
 
-                if ($direccionId === null) {
-                    $omitidos++;
+            try {
+                foreach ($categorias as $categoria) {
+                    
+                    $direccionId = (int) $categoria->Direccion_ct;
+
+                    $tipoManoObra = match (trim($categoria->ManoObra_ct ?? '')) {
+                        'I' => 'indirecto',
+                        'D' => 'directo',
+                        default => 'directo',
+                    };
+
+                    $estado = in_array($direccionId, [186, 187, 188, 189, 190], true) ? 'activo' : 'inactivo';
+
+                    $exists = DB::table('puestos')->where('id', $categoria->Id_categoria)->exists();
+
+                    if ($exists) {
+                        DB::table('puestos')
+                            ->where('id', $categoria->Id_categoria)
+                            ->update([
+                                'nombre_puesto' => trim($categoria->Nombre_ct),
+                                'direccion_id' => $direccionId,
+                                'tipo' => $tipoManoObra,
+                                'estado' => $estado,
+                                'updated_at' => now(),
+                            ]);
+                    } else {
+                        DB::table('puestos')->insert([
+                            'id' => $categoria->Id_categoria,
+                            'nombre_puesto' => trim($categoria->Nombre_ct),
+                            'direccion_id' => $direccionId,
+                            'tipo' => $tipoManoObra,
+                            'estado' => $estado,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+
+                    $migrados++;
                     $bar->advance();
-                    continue;
                 }
-
-                $tipoManoObra = match (trim($categoria->ManoObra_ct ?? '')) {
-                    'I' => 'indirecto',
-                    'D' => 'directo',
-                    default => 'directo',
-                };
-
-                Puesto::updateOrCreate(
-                    ['id' => $categoria->Id_categoria],
-                    [
-                        'nombre_puesto' => trim($categoria->Nombre_ct),
-                        'direccion_id' => $direccionId,
-                        'tipo' => $tipoManoObra,
-                        'estado' => 'activo'
-                    ]
-                );
-
-                $migrados++;
-                $bar->advance();
+            } finally {
+                DB::unprepared('SET IDENTITY_INSERT puestos OFF');
             }
         });
 
         $bar->finish();
         $this->newLine(2);
 
-        $this->info("Migración completada. Migrados: {$migrados} | Omitidos por regla de dirección: {$omitidos}");
+        $this->info("Migración completada. Total migrados: {$migrados}");
         
         return self::SUCCESS;
     }
