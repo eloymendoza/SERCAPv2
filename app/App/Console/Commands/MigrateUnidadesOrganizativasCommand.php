@@ -15,18 +15,13 @@ class MigrateUnidadesOrganizativasCommand extends Command
     {
         $this->info('Conectando con bdidiai.dbo.vAreas...');
 
-        // Query principal siguiendo las reglas de extracción exactas
+        // Query principal sin filtros para extraer la totalidad histórica
         $areas = DB::table('bdidiai.dbo.vAreas')
-            ->where('borrado', 0)
-            ->where(function ($query) {
-                $query->whereBetween('idArea', [186, 190])
-                      ->orWhere('idArea', '>=', 231);
-            })
             ->orderBy('idArea') // Fundamental para insertar padres antes que hijos y evitar error FK
             ->get();
 
         if ($areas->isEmpty()) {
-            $this->warn('No se encontraron registros activos en la vista de origen.');
+            $this->warn('No se encontraron registros en la vista de origen.');
             return self::FAILURE;
         }
 
@@ -106,6 +101,14 @@ class MigrateUnidadesOrganizativasCommand extends Command
             
             $abreviaturasUsadas[] = $abreviatura;
 
+            $enRangoValido = ($row->idArea >= 186 && $row->idArea <= 190) || $row->idArea >= 231;
+
+            if (!$enRangoValido || (int) $row->borrado === 1) {
+                $estado = 'legado';
+            } else {
+                $estado = 'activo';
+            }
+
             // 5. Armado de payload
             $registrosAInsertar[] = [
                 'id'           => $row->idArea,
@@ -116,8 +119,8 @@ class MigrateUnidadesOrganizativasCommand extends Command
                 'nombre_corto' => $row->nombreCorto,
                 'rfc'          => $row->rfc,
                 'encargado_id' => $encargadoId,
-                'estado'       => 'Activo', // Estado unificado
-                'created_at'   => now()->format('Y-m-d\TH:i:s.v'), // Formato ISO explícito
+                'estado'       => $estado, 
+                'created_at'   => now()->format('Y-m-d\TH:i:s.v'), 
                 'updated_at'   => now()->format('Y-m-d\TH:i:s.v'),
             ];
 
@@ -126,6 +129,12 @@ class MigrateUnidadesOrganizativasCommand extends Command
 
         $bar->finish();
         $this->newLine();
+
+        // Ordenamiento topológico en memoria (padres primero) para evitar errores FK
+        usort($registrosAInsertar, function ($a, $b) {
+            $pesos = ['direccion' => 1, 'gerencia' => 2, 'area' => 3];
+            return $pesos[$a['nivel']] <=> $pesos[$b['nivel']];
+        });
 
         $totValidos = count($registrosAInsertar);
         $this->info("Filtrado completado. Se procesarán {$totValidos} nodos válidos.");
