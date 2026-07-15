@@ -39,12 +39,12 @@ class TruncateRequisicionesCommand extends Command
                 new Postulacion(),
                 new PropuestaPuesto(),
                 new Vacante(),
+                new SolicitudRequisicion(),
                 new DetalleRequisicion(),
                 new Requisicion(),
-                new SolicitudRequisicion(),
                 new PerfilPuestoDetalle(),
-                new PerfilPuesto(),
                 new SolicitudPerfilPuesto(),
+                new PerfilPuesto(),
             ];
 
             foreach ($modelsToTruncate as $model) {
