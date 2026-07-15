@@ -63,4 +63,22 @@ class Vacante extends Model
     {
         return $this->belongsTo(Aspirante::class, 'aspirante_id');
     }
+
+    /**
+     * Cancela la vacante registrando el motivo de auditoría y deteniendo el SLA.
+     *
+     * @param string $motivoDeCancelacion Razón detallada de la cancelación (ej. Enmienda).
+     * @throws \DomainException Si la vacante ya está cubierta o contratada.
+     */
+    public function cancelar(string $motivoDeCancelacion): void
+    {
+        if ($this->estado === VacanteEstado::CONTRATADA) {
+            throw new \DomainException("No se puede cancelar una vacante que ya está contratada.");
+        }
+
+        $this->update([
+            'estado' => VacanteEstado::CANCELADA,
+            'observaciones_rechazo' => $motivoDeCancelacion,
+        ]);
+    }
 }

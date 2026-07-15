@@ -52,6 +52,7 @@ class SolicitudRequisicion extends Model implements Workflowable
         'coordinacion_id',
         'observaciones',
         'estado',
+        'requisicion_padre_id',
     ];
 
 
@@ -72,6 +73,22 @@ class SolicitudRequisicion extends Model implements Workflowable
     public function requisicion(): HasOne
     {
         return $this->hasOne(Requisicion::class, 'solicitud_id');
+    }
+
+    /**
+     * Recupera la requisición padre a la que esta solicitud enmienda.
+     */
+    public function requisicionPadre(): BelongsTo
+    {
+        return $this->belongsTo(Requisicion::class, 'requisicion_padre_id');
+    }
+
+    /**
+     * Determina si esta solicitud es una enmienda a una requisición existente.
+     */
+    public function esEnmienda(): bool
+    {
+        return !is_null($this->requisicion_padre_id);
     }
 
     /**
