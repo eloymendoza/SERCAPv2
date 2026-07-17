@@ -18,7 +18,11 @@ class AuthException extends DomainException
      */
     public static function invalidCredentials(string $message = 'Las credenciales proporcionadas son incorrectas.'): self
     {
-        return new self($message);
+        return new self(
+            message: $message,
+            statusCode: 401,
+            errorCode: 'AUTH_INVALID_CREDENTIALS'
+        );
     }
 
     /**
@@ -27,9 +31,10 @@ class AuthException extends DomainException
      */
     public static function accessDenied(string $message = 'El usuario no tiene permisos para acceder al sistema.'): self
     {
-        $exception = new self($message);
-        $exception->errorCode = 'AUTH_ACCESS_DENIED';
-        $exception->statusCode = 403;
-        return $exception;
+        return new self(
+            message: $message,
+            statusCode: 403,
+            errorCode: 'AUTH_ACCESS_DENIED'
+        );
     }
 }

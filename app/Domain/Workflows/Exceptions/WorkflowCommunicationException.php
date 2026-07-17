@@ -2,10 +2,13 @@
 
 namespace App\Domain\Workflows\Exceptions;
 
-use App\Exceptions\BaseApiException;
+use App\Exceptions\Infrastructure\InfrastructureException;
 
-class WorkflowCommunicationException extends BaseApiException
+/**
+ * Excepción técnica cuando falla la integración o comunicación con el motor de Workflows.
+ */
+class WorkflowCommunicationException extends InfrastructureException
 {
-    // Hereda de BaseApiException para que HandlesProcess lo atrape y registre
-    // adecuadamente sin envolverlo en un Error 500 genérico.
+    protected string $errorCode = 'WORKFLOW_COMMUNICATION_ERROR';
+    protected int $statusCode = 502; // Bad Gateway
 }
