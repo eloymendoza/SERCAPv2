@@ -8,13 +8,16 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 use App\Domain\EstructuraOrganizacional\DTOs\UnidadOrganizativaDTO;
 use App\Domain\EstructuraOrganizacional\Mappers\UnidadOrganizativaMapper;
+use App\Domain\EstructuraOrganizacional\Enums\UnidadOrganizativaEstadoEnum;
+use App\Domain\EstructuraOrganizacional\Rules\Update\ValidarEstadoLegadoRule;
 
 class UnidadOrganizativaService
 {
     use HandlesProcess;
 
     public function __construct(
-        private readonly UnidadOrganizativaMapper $mapper
+        private readonly UnidadOrganizativaMapper $mapper,
+        private readonly ValidarEstadoLegadoRule $validarEstadoLegadoRule
     ) {}
 
     protected function getLogChannel(): string
@@ -49,11 +52,15 @@ class UnidadOrganizativaService
         $this->logger()->info("Actualizando atributos jerárquicos.", ['id' => $model->id]);
 
         return $this->handle(function () use ($model, $dto) {
+            $rules = [$this->validarEstadoLegadoRule];
+            
+            foreach ($rules as $rule) {
+                $rule->validate($model, $dto);
+            }
+
             $updatedDto = DB::transaction(function () use ($model, $dto) {
-                // Evitamos sobrescribir con null si no venía en el request, pero asumimos DTO completo aquí.
                 $data = array_filter($this->mapper->toPersistenceArray($dto), function($v) { return !is_null($v); });
                 
-                // Si explícitamente es un desligamiento de parent_id o encargado:
                 if (property_exists($dto, 'parentId') && $dto->parentId === null) $data['parent_id'] = null;
                 if (property_exists($dto, 'encargadoId') && $dto->encargadoId === null) $data['encargado_id'] = null;
 
@@ -83,7 +90,9 @@ class UnidadOrganizativaService
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return $this->handle(function () use ($perPage) {
-            $paginator = UnidadOrganizativa::with('encargado')->paginate($perPage);
+            $paginator = UnidadOrganizativa::with('encargado')
+                ->where('estado', UnidadOrganizativaEstadoEnum::ACTIVO->value)
+                ->paginate($perPage);
             
             $paginator->getCollection()->transform(function ($model) {
                 return $this->mapper->toDTO($model);
