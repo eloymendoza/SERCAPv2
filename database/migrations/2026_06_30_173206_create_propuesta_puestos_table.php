@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('detalle_requisicion_id')->constrained('detalle_requisiciones')->onDelete('cascade');
             $table->string('nombre_puesto', 255);
             $table->unsignedBigInteger('reporta_a_puesto_id')->nullable();
-            $table->tinyInteger('tipo');
+            $table->string('tipo');
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });

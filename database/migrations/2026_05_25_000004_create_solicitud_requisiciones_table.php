@@ -20,6 +20,8 @@ return new class extends Migration
                 ->comment('Referencia lógica a id_proyecto de BD Costosv2');
             $table->unsignedBigInteger('id_instancia_workflow')->nullable()
                 ->comment('Referencia lógica a id_instancia_workflow de BD Workflows');
+            $table->unsignedBigInteger('requisicion_padre_id')->nullable()
+                ->comment('Referencia a la requisición original en caso de enmienda');
             $table->unsignedBigInteger('direccion_id');
             $table->unsignedBigInteger('gerencia_id')->nullable();
             $table->unsignedBigInteger('coordinacion_id')->nullable();
