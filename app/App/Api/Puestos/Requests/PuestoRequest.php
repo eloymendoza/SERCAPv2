@@ -22,7 +22,19 @@ class PuestoRequest extends FormRequest
             return $this->user()?->can('update', $puesto) ?? false;
         }
 
-        return $this->user()?->can('create') ?? false;
+        return $this->user()?->can('create', Puesto::class) ?? false;
+    }
+
+    /**
+     * Prepara los datos antes de la validación.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('nombre_puesto')) {
+            $this->merge([
+                'nombre_puesto' => mb_strtoupper((string) $this->input('nombre_puesto'), 'UTF-8'),
+            ]);
+        }
     }
 
     /**
@@ -33,7 +45,14 @@ class PuestoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_puesto' => ['required', 'string', 'max:255'],
+            'nombre_puesto' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('puestos', 'nombre_puesto')
+                    ->where('direccion_id', $this->input('direccion_id'))
+                    ->ignore($this->route('puesto')),
+            ],
             'direccion_id' => [
                 'required',
                 'integer',
@@ -62,6 +81,7 @@ class PuestoRequest extends FormRequest
     {
         return [
             'nombre_puesto.required' => 'El campo :attribute es obligatorio.',
+            'nombre_puesto.unique' => 'Ya existe un puesto con este nombre en la dirección seleccionada.',
             
             'direccion_id.required' => 'El campo :attribute es obligatorio.',
             'direccion_id.integer' => 'El campo :attribute debe ser un número entero.',

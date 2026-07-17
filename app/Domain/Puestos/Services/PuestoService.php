@@ -57,7 +57,7 @@ class PuestoService
                     });
                 }])
                 ->orderByDesc('urgente')
-                ->where('estado', PuestoEstadoEnum::ACTIVO->value)
+                ->where('estado', '!=', PuestoEstadoEnum::LEGADO->value)
                 ->orderBy('nombre_puesto')
                 ->paginate($perPage);
             
@@ -102,7 +102,7 @@ class PuestoService
             if ($dto->idDocumento || $puesto->tienePerfilVinculadoSGC()) {
                 $data['estado'] = PuestoEstadoEnum::ACTIVO->value;
             } else {
-                $data['estado'] = PuestoEstadoEnum::INACTIVO->value;
+                $data['estado'] = $puesto->estado === PuestoEstadoEnum::INACTIVO->value ? PuestoEstadoEnum::INACTIVO->value : PuestoEstadoEnum::BORRADOR->value;
             }
 
             $puesto->update($data);
@@ -134,7 +134,7 @@ class PuestoService
         return $this->handle(function () use ($dto) {
             $data = $this->mapper->toPersistenceArray($dto);
             
-            $data['estado'] = $dto->idDocumento ? PuestoEstadoEnum::ACTIVO->value : PuestoEstadoEnum::INACTIVO->value;
+            $data['estado'] = $dto->idDocumento ? PuestoEstadoEnum::ACTIVO->value : PuestoEstadoEnum::BORRADOR->value;
             
             $puesto = Puesto::create($data);
 

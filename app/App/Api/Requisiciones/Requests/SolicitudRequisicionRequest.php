@@ -50,6 +50,22 @@ class SolicitudRequisicionRequest extends FormRequest
     }
 
     /**
+     * Prepara los datos antes de la validación.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('requisicion.detalle') && is_array($this->input('requisicion.detalle'))) {
+            $requisicion = $this->input('requisicion');
+            foreach ($requisicion['detalle'] as $key => $detalle) {
+                if (isset($detalle['propuesta_nombre']) && is_string($detalle['propuesta_nombre'])) {
+                    $requisicion['detalle'][$key]['propuesta_nombre'] = mb_strtoupper($detalle['propuesta_nombre'], 'UTF-8');
+                }
+            }
+            $this->merge(['requisicion' => $requisicion]);
+        }
+    }
+
+    /**
      * Retorna las reglas de validación aplicadas a la petición.
      *
      * @return array<string, array<int, mixed>>
@@ -111,7 +127,10 @@ class SolicitudRequisicionRequest extends FormRequest
             'requisicion.detalle.*.propuesta_nombre' => [
                 'required_without:requisicion.detalle.*.puesto_id',
                 'string',
-                'max:255'
+                'max:255',
+                'distinct',
+                Rule::unique('puestos', 'nombre_puesto')
+                    ->where('direccion_id', $this->input('direccion_id')),
             ],
             'requisicion.detalle.*.propuesta_reporta_a' => [
                 'nullable',
@@ -120,7 +139,7 @@ class SolicitudRequisicionRequest extends FormRequest
             ],
             'requisicion.detalle.*.propuesta_tipo' => [
                 'required_without:requisicion.detalle.*.puesto_id',
-                'integer'
+                'string'
             ],
             'requisicion.detalle.*.cantidad_solicitada' => ['required_with:requisicion.detalle', 'integer', 'min:1'],
             'requisicion.detalle.*.disciplina_id' => ['required_with:requisicion.detalle', 'integer'],
@@ -168,6 +187,8 @@ class SolicitudRequisicionRequest extends FormRequest
             'proyecto_id.exists' => 'El proyecto seleccionado no existe.',
             
             'requisicion.detalle.*.puesto_id.exists' => 'El puesto seleccionado no es válido o no pertenece a la dirección solicitada.',
+            'requisicion.detalle.*.propuesta_nombre.unique' => 'El nombre del puesto propuesto ya existe en la dirección seleccionada.',
+            'requisicion.detalle.*.propuesta_nombre.distinct' => 'El nombre del puesto propuesto no puede repetirse en la misma solicitud.',
 
             'solicitante_id.integer' => 'El campo :attribute debe ser un número entero.',
             'solicitante_id.exists' => 'El :attribute especificado no existe.',

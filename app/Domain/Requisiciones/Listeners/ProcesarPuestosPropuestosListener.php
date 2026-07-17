@@ -2,6 +2,7 @@
 
 namespace App\Domain\Requisiciones\Listeners;
 
+use App\Domain\Puestos\Enums\PuestoEstadoEnum;
 use Illuminate\Support\Facades\DB;
 use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Puestos\Models\PerfilPuesto;
@@ -35,6 +36,7 @@ class ProcesarPuestosPropuestosListener
                         'direccion_id' => $solicitud->direccion_id,
                         'reporta_a_puesto_id' => $propuesta->reporta_a_puesto_id,
                         'tipo' => $propuesta->tipo,
+                        'estado' => PuestoEstadoEnum::BORRADOR->value,
                     ]);
 
                     // 2. Crear la SolicitudPerfilPuesto automáticamente (en borrador)
