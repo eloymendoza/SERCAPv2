@@ -5,7 +5,7 @@ namespace App\Domain\Puestos\Rules\Delete;
 use App\Domain\Puestos\Rules\PuestoRuleInterface;
 use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Puestos\DTOs\PuestoDTO;
-use Exception;
+use App\Exceptions\Domain\BusinessRuleException;
 
 class ValidarRequisicionesActivasRule implements PuestoRuleInterface
 {
@@ -15,7 +15,7 @@ class ValidarRequisicionesActivasRule implements PuestoRuleInterface
     public function validate(Puesto $puesto, ?PuestoDTO $dto = null): void
     {
         if ($puesto->tieneRequisicionesActivas()) {
-            throw new Exception("No es posible eliminar el puesto porque existen procesos de selección activos vinculados a él.");
+            throw BusinessRuleException::withMessage("No es posible eliminar el puesto porque existen procesos de selección activos vinculados a él.", "PUESTO_CON_REQUISICIONES_ACTIVAS");
         }
     }
 }

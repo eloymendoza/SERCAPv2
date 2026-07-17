@@ -60,18 +60,12 @@ class PuestoController extends Controller
      */
     public function update(Puesto $puesto, PuestoRequest $request): JsonResponse
     {
-        try {
-            $dto = PuestoDTO::fromRequest($request->validated());
-            $updatedDto = $this->puestoService->update($puesto, $dto);
+        $dto = PuestoDTO::fromRequest($request->validated());
+        $updatedDto = $this->puestoService->update($puesto, $dto);
 
-            return response()->json([
-                'data' => new PuestoResource($updatedDto)
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 422);
-        }
+        return response()->json([
+            'data' => new PuestoResource($updatedDto)
+        ]);
     }
 
     /**
@@ -79,19 +73,13 @@ class PuestoController extends Controller
      */
     public function store(PuestoRequest $request): JsonResponse
     {
-        try {
-            $dto = PuestoDTO::fromRequest($request->validated());
-            $createdDto = $this->puestoService->create($dto);
+        $dto = PuestoDTO::fromRequest($request->validated());
+        $createdDto = $this->puestoService->create($dto);
 
-            return response()->json([
-                'message' => 'Puesto creado correctamente.',
-                'data' => new PuestoResource($createdDto)
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 422);
-        }
+        return response()->json([
+            'message' => 'Puesto creado correctamente.',
+            'data' => new PuestoResource($createdDto)
+        ], 201);
     }
 
     /**
@@ -101,16 +89,10 @@ class PuestoController extends Controller
     {
         Gate::authorize('delete', $puesto);
 
-        try {
-            $this->puestoService->delete($puesto);
+        $this->puestoService->delete($puesto);
 
-            return response()->json([
-                'message' => 'Puesto eliminado correctamente.'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 422);
-        }
+        return response()->json([
+            'message' => 'Puesto eliminado correctamente.'
+        ]);
     }
 }
