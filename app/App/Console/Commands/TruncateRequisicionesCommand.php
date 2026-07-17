@@ -64,7 +64,7 @@ class TruncateRequisicionesCommand extends Command
             $maxId = DB::table($puestosTable)->max('id') ?? 720;
             DB::statement("DBCC CHECKIDENT ('{$puestosTable}', RESEED, {$maxId})");
             
-            $this->line("Tabla {$puestosTable} limpiada (IDs > 720 eliminados y contador ajustado).");
+            $this->line("Tabla {$puestosTable} limpiada (IDs eliminados y contador ajustado).");
 
             DB::commit();
             $this->info('Limpieza completada.');

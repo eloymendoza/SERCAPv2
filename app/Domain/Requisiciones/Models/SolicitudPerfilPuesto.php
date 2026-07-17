@@ -4,6 +4,7 @@ namespace App\Domain\Requisiciones\Models;
 
 use App\Traits\GeneratesFolio;
 use Illuminate\Database\Eloquent\Model;
+use App\Domain\Puestos\Models\PerfilPuesto;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,6 +31,7 @@ class SolicitudPerfilPuesto extends Model
      */
     protected $fillable = [
         'solicitante_id',
+        'elaborador_id',
         'id_instancia_workflow',
         'direccion_id',
         'estado',

@@ -3,6 +3,7 @@
 namespace App\Domain\Puestos\Services;
 
 use App\Traits\HandlesProcess;
+use Illuminate\Support\Facades\Auth;
 use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Puestos\DTOs\PuestoDTO;
 use App\Domain\Puestos\Mappers\PuestoMapper;
@@ -10,6 +11,7 @@ use App\Domain\Puestos\Enums\PuestoEstadoEnum;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Domain\Requisiciones\Enums\VacanteEstado;
 use App\Domain\Puestos\Actions\VincularPerfilSgcAction;
+use App\Domain\Puestos\Events\PuestoCreadoSinPerfil;
 use App\Domain\Puestos\Rules\Update\ValidarEstadoLegadoRule;
 use App\Domain\Puestos\Rules\Update\ValidarCambioPerfilSlaRule;
 use App\Domain\Puestos\Rules\Delete\ValidarRequisicionesActivasRule;
@@ -140,6 +142,8 @@ class PuestoService
 
             if ($dto->idDocumento) {
                 $this->vincularAction->execute($puesto, $dto->idDocumento);
+            } else {
+                PuestoCreadoSinPerfil::dispatch($puesto, Auth::user()?->id_personal);
             }
 
             $this->logger()->info("Puesto creado.", ['id' => $puesto->id]);
