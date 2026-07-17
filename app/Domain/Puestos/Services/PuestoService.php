@@ -6,9 +6,11 @@ use App\Traits\HandlesProcess;
 use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Puestos\DTOs\PuestoDTO;
 use App\Domain\Puestos\Mappers\PuestoMapper;
+use App\Domain\Puestos\Enums\PuestoEstadoEnum;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Domain\Requisiciones\Enums\VacanteEstado;
 use App\Domain\Puestos\Actions\VincularPerfilSgcAction;
+use App\Domain\Puestos\Rules\Update\ValidarEstadoLegadoRule;
 use App\Domain\Puestos\Rules\Update\ValidarCambioPerfilSlaRule;
 use App\Domain\Puestos\Rules\Delete\ValidarRequisicionesActivasRule;
 use App\Domain\Puestos\Rules\Delete\ValidarPuestosSubordinadosRule;
@@ -25,6 +27,7 @@ class PuestoService
         private readonly PuestoMapper $mapper,
         private readonly VincularPerfilSgcAction $vincularAction,
         private readonly ValidarCambioPerfilSlaRule $validarCambioPerfilSlaRule,
+        private readonly ValidarEstadoLegadoRule $validarEstadoLegadoRule,
         private readonly ValidarRequisicionesActivasRule $validarRequisicionesActivasRule,
         private readonly ValidarPuestosSubordinadosRule $validarPuestosSubordinadosRule
     ) {
@@ -47,13 +50,14 @@ class PuestoService
         return $this->handle(function () use ($perPage) {
             $paginator = Puesto::query()
                 ->select(['id', 'nombre_puesto', 'tipo', 'direccion_id', 'reporta_a_puesto_id'])
-                ->with('perfilSgc')
+                ->with(['perfilSgc', 'direccion'])
                 ->withCount(['detallesRequisicion as urgente' => function($q) {
                     $q->whereHas('vacantes', function($q2) {
                         $q2->where('estado', VacanteEstado::PENDIENTE_VINCULACION_SGC->value);
                     });
                 }])
                 ->orderByDesc('urgente')
+                ->where('estado', PuestoEstadoEnum::ACTIVO->value)
                 ->orderBy('nombre_puesto')
                 ->paginate($perPage);
             
@@ -84,13 +88,23 @@ class PuestoService
         ]);
 
         return $this->handle(function () use ($puesto, $dto) {
-            $rules = [ $this->validarCambioPerfilSlaRule ];
+            $rules = [
+                $this->validarEstadoLegadoRule,
+                $this->validarCambioPerfilSlaRule,
+            ];
             
             foreach ($rules as $rule) {
                 $rule->validate($puesto, $dto);
             }
 
             $data = $this->mapper->toPersistenceArray($dto);
+            
+            if ($dto->idDocumento || $puesto->tienePerfilVinculadoSGC()) {
+                $data['estado'] = PuestoEstadoEnum::ACTIVO->value;
+            } else {
+                $data['estado'] = PuestoEstadoEnum::INACTIVO->value;
+            }
+
             $puesto->update($data);
 
             if ($dto->idDocumento) {
@@ -119,6 +133,9 @@ class PuestoService
 
         return $this->handle(function () use ($dto) {
             $data = $this->mapper->toPersistenceArray($dto);
+            
+            $data['estado'] = $dto->idDocumento ? PuestoEstadoEnum::ACTIVO->value : PuestoEstadoEnum::INACTIVO->value;
+            
             $puesto = Puesto::create($data);
 
             if ($dto->idDocumento) {
@@ -154,7 +171,7 @@ class PuestoService
      */
     private function loadRequiredRelations(Puesto $puesto): void
     {
-        $puesto->load('perfilSgc');
+        $puesto->load(['perfilSgc', 'direccion']);
         $puesto->loadCount(['detallesRequisicion as urgente' => function($q) {
             $q->whereHas('vacantes', function($q2) {
                 $q2->where('estado', VacanteEstado::PENDIENTE_VINCULACION_SGC->value);

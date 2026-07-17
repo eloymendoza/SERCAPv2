@@ -59,7 +59,7 @@ class TruncateRequisicionesCommand extends Command
             $puesto = new Puesto();
             $puestosTable = $puesto->getTable();
             
-            DB::table($puestosTable)->where('id', '>', 720)->delete();
+            DB::table($puestosTable)->where('id', '>', 1653)->delete();
             
             $maxId = DB::table($puestosTable)->max('id') ?? 720;
             DB::statement("DBCC CHECKIDENT ('{$puestosTable}', RESEED, {$maxId})");

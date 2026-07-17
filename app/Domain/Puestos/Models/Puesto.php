@@ -46,6 +46,14 @@ class Puesto extends Model
     }
 
     /**
+     * Retorna la unidad organizativa a la que pertenece el puesto (Dirección).
+     */
+    public function direccion(): BelongsTo
+    {
+        return $this->belongsTo(\App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::class, 'direccion_id');
+    }
+
+    /**
      * Retorna los puestos subordinados directos.
      */
     public function subordinados(): HasMany

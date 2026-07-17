@@ -55,7 +55,9 @@ class PuestoMapper
             id: $model->id,
             reportaAPuestoId: $model->reporta_a_puesto_id,
             perfilSgc: $perfilSgc,
-            urgente: $model->urgente ?? 0
+            urgente: $model->urgente ?? 0,
+            estado: $model->estado,
+            direccion: $model->relationLoaded('direccion') && $model->direccion ? $model->direccion->only(['id', 'nombre', 'abreviatura', 'nivel']) : null
         );
     }
 }

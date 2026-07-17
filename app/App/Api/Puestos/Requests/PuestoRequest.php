@@ -5,7 +5,7 @@ namespace App\App\Api\Puestos\Requests;
 use Illuminate\Validation\Rule;
 use App\Domain\Puestos\Models\Puesto;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Domain\Puestos\Enums\TipoPuesto;
+use App\Domain\Puestos\Enums\TipoPuestoEnum;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 
 /**
@@ -48,7 +48,7 @@ class PuestoRequest extends FormRequest
                 Rule::exists(Puesto::class, 'id')
                     ->where('direccion_id', $this->input('direccion_id')),
             ],
-            'tipo' => ['required', Rule::enum(TipoPuesto::class)],
+            'tipo' => ['required', Rule::enum(TipoPuestoEnum::class)],
             'id_documento' => ['nullable', 'integer', 'min:1'],
         ];
     }

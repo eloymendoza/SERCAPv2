@@ -54,7 +54,7 @@ class MigratePuestosCommand extends Command
                         default => 'directo',
                     };
 
-                    $estado = in_array($direccionId, [186, 187, 188, 189, 190], true) ? 'activo' : 'inactivo';
+                    $estado = in_array($direccionId, [186, 187, 188, 189, 190], true) ? 'activo' : 'legado';
 
                     $exists = DB::table('puestos')->where('id', $categoria->Id_categoria)->exists();
 

@@ -24,6 +24,8 @@ class PuestoResource extends JsonResource
             'tipo' => $this->resource->tipo,
             'urgente' => $this->resource->urgente,
             'perfil_sgc' => $this->resource->perfilSgc,
+            'estado' => $this->resource->estado,
+            'direccion' => $this->resource->direccion,
         ];
     }
 }

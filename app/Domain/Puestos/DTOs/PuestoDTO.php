@@ -12,7 +12,9 @@ class PuestoDTO
         public readonly ?int $reportaAPuestoId = null,
         public readonly ?int $idDocumento = null,
         public readonly ?array $perfilSgc = null,
-        public readonly ?int $urgente = null
+        public readonly ?int $urgente = null,
+        public readonly ?string $estado = null,
+        public readonly ?array $direccion = null
     ) {}
 
     /**
