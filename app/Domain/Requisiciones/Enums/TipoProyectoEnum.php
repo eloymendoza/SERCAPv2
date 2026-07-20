@@ -2,7 +2,7 @@
 
 namespace App\Domain\Requisiciones\Enums;
 
-enum TipoProyecto: string
+enum TipoProyectoEnum: string
 {
     case CORPORATIVO = "0";
     case CLV = "1";

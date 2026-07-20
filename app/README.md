@@ -98,7 +98,7 @@ Clases con un solo método público (`execute()`) o mágico (`__invoke()`).
 
 ### Enums (`Enums/`)
 Enumeraciones nativas (Backed Enums de PHP 8.1+).
-- **🟢 Cuándo usar:** Para estados, categorías, roles, tipos fijos en la base de datos (ej. `VacanteEstado::ACTIVA`).
+- **🟢 Cuándo usar:** Para estados, categorías, roles, tipos fijos en la base de datos (ej. `VacanteEstadoEnum::ACTIVA`).
 - **🔴 Cuándo NO usar:** Si los valores pueden ser editados o creados por un administrador en un panel (en ese caso es una tabla de catálogo en BD).
 
 ### Exceptions (`Exceptions/`)

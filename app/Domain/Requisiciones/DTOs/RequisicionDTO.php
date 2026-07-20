@@ -2,7 +2,7 @@
 
 namespace App\Domain\Requisiciones\DTOs;
 
-use App\Domain\Requisiciones\Enums\RequisicionEstado;
+use App\Domain\Requisiciones\Enums\RequisicionEstadoEnum;
 
 /**
  * Contenedor de datos inmutable para transferir información de la Requisicion.
@@ -20,7 +20,7 @@ class RequisicionDTO
         public readonly ?string $folio,
         public readonly int $tipo,
         public readonly ?string $observaciones,
-        public readonly ?RequisicionEstado $estado,
+        public readonly ?RequisicionEstadoEnum $estado,
         /** @var array<\App\Domain\Requisiciones\DTOs\DetalleRequisicionDTO>|null */
         public readonly ?array $detalles
     ) {}
@@ -65,9 +65,9 @@ class RequisicionDTO
         $estado = null;
         if (isset($data['estado'])) {
             $estadoVal = $data['estado'];
-            $estado = $estadoVal instanceof RequisicionEstado 
+            $estado = $estadoVal instanceof RequisicionEstadoEnum 
                 ? $estadoVal 
-                : RequisicionEstado::tryFrom($estadoVal);
+                : RequisicionEstadoEnum::tryFrom($estadoVal);
         }
 
         return new self(

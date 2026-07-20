@@ -7,7 +7,7 @@ use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Puestos\Models\PerfilPuesto;
 use App\Domain\Requisiciones\Models\Vacante;
 use App\Exceptions\Domain\BusinessRuleException;
-use App\Domain\Requisiciones\Enums\VacanteEstado;
+use App\Domain\Requisiciones\Enums\VacanteEstadoEnum;
 use App\Domain\Requisiciones\Models\DetalleRequisicion;
 use App\Domain\Requisiciones\Models\SolicitudPerfilPuesto;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
@@ -69,7 +69,7 @@ class AplicarEnmiendaRequisicionAction
                 // Cambio de perfil (Sueldo o condiciones que requieran reiniciar SLA)
                 if ((float)$detalleNuevo->sueldo_asignado !== (float)$detalleActual->sueldo_asignado) {
                     $vacantesLibres = $detalleActual->vacantes()
-                        ->whereIn('estado', [VacanteEstado::BUSQUEDA_ACTIVA, VacanteEstado::PENDIENTE_PERFIL])
+                        ->whereIn('estado', [VacanteEstadoEnum::BUSQUEDA_ACTIVA, VacanteEstadoEnum::PENDIENTE_PERFIL])
                         ->count();
 
                     if ($vacantesLibres > 0) {
@@ -137,7 +137,7 @@ class AplicarEnmiendaRequisicionAction
     private function cancelarVacantesActivas(DetalleRequisicion $detalle, int $cantidadACancelar, string $motivo): void
     {
         $vacantesLibres = $detalle->vacantes()
-            ->whereIn('estado', [VacanteEstado::BUSQUEDA_ACTIVA, VacanteEstado::PENDIENTE_PERFIL, VacanteEstado::PENDIENTE_VINCULACION_SGC])
+            ->whereIn('estado', [VacanteEstadoEnum::BUSQUEDA_ACTIVA, VacanteEstadoEnum::PENDIENTE_PERFIL, VacanteEstadoEnum::PENDIENTE_VINCULACION_SGC])
             ->limit($cantidadACancelar)
             ->get();
 
@@ -153,13 +153,13 @@ class AplicarEnmiendaRequisicionAction
     private function crearNuevasVacantes(DetalleRequisicion $detalle, int $cantidadACrear): void
     {
         $puesto = $detalle->puesto;
-        $estadoInicial = VacanteEstado::PENDIENTE_VINCULACION_SGC;
+        $estadoInicial = VacanteEstadoEnum::PENDIENTE_VINCULACION_SGC;
 
         if ($puesto) {
             if ($puesto->tienePerfilVinculadoSGC()) {
-                $estadoInicial = VacanteEstado::BUSQUEDA_ACTIVA;
+                $estadoInicial = VacanteEstadoEnum::BUSQUEDA_ACTIVA;
             } elseif ($puesto->tienePerfilLocalEnProceso()) {
-                $estadoInicial = VacanteEstado::PENDIENTE_PERFIL;
+                $estadoInicial = VacanteEstadoEnum::PENDIENTE_PERFIL;
             }
         }
 

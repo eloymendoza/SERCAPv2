@@ -4,7 +4,7 @@ namespace App\Domain\Requisiciones\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Domain\Requisiciones\Enums\VacanteEstado;
+use App\Domain\Requisiciones\Enums\VacanteEstadoEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -44,7 +44,7 @@ class Vacante extends Model
             'fecha_limite_anexo_a' => 'datetime',
             'sueldo_anexo_d' => 'decimal:2',
             'fecha_alta_imss' => 'date',
-            'estado' => VacanteEstado::class,
+            'estado' => VacanteEstadoEnum::class,
         ];
     }
 
@@ -72,12 +72,12 @@ class Vacante extends Model
      */
     public function cancelar(string $motivoDeCancelacion): void
     {
-        if ($this->estado === VacanteEstado::CONTRATADA) {
+        if ($this->estado === VacanteEstadoEnum::CONTRATADA) {
             throw new \DomainException("No se puede cancelar una vacante que ya está contratada.");
         }
 
         $this->update([
-            'estado' => VacanteEstado::CANCELADA,
+            'estado' => VacanteEstadoEnum::CANCELADA,
             'observaciones_rechazo' => $motivoDeCancelacion,
         ]);
     }

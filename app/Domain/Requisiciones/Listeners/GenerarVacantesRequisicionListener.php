@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Domain\Requisiciones\Models\Vacante;
 use App\Domain\Puestos\Enums\PuestoEstadoEnum;
-use App\Domain\Requisiciones\Enums\VacanteEstado;
-use App\Domain\Requisiciones\Events\SolicitudRequisicionAprobada;
+use App\Domain\Requisiciones\Enums\VacanteEstadoEnum;
+use App\Domain\Requisiciones\Events\SolicitudRequisicionAprobadaEvent;
 use App\Domain\Requisiciones\Actions\EvaluarEstadoRequisicionAction;
 
 class GenerarVacantesRequisicionListener implements ShouldQueue
@@ -20,7 +20,7 @@ class GenerarVacantesRequisicionListener implements ShouldQueue
      * Intercepta el evento de aprobación de la solicitud de requisición
      * para generar físicamente las vacantes solicitadas en base a las partidas.
      */
-    public function handle(SolicitudRequisicionAprobada $event): void
+    public function handle(SolicitudRequisicionAprobadaEvent $event): void
     {
         $solicitud = $event->solicitud;
         
@@ -37,15 +37,15 @@ class GenerarVacantesRequisicionListener implements ShouldQueue
             foreach ($requisicion->detalles as $detalle) {
                 // Determinar el estado inicial de la vacante basado en la situación del puesto
                 $puesto = $detalle->puesto;
-                $estadoInicial = VacanteEstado::PENDIENTE_VINCULACION_SGC->value; // Por defecto si no tiene nada
+                $estadoInicial = VacanteEstadoEnum::PENDIENTE_VINCULACION_SGC->value; // Por defecto si no tiene nada
 
                 if ($puesto) {
                     if ($puesto->estado === PuestoEstadoEnum::BORRADOR->value) {
-                        $estadoInicial = VacanteEstado::PENDIENTE_PERFIL->value;
+                        $estadoInicial = VacanteEstadoEnum::PENDIENTE_PERFIL->value;
                     } elseif ($puesto->tienePerfilVinculadoSGC()) {
-                        $estadoInicial = VacanteEstado::BUSQUEDA_ACTIVA->value;
+                        $estadoInicial = VacanteEstadoEnum::BUSQUEDA_ACTIVA->value;
                     } elseif ($puesto->tienePerfilLocalEnProceso()) {
-                        $estadoInicial = VacanteEstado::PENDIENTE_PERFIL->value;
+                        $estadoInicial = VacanteEstadoEnum::PENDIENTE_PERFIL->value;
                     }
                 }
 

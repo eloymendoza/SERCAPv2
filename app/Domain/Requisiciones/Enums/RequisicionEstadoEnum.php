@@ -5,7 +5,7 @@ namespace App\Domain\Requisiciones\Enums;
 /**
  * Define los estados automáticos de una requisición (Folio Padre) calculados según sus vacantes y postulaciones.
  */
-enum RequisicionEstado: string
+enum RequisicionEstadoEnum: string
 {
     /**
      * Estado inicial de la requisición

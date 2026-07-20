@@ -9,7 +9,7 @@ use App\Domain\Puestos\DTOs\PuestoDTO;
 use App\Domain\Puestos\Mappers\PuestoMapper;
 use App\Domain\Puestos\Enums\PuestoEstadoEnum;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Domain\Requisiciones\Enums\VacanteEstado;
+use App\Domain\Requisiciones\Enums\VacanteEstadoEnum;
 use App\Domain\Puestos\Actions\VincularPerfilSgcAction;
 use App\Domain\Puestos\Events\PuestoCreadoSinPerfil;
 use App\Domain\Puestos\Rules\Update\ValidarEstadoLegadoRule;
@@ -55,7 +55,7 @@ class PuestoService
                 ->with(['perfilSgc', 'direccion'])
                 ->withCount(['detallesRequisicion as urgente' => function($q) {
                     $q->whereHas('vacantes', function($q2) {
-                        $q2->where('estado', VacanteEstado::PENDIENTE_VINCULACION_SGC->value);
+                        $q2->where('estado', VacanteEstadoEnum::PENDIENTE_VINCULACION_SGC->value);
                     });
                 }])
                 ->orderByDesc('urgente')
@@ -178,7 +178,7 @@ class PuestoService
         $puesto->load(['perfilSgc', 'direccion']);
         $puesto->loadCount(['detallesRequisicion as urgente' => function($q) {
             $q->whereHas('vacantes', function($q2) {
-                $q2->where('estado', VacanteEstado::PENDIENTE_VINCULACION_SGC->value);
+                $q2->where('estado', VacanteEstadoEnum::PENDIENTE_VINCULACION_SGC->value);
             });
         }]);
     }

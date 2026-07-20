@@ -2,7 +2,7 @@
 
 namespace App\Domain\Requisiciones\Enums;
 
-enum TipoMovimiento: string
+enum TipoMovimientoEnum: string
 {
     case NUEVO_INGRESO = 'nuevo_ingreso';
     case REINGRESO = 'reingreso';

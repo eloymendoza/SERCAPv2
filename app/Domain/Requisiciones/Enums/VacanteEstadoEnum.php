@@ -5,7 +5,7 @@ namespace App\Domain\Requisiciones\Enums;
 /**
  * Define los estados de una vacante (asiento/silla presupuestal) en el proceso de contratación.
  */
-enum VacanteEstado: string
+enum VacanteEstadoEnum: string
 {
     /**
      * Perfil (Anexo A) inexistente. El asiento está bloqueado con un SLA de 3 días hábiles.

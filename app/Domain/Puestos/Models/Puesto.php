@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Domain\Requisiciones\Models\DetalleRequisicion;
 
-use App\Domain\Requisiciones\Enums\RequisicionEstado;
+use App\Domain\Requisiciones\Enums\RequisicionEstadoEnum;
 
 /**
  * Representa la estructura de puestos organizacional jerárquica y recursiva.
@@ -112,9 +112,9 @@ class Puesto extends Model
         return $this->detallesRequisicion()
             ->whereHas('requisicion', function ($query) {
                 $query->whereIn('estado', [
-                    RequisicionEstado::ABIERTA->value,
-                    RequisicionEstado::EN_PROCESO->value,
-                    RequisicionEstado::CIERRE_PARCIAL->value
+                    RequisicionEstadoEnum::ABIERTA->value,
+                    RequisicionEstadoEnum::EN_PROCESO->value,
+                    RequisicionEstadoEnum::CIERRE_PARCIAL->value
                 ]);
             })->exists();
     }

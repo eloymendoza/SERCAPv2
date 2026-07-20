@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Domain\Workflows\DTOs\WorkflowInstanceDTO;
 use App\Domain\Workflows\Services\WorkflowService;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
-use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstadoEnum;
 use App\Domain\Requisiciones\Services\FirmantesResolverService;
 
 uses(RefreshDatabase::class);
@@ -37,7 +37,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
             'elaborador_id' => $user->id_personal,
             'solicitante_id' => $user->id_personal,
             'direccion_id' => 1,
-            'estado' => SolicitudRequisicionEstado::BORRADOR,
+            'estado' => SolicitudRequisicionEstadoEnum::BORRADOR,
             'id_instancia_workflow' => null
         ]);
 
@@ -61,7 +61,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
             'elaborador_id' => 999,
             'solicitante_id' => 999,
             'direccion_id' => 1,
-            'estado' => SolicitudRequisicionEstado::EN_PROCESO,
+            'estado' => SolicitudRequisicionEstadoEnum::EN_PROCESO,
             'id_instancia_workflow' => 888
         ]);
 
@@ -94,7 +94,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
             'elaborador_id' => 999,
             'solicitante_id' => 999,
             'direccion_id' => 1,
-            'estado' => SolicitudRequisicionEstado::EN_PROCESO,
+            'estado' => SolicitudRequisicionEstadoEnum::EN_PROCESO,
             'id_instancia_workflow' => 777
         ]);
 
@@ -156,7 +156,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'elaborador_id' => $user->id_personal,
                 'solicitante_id' => $user->id_personal,
                 'direccion_id' => 1,
-                'estado' => SolicitudRequisicionEstado::BORRADOR,
+                'estado' => SolicitudRequisicionEstadoEnum::BORRADOR,
                 'id_instancia_workflow' => null
             ]);
 
@@ -182,7 +182,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'elaborador_id' => 999,
                 'solicitante_id' => 999,
                 'direccion_id' => 1,
-                'estado' => SolicitudRequisicionEstado::EN_PROCESO,
+                'estado' => SolicitudRequisicionEstadoEnum::EN_PROCESO,
                 'id_instancia_workflow' => 888
             ]);
 
@@ -215,7 +215,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'elaborador_id' => 999,
                 'solicitante_id' => 999,
                 'direccion_id' => 1,
-                'estado' => SolicitudRequisicionEstado::EN_PROCESO,
+                'estado' => SolicitudRequisicionEstadoEnum::EN_PROCESO,
                 'id_instancia_workflow' => 777
             ]);
 
@@ -276,7 +276,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'elaborador_id' => $user->id_personal,
                 'solicitante_id' => $user->id_personal,
                 'direccion_id' => 1,
-                'estado' => SolicitudRequisicionEstado::BORRADOR,
+                'estado' => SolicitudRequisicionEstadoEnum::BORRADOR,
                 'id_instancia_workflow' => null
             ]);
 
@@ -302,7 +302,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'elaborador_id' => 999,
                 'solicitante_id' => 999,
                 'direccion_id' => 1,
-                'estado' => SolicitudRequisicionEstado::RECHAZADO,
+                'estado' => SolicitudRequisicionEstadoEnum::RECHAZADO,
                 'id_instancia_workflow' => 888
             ]);
 
@@ -328,7 +328,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'elaborador_id' => 400,
                 'solicitante_id' => 400,
                 'direccion_id' => 1,
-                'estado' => SolicitudRequisicionEstado::RECHAZADO,
+                'estado' => SolicitudRequisicionEstadoEnum::RECHAZADO,
                 'id_instancia_workflow' => 777
             ]);
 

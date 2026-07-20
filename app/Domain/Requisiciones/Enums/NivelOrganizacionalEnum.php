@@ -2,7 +2,7 @@
 
 namespace App\Domain\Requisiciones\Enums;
 
-enum NivelOrganizacional: string
+enum NivelOrganizacionalEnum: string
 {
     case OPERATIVO = 'operativo';
     case MANDO_MEDIO = 'mando_medio';

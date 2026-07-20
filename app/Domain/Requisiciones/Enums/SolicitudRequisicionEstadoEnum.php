@@ -5,7 +5,7 @@ namespace App\Domain\Requisiciones\Enums;
 /**
  * Define los estados del flujo de aprobación para una solicitud de requisición.
  */
-enum SolicitudRequisicionEstado: string
+enum SolicitudRequisicionEstadoEnum: string
 {
     /**
      * Solicitud creada pero no enviada a aprobación.

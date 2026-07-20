@@ -7,7 +7,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 
-class SolicitudRequisicionAprobada
+class SolicitudRequisicionAprobadaEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

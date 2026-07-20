@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Puestos\Models\PerfilPuesto;
 use App\Domain\Requisiciones\Models\SolicitudPerfilPuesto;
-use App\Domain\Requisiciones\Events\SolicitudRequisicionAprobada;
+use App\Domain\Requisiciones\Events\SolicitudRequisicionAprobadaEvent;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 
 class ProcesarPuestosPropuestosListener
@@ -15,7 +15,7 @@ class ProcesarPuestosPropuestosListener
     /**
      * Intercepta la aprobación de la requisición para convertir las propuestas de puestos en reales.
      */
-    public function handle(SolicitudRequisicionAprobada $event): void
+    public function handle(SolicitudRequisicionAprobadaEvent $event): void
     {
         $solicitud = $event->solicitud;
         $solicitud->loadMissing('requisicion.detalles.propuestaPuesto');

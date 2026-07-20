@@ -5,7 +5,7 @@ namespace App\App\Api\Requisiciones\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
-use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstadoEnum;
 
 class UnicaEnmiendaEnProcesoRule implements ValidationRule
 {
@@ -27,9 +27,9 @@ class UnicaEnmiendaEnProcesoRule implements ValidationRule
             })
             ->when($this->solicitudId, fn($q) => $q->where('id', '!=', $this->solicitudId))
             ->whereIn('estado', [
-                SolicitudRequisicionEstado::BORRADOR->value,
-                SolicitudRequisicionEstado::EN_PROCESO->value,
-                SolicitudRequisicionEstado::RECHAZADO->value,
+                SolicitudRequisicionEstadoEnum::BORRADOR->value,
+                SolicitudRequisicionEstadoEnum::EN_PROCESO->value,
+                SolicitudRequisicionEstadoEnum::RECHAZADO->value,
             ])
             ->exists();
 

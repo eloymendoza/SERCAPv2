@@ -5,7 +5,7 @@ namespace App\Domain\Requisiciones\Enums;
 /**
  * Define los estados del embudo de reclutamiento para una postulación individual.
  */
-enum PostulacionEstado: string
+enum PostulacionEstadoEnum: string
 {
     /**
      * Candidato apto para iniciar el proceso tras evaluación curricular.

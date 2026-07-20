@@ -6,7 +6,7 @@ use Illuminate\Validation\Rule;
 use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Catalogos\Models\Proyecto;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Domain\Requisiciones\Enums\TipoContrato;
+use App\Domain\Requisiciones\Enums\TipoContratoEnum;
 use App\Domain\Requisiciones\Models\Requisicion;
 use App\Domain\Catalogos\Models\TabuladorSalario;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
@@ -145,7 +145,7 @@ class SolicitudRequisicionRequest extends FormRequest
             ],
             'requisicion.detalle.*.cantidad_solicitada' => ['required_with:requisicion.detalle', 'integer', 'min:1'],
             'requisicion.detalle.*.disciplina_id' => ['required_with:requisicion.detalle', 'integer'],
-            'requisicion.detalle.*.tipo_contrato' => ['required_with:requisicion.detalle', Rule::enum(TipoContrato::class)],
+            'requisicion.detalle.*.tipo_contrato' => ['required_with:requisicion.detalle', Rule::enum(TipoContratoEnum::class)],
             'requisicion.detalle.*.tabulador_id' => [
                 'required_with:requisicion.detalle', 
                 'integer',

@@ -2,7 +2,7 @@
 
 namespace App\Domain\Requisiciones\DTOs;
 
-use App\Domain\Requisiciones\Enums\VacanteEstado;
+use App\Domain\Requisiciones\Enums\VacanteEstadoEnum;
 
 /**
  * Contenedor de datos inmutable para transferir información de Vacante.
@@ -12,7 +12,7 @@ class VacanteDTO
     public function __construct(
         public readonly ?int $id,
         public readonly ?int $detalleRequisicionId,
-        public readonly ?VacanteEstado $estado
+        public readonly ?VacanteEstadoEnum $estado
     ) {}
 
     public function toArray(): array
@@ -36,9 +36,9 @@ class VacanteDTO
             if (is_array($estadoVal) && isset($estadoVal['value'])) {
                 $estadoVal = $estadoVal['value'];
             }
-            $estado = $estadoVal instanceof VacanteEstado 
+            $estado = $estadoVal instanceof VacanteEstadoEnum 
                 ? $estadoVal 
-                : VacanteEstado::tryFrom($estadoVal);
+                : VacanteEstadoEnum::tryFrom($estadoVal);
         }
 
         return new self(

@@ -5,7 +5,7 @@ namespace App\Domain\Requisiciones\Models;
 use App\Domain\Puestos\Models\Puesto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Domain\Requisiciones\Enums\TipoContrato;
+use App\Domain\Requisiciones\Enums\TipoContratoEnum;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -50,7 +50,7 @@ class DetalleRequisicion extends Model
     {
         return [
             'sueldo_asignado' => 'decimal:2',
-            'tipo_contrato' => TipoContrato::class,
+            'tipo_contrato' => TipoContratoEnum::class,
             'fecha_inicio' => 'date',
             'fecha_termino' => 'date',
             'fecha_limite_requerimiento' => 'date',

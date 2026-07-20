@@ -9,7 +9,7 @@ use App\Domain\Workflows\Contracts\Workflowable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstadoEnum;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 use App\Domain\Requisiciones\Observers\SolicitudRequisicionObserver;
 
@@ -63,7 +63,7 @@ class SolicitudRequisicion extends Model implements Workflowable
     protected function casts(): array
     {
         return [
-            'estado' => SolicitudRequisicionEstado::class,
+            'estado' => SolicitudRequisicionEstadoEnum::class,
         ];
     }
 
@@ -134,7 +134,7 @@ class SolicitudRequisicion extends Model implements Workflowable
 
         $this->update([
             'id_instancia_workflow' => $idInstanciaWorkflow,
-            'estado' => SolicitudRequisicionEstado::EN_PROCESO,
+            'estado' => SolicitudRequisicionEstadoEnum::EN_PROCESO,
         ]);
     }
 
@@ -145,7 +145,7 @@ class SolicitudRequisicion extends Model implements Workflowable
     {
         $this->asignarFoliosDefinitivos();
 
-        $this->update(['estado' => SolicitudRequisicionEstado::TERMINADO]);
+        $this->update(['estado' => SolicitudRequisicionEstadoEnum::TERMINADO]);
     }
 
     /**
@@ -177,10 +177,10 @@ class SolicitudRequisicion extends Model implements Workflowable
     public function sincronizarEstadoWorkflow(string $estadoDjango): void
     {
         $estadoLocal = match (strtolower($estadoDjango)) {
-            'terminado' => SolicitudRequisicionEstado::TERMINADO,
-            'rechazado' => SolicitudRequisicionEstado::RECHAZADO,
-            'cancelado' => SolicitudRequisicionEstado::CANCELADO,
-            default     => SolicitudRequisicionEstado::EN_PROCESO,
+            'terminado' => SolicitudRequisicionEstadoEnum::TERMINADO,
+            'rechazado' => SolicitudRequisicionEstadoEnum::RECHAZADO,
+            'cancelado' => SolicitudRequisicionEstadoEnum::CANCELADO,
+            default     => SolicitudRequisicionEstadoEnum::EN_PROCESO,
         };
 
         $this->update(['estado' => $estadoLocal]);

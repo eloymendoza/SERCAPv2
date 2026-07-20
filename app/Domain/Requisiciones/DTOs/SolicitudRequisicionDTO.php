@@ -2,7 +2,7 @@
 
 namespace App\Domain\Requisiciones\DTOs;
 
-use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstadoEnum;
 
 /**
  * Contenedor de datos inmutable para transferir información de SolicitudRequisicion.
@@ -24,7 +24,7 @@ class SolicitudRequisicionDTO
         public readonly ?int $coordinacionId,
         public readonly ?int $requisicionPadreId,
         public readonly ?string $observaciones,
-        public readonly ?SolicitudRequisicionEstado $estado,
+        public readonly ?SolicitudRequisicionEstadoEnum $estado,
         public readonly ?string $accion = null,
         public readonly ?RequisicionDTO $requisicion = null
     ) {}
@@ -65,9 +65,9 @@ class SolicitudRequisicionDTO
         $estado = null;
         if (isset($data['estado'])) {
             $estadoVal = $data['estado'];
-            $estado = $estadoVal instanceof SolicitudRequisicionEstado 
+            $estado = $estadoVal instanceof SolicitudRequisicionEstadoEnum 
                 ? $estadoVal 
-                : SolicitudRequisicionEstado::tryFrom($estadoVal);
+                : SolicitudRequisicionEstadoEnum::tryFrom($estadoVal);
         }
 
         return new self(
@@ -91,7 +91,7 @@ class SolicitudRequisicionDTO
     /**
      * Retorna una nueva instancia del DTO con el estado actualizado.
      */
-    public function withEstado(SolicitudRequisicionEstado $estado): self
+    public function withEstado(SolicitudRequisicionEstadoEnum $estado): self
     {
         return new self(
             id: $this->id,

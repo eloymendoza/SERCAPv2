@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Domain\Requisiciones\Enums\RequisicionEstado;
-use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
+use App\Domain\Requisiciones\Enums\RequisicionEstadoEnum;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstadoEnum;
 
 /**
  * Representa la requisición autorizada (Folio Padre) que agrupa las vacantes operativas.
@@ -58,7 +58,7 @@ class Requisicion extends Model
     protected function casts(): array
     {
         return [
-            'estado' => RequisicionEstado::class,
+            'estado' => RequisicionEstadoEnum::class,
         ];
     }
 

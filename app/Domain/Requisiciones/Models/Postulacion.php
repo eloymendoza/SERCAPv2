@@ -4,7 +4,7 @@ namespace App\Domain\Requisiciones\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Domain\Requisiciones\Enums\PostulacionEstado;
+use App\Domain\Requisiciones\Enums\PostulacionEstadoEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -45,7 +45,7 @@ class Postulacion extends Model
     {
         return [
             'fecha_inicio_sla_entrevista' => 'datetime',
-            'estado' => PostulacionEstado::class,
+            'estado' => PostulacionEstadoEnum::class,
         ];
     }
 

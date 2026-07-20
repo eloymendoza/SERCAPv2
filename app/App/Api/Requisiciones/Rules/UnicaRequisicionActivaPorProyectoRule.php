@@ -5,7 +5,7 @@ namespace App\App\Api\Requisiciones\Rules;
 use Closure;
 use App\Domain\Requisiciones\Models\Requisicion;
 use Illuminate\Contracts\Validation\ValidationRule;
-use App\Domain\Requisiciones\Enums\RequisicionEstado;
+use App\Domain\Requisiciones\Enums\RequisicionEstadoEnum;
 
 class UnicaRequisicionActivaPorProyectoRule implements ValidationRule
 {
@@ -23,8 +23,8 @@ class UnicaRequisicionActivaPorProyectoRule implements ValidationRule
             $query->where('proyecto_id', $value);
         })
         ->whereNotIn('estado', [
-            RequisicionEstado::CUBIERTA,
-            RequisicionEstado::CANCELADA,
+            RequisicionEstadoEnum::CUBIERTA,
+            RequisicionEstadoEnum::CANCELADA,
         ])
         ->exists();
 

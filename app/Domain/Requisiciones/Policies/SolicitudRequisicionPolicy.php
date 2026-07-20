@@ -6,7 +6,7 @@ use App\Domain\Autenticacion\Models\User;
 use App\Domain\Workflows\Services\WorkflowService;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\ContextoAutorizacionDTO;
-use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstado;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstadoEnum;
 use App\Domain\Requisiciones\Services\VinculoContextualService;
 
 class SolicitudRequisicionPolicy
@@ -50,7 +50,7 @@ class SolicitudRequisicionPolicy
      */
     public function aprobar(User $user, SolicitudRequisicion $solicitud): bool
     {
-        if ($solicitud->estado !== SolicitudRequisicionEstado::EN_PROCESO) {
+        if ($solicitud->estado !== SolicitudRequisicionEstadoEnum::EN_PROCESO) {
             return false;
         }
 
@@ -66,7 +66,7 @@ class SolicitudRequisicionPolicy
      */
     public function reiniciar(User $user, SolicitudRequisicion $solicitud): bool
     {
-        return $solicitud->estado === SolicitudRequisicionEstado::RECHAZADO
+        return $solicitud->estado === SolicitudRequisicionEstadoEnum::RECHAZADO
             && (int) $user->id_personal === (int) $solicitud->elaborador_id;
     }
 }
