@@ -12,6 +12,7 @@ use App\Domain\Catalogos\Models\TabuladorSalario;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
 use App\App\Api\Requisiciones\Rules\ValidarVinculoProyectoRule;
+use App\App\Api\Requisiciones\Rules\UnicaEnmiendaEnProcesoRule;
 use App\App\Api\Requisiciones\Rules\EnmiendaConCambiosRealesRule;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 use App\App\Api\Requisiciones\Rules\ValidarRangoSueldoTabuladorRule;
@@ -79,6 +80,7 @@ class SolicitudRequisicionRequest extends FormRequest
                 'nullable',
                 'integer',
                 Rule::exists(Requisicion::class, 'id'),
+                new UnicaEnmiendaEnProcesoRule($id),
             ],
             'proyecto_id' => [
                 'nullable',

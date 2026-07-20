@@ -34,6 +34,7 @@ class GenerarBorradorPerfilSGCListener
             PerfilPuesto::create([
                 'solicitud_id' => $solicitudPerfil->id,
                 'puesto_id' => $puesto->id,
+                'estado' => 'borrador',
             ]);
         });
     }

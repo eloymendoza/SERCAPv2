@@ -5,11 +5,12 @@ namespace App\Domain\Requisiciones\Listeners;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Domain\Requisiciones\Models\Vacante;
+use App\Domain\Puestos\Enums\PuestoEstadoEnum;
 use App\Domain\Requisiciones\Enums\VacanteEstado;
 use App\Domain\Requisiciones\Events\SolicitudRequisicionAprobada;
 use App\Domain\Requisiciones\Actions\EvaluarEstadoRequisicionAction;
 
-class GenerarVacantesRequisicion implements ShouldQueue
+class GenerarVacantesRequisicionListener implements ShouldQueue
 {
     public function __construct(
         private readonly EvaluarEstadoRequisicionAction $evaluarEstadoAction
@@ -39,7 +40,9 @@ class GenerarVacantesRequisicion implements ShouldQueue
                 $estadoInicial = VacanteEstado::PENDIENTE_VINCULACION_SGC->value; // Por defecto si no tiene nada
 
                 if ($puesto) {
-                    if ($puesto->tienePerfilVinculadoSGC()) {
+                    if ($puesto->estado === PuestoEstadoEnum::BORRADOR->value) {
+                        $estadoInicial = VacanteEstado::PENDIENTE_PERFIL->value;
+                    } elseif ($puesto->tienePerfilVinculadoSGC()) {
                         $estadoInicial = VacanteEstado::BUSQUEDA_ACTIVA->value;
                     } elseif ($puesto->tienePerfilLocalEnProceso()) {
                         $estadoInicial = VacanteEstado::PENDIENTE_PERFIL->value;

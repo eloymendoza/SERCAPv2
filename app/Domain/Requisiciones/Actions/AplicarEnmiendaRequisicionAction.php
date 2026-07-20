@@ -111,6 +111,7 @@ class AplicarEnmiendaRequisicionAction
                         PerfilPuesto::create([
                             'solicitud_id' => $solicitudPerfil->id,
                             'puesto_id' => $puestoNuevo->id,
+                            'estado' => 'borrador',
                         ]);
 
                         $detalleNuevo->update(['puesto_id' => $puestoNuevo->id]);
