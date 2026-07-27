@@ -4,6 +4,7 @@ namespace App\App\Api\EstructuraOrganizacional\Controllers;
 
 use App\Logging\LogContext;
 use App\App\Api\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 use App\Domain\EstructuraOrganizacional\DTOs\UnidadOrganizativaDTO;
@@ -23,9 +24,10 @@ class UnidadOrganizativaController extends Controller
     /**
      * Orquesta el listado integral o paginado del recurso de dominio.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $paginator = $this->service->paginate(15);
+        $nivel = $request->query('nivel');
+        $paginator = $this->service->paginate(15, $nivel);
         
         return response()->json([
             'data' => UnidadOrganizativaResource::collection($paginator->items()),

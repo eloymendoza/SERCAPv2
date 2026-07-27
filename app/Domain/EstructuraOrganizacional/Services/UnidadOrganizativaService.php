@@ -87,11 +87,12 @@ class UnidadOrganizativaService
     /**
      * Procesa la extracción de nodos organizacionales en bloque con paginación.
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $perPage = 15, ?string $nivel = null): LengthAwarePaginator
     {
-        return $this->handle(function () use ($perPage) {
+        return $this->handle(function () use ($perPage, $nivel) {
             $paginator = UnidadOrganizativa::with('encargado')
                 ->where('estado', UnidadOrganizativaEstadoEnum::ACTIVO->value)
+                ->when($nivel, fn($q) => $q->where('nivel', $nivel))
                 ->paginate($perPage);
             
             $paginator->getCollection()->transform(function ($model) {
