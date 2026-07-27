@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('solicitud_requisiciones', function (Blueprint $table) {
             $table->id();
             $table->string('folio')->nullable()->comment('Ej: SRPIACDS-001');
+            $table->unsignedBigInteger('requisicion_padre_id')->nullable()
+                ->comment('Referencia a la requisición original en caso de enmienda');
             $table->unsignedBigInteger('solicitante_id')->nullable()->comment('id_empleado (DIR, GA, JP o LI)');
             $table->unsignedBigInteger('elaborador_id')->nullable()->comment('id_empleado');
             $table->unsignedBigInteger('proyecto_id')->nullable()
                 ->comment('Referencia lógica a id_proyecto de BD Costosv2');
             $table->unsignedBigInteger('id_instancia_workflow')->nullable()
                 ->comment('Referencia lógica a id_instancia_workflow de BD Workflows');
-            $table->unsignedBigInteger('requisicion_padre_id')->nullable()
-                ->comment('Referencia a la requisición original en caso de enmienda');
             $table->unsignedBigInteger('direccion_id');
             $table->unsignedBigInteger('gerencia_id')->nullable();
             $table->unsignedBigInteger('coordinacion_id')->nullable();
