@@ -57,9 +57,10 @@ class AuthService
             }
 
             $data = $response->json();
-            $this->logger()->info("Autenticación exitosa.", [
-                'data' => $data
-            ]);
+            
+            $this->logContext->setUsername($dto->username);
+            
+            $this->logger()->info("Autenticación exitosa.");
 
             $userDto = $this->userMapper->fromDjangoToDTO($data);
             
@@ -71,12 +72,9 @@ class AuthService
             $userDtoResult = $this->userMapper->toDTO($user);
 
             Auth::loginUsingId($userDtoResult->id);
-            $this->logContext->setUsername($userDtoResult->username);
 
             $fullDto = $userDto->withId($userDtoResult->id);
-            $this->logger()->info("Sesión local sincronizada.", [
-                'data' => $fullDto
-            ]);
+            $this->logger()->info("Sesión local sincronizada.");
 
             $this->syncLocalSession($fullDto);
             $this->clearOtherSessions($userDtoResult->id);
@@ -121,9 +119,7 @@ class AuthService
         
         return $this->handle(function () {
             $sessionData = $this->getAuthenticatedSession();
-            $this->logger()->info("Sesión local recuperada.", [
-                'data' => $sessionData
-            ]);
+            $this->logger()->info("Sesión local recuperada.");
             return $this->userMapper->toDTO($sessionData);
         }, 'AuthService@checkSession');
     }
