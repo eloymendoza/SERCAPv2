@@ -45,6 +45,8 @@ class SolicitudRequisicion extends Model implements Workflowable
         'folio',
         'proyecto_id',
         'id_instancia_workflow',
+        // TODO: EMC: Al crear el modelo Empleado.php en el módulo de Contrataciones,
+        // estos campos deberán apuntar a esa tabla en lugar de a User.php. (solicitante_id, elaborador_id, etc.)
         'solicitante_id',
         'elaborador_id',
         'direccion_id',

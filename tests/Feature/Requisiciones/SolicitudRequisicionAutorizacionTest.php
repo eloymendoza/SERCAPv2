@@ -44,81 +44,7 @@ beforeEach(function () {
     });
 });
 
-describe('Métodos Contextuales de User', function () {
 
-    it('identifica si el usuario es encargado de una dirección específica', function () {
-        $user = User::create([
-            'id_personal' => 100,
-            'username' => 'juan.perez',
-            'name' => 'JUAN PEREZ',
-            'email' => 'juan.perez@test.com',
-        ]);
-
-        $otraDireccion = UnidadOrganizativa::create([
-            'nivel' => 'direccion',
-            'nombre' => 'Dirección B',
-            'encargado_id' => 200,
-            'estado' => 'Activo'
-        ]);
-
-        $suDireccion = UnidadOrganizativa::create([
-            'parent_id' => null,
-            'nivel' => 'direccion',
-            'nombre' => 'Dirección A',
-            'encargado_id' => 100,
-            'estado' => 'Activo'
-        ]);
-
-        expect($user->esDireccionEncargada($suDireccion->id))->toBeTrue()
-            ->and($user->esDireccionEncargada($otraDireccion->id))->toBeFalse();
-    });
-
-    it('identifica si el usuario está vinculado a un proyecto como gerente o jefe', function () {
-        $user = User::create([
-            'id_personal' => 100,
-            'username' => 'juan.perez',
-            'name' => 'JUAN PEREZ',
-            'email' => 'juan.perez@test.com',
-        ]);
-
-        $proyectoGerente = Proyecto::create([
-            'idProyecto' => 1,
-            'proyecto' => 'Proyecto A',
-            'gerenteProyecto' => 'JUAN PEREZ',
-            'jefeProyecto' => 'OTRO',
-            'activoProyecto' => true
-        ]);
-
-        $proyectoJefe = Proyecto::create([
-            'idProyecto' => 2,
-            'proyecto' => 'Proyecto B',
-            'gerenteProyecto' => 'OTRO',
-            'jefeProyecto' => 'JUAN PEREZ',
-            'activoProyecto' => true
-        ]);
-
-        $proyectoNoVinculado = Proyecto::create([
-            'idProyecto' => 3,
-            'proyecto' => 'Proyecto C',
-            'gerenteProyecto' => 'OTRO',
-            'jefeProyecto' => 'OTRO',
-            'activoProyecto' => true
-        ]);
-
-        $proyectoInactivo = Proyecto::create([
-            'idProyecto' => 4,
-            'proyecto' => 'Proyecto D',
-            'gerenteProyecto' => 'JUAN PEREZ',
-            'activoProyecto' => false
-        ]);
-
-        expect($user->esVinculadoProyecto($proyectoGerente->idProyecto))->toBeTrue()
-            ->and($user->esVinculadoProyecto($proyectoJefe->idProyecto))->toBeTrue()
-            ->and($user->esVinculadoProyecto($proyectoNoVinculado->idProyecto))->toBeFalse()
-            ->and($user->esVinculadoProyecto($proyectoInactivo->idProyecto))->toBeFalse();
-    });
-
-});
 
 describe('SolicitudRequisicionPolicy', function () {
 
@@ -147,7 +73,7 @@ describe('SolicitudRequisicionPolicy', function () {
         $direccion = UnidadOrganizativa::create([
             'nivel' => 'direccion',
             'nombre' => 'Dirección A',
-            'encargado_id' => 100,
+            'encargado_usuario' => 'juan.perez',
             'estado' => 'Activo'
         ]);
 
@@ -204,7 +130,7 @@ describe('ValidarVinculoProyectoRule', function () {
         $direccion = UnidadOrganizativa::create([
             'nivel' => 'direccion',
             'nombre' => 'Dirección A',
-            'encargado_id' => 300,
+            'encargado_usuario' => 'pedro.gomez',
             'estado' => 'Activo'
         ]);
 
@@ -266,7 +192,7 @@ describe('Integración HTTP (Request y Endpoint)', function () {
         $direccion = UnidadOrganizativa::create([
             'nivel' => 'direccion',
             'nombre' => 'Dirección A',
-            'encargado_id' => 100,
+            'encargado_usuario' => 'juan.perez',
             'estado' => 'Activo'
         ]);
 
@@ -305,7 +231,7 @@ describe('Integración HTTP (Request y Endpoint)', function () {
         $direccion = UnidadOrganizativa::create([
             'nivel' => 'direccion',
             'nombre' => 'Dirección A',
-            'encargado_id' => 200, // Pertenece a otro encargado
+            'encargado_usuario' => 'pedro.gomez', // Pertenece a otro encargado
             'estado' => 'Activo'
         ]);
 

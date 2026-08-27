@@ -23,7 +23,7 @@ class UnidadOrganizativa extends Model
         'abreviatura',
         'nombre_corto',
         'rfc',
-        'encargado_id',
+        'encargado_usuario',
         'estado'
     ];
 
@@ -50,6 +50,6 @@ class UnidadOrganizativa extends Model
      */
     public function encargado(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'encargado_id', 'id_personal');
+        return $this->belongsTo(User::class, 'encargado_usuario', 'username');
     }
 }

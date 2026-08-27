@@ -15,7 +15,7 @@ class VinculoContextualService
     public function esDireccionEncargada(User $user, int $direccionId): bool
     {
         return UnidadOrganizativa::where('id', $direccionId)
-            ->where('encargado_id', $user->id_personal)
+            ->where('encargado_usuario', $user->username)
             ->where('nivel', 'direccion')
             ->exists();
     }

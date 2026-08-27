@@ -5,9 +5,12 @@ namespace App\Domain\Autenticacion\Models;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Domain\Requisiciones\DTOs\ContextoAutorizacionDTO;
-use App\Domain\Requisiciones\Services\VinculoContextualService;
 
+/**
+ * //TODO: EMC: Crear el modelo Empleado.php cuando se desarrolle el módulo de Contrataciones.
+ * Por ahora usamos User.php para los datos del empleado, pero a futuro 
+ * Requisiciones y Workflows deberán enlazarse al nuevo modelo Empleado.
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -47,32 +50,5 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    // --- Vinculación contextual ---
-
-    /**
-     * Determina si el usuario es el encargado de una dirección organizativa específica.
-     */
-    public function esDireccionEncargada(int $direccionId): bool
-    {
-        return app(VinculoContextualService::class)->esDireccionEncargada($this, $direccionId);
-    }
-
-    /**
-     * Determina si el usuario funge como gerente o jefe de un proyecto específico activo.
-     */
-    public function esVinculadoProyecto(int $proyectoId): bool
-    {
-        return app(VinculoContextualService::class)->esVinculadoProyecto($this, $proyectoId);
-    }
-
-    /**
-     * Determina si el usuario tiene vínculo operativo con la dirección o proyecto dados.
-     */
-    public function tieneVinculoContextual(?int $direccionId, ?int $proyectoId): bool
-    {
-        $contexto = new ContextoAutorizacionDTO($this, $direccionId, $proyectoId);
-        return app(VinculoContextualService::class)->tieneVinculoContextual($contexto);
     }
 }

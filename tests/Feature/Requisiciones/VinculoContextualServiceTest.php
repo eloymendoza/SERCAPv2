@@ -43,7 +43,7 @@ describe('VinculoContextualService', function () {
         $direccion = UnidadOrganizativa::create([
             'nivel' => 'direccion',
             'nombre' => 'Dirección de Desarrollo',
-            'encargado_id' => 123,
+            'encargado_usuario' => 'eloy.mendoza',
             'estado' => 'Activo'
         ]);
 

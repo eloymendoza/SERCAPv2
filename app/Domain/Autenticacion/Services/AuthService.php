@@ -77,7 +77,7 @@ class AuthService
             
             $persistenceData = $this->userMapper->toPersistenceArray($userDto);
             $user = User::updateOrCreate(
-                ['id_personal' => $persistenceData['id_personal']], 
+                ['username' => $persistenceData['username']], 
                 $persistenceData
             );
             $userDtoResult = $this->userMapper->toDTO($user);
@@ -174,6 +174,7 @@ class AuthService
         Session::put([
             'id' => $dto->id,
             'idPersonal' => $dto->idPersonal,
+            'idEmpleado' => $dto->idEmpleado,
             'username' => $dto->username,
             'name' => $dto->name,
             'email' => $dto->email,
@@ -220,7 +221,7 @@ class AuthService
         }
 
         return Session::only([
-            'id', 'idPersonal', 'username', 'name', 'email',
+            'id', 'idPersonal', 'idEmpleado', 'username', 'name', 'email',
             'puestoActual', 'rutaFoto', 'permisos', 'token'
         ]);
     }

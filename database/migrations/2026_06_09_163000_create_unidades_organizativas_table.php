@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('nombre_corto', 150)->nullable();
             $table->string('rfc', 20)->nullable();
 
-            $table->foreignId('encargado_id')->nullable();
+            $table->string('encargado_usuario', 255)->nullable();
 
             $table->string('estado', 50)->default('Activo')->comment('Activo, Inactivo, Borrador');
             
