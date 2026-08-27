@@ -4,11 +4,11 @@ namespace App\App\Api\Autenticacion\Controllers;
 
 
 use App\Logging\LogContext;
-use App\Domain\Autenticacion\Services\AuthService;
+use App\App\Api\Controller;
 use Illuminate\Http\JsonResponse;
+use App\Domain\Autenticacion\Services\AuthService;
 use App\App\Api\Autenticacion\Requests\LoginRequest;
 use App\App\Api\Autenticacion\Resources\UserResource;
-use App\App\Api\Controller;
 
 /**
  * Orquestación de autenticación.
@@ -39,11 +39,15 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $dto = $request->toDTO();
-        $userDto = $this->authService->authenticate($dto);
+        // Auth::attempt delega automáticamente al DjangoUserProvider
+        if (!\Illuminate\Support\Facades\Auth::attempt($request->only('username', 'password'))) {
+            throw \App\Domain\Autenticacion\Exceptions\AuthException::invalidCredentials('Credenciales inválidas.');
+        }
 
-        // La regeneración de sesión es una preocupación de HTTP/Controlador
         $request->session()->regenerate();
+
+        // El DTO fue hidratado en memoria por el Provider
+        $userDto = \Illuminate\Support\Facades\Auth::user()->contexto;
 
         return response()->json([
             'success' => true,
@@ -75,7 +79,11 @@ class AuthController extends Controller
      */
     public function checkSession(): JsonResponse
     {
-        $userDto = $this->authService->checkSession();
+        if (!\Illuminate\Support\Facades\Auth::check() || !\Illuminate\Support\Facades\Auth::user()->contexto) {
+            throw new \App\Domain\Autenticacion\Exceptions\AuthException('Sesión no encontrada o expirada.');
+        }
+
+        $userDto = \Illuminate\Support\Facades\Auth::user()->contexto;
 
         return response()->json([
             'success' => true,

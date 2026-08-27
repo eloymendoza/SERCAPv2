@@ -3,13 +3,13 @@
 namespace App\App\Api\Middleware;
 
 use Closure;
+use App\Logging\LogContext;
 use Illuminate\Http\Request;
-use App\Domain\Autenticacion\Services\AuthService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use App\Domain\Autenticacion\Exceptions\AuthException;
-use App\Logging\LogContext;
 use Symfony\Component\HttpFoundation\Response;
+use App\Domain\Autenticacion\Services\AuthService;
+use App\Domain\Autenticacion\Exceptions\AuthException;
 
 /**
  * Middleware para la verificación de tokens de sesión contra la API de Django.
@@ -38,10 +38,11 @@ class VerifyDjangoToken
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()) {
-            $username = Auth::user()?->username;
+            $user = Auth::user();
+            $username = $user?->username;
             
-            if ($username) {
-                if (!$this->authService->verifyToken($username)) {
+            if ($username && $user->contexto) {
+                if (!$this->authService->verifyToken($username, $user->contexto->token)) {
                     Log::channel($this->logContext->channel())->warning("Middleware: Sesión invalidada por token expirado/inválido: {$username}");
 
                     $user = Auth::user();

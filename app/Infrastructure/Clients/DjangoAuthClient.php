@@ -33,7 +33,7 @@ class DjangoAuthClient
         $payload = [
             'token'     => base64_encode($this->secretKey),
             'user'      => $username,
-            'password'  => $password, // Ya viene en Base64 desde el Mapper
+            'password'  => base64_encode($password),
             'idSistema' => $this->systemId,
             'timeExp'   => 1,
             'saveTk'    => 1

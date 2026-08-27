@@ -4,16 +4,9 @@ namespace App\Domain\Autenticacion\Services;
 
 use App\Logging\LogContext;
 use App\Traits\HandlesProcess;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
-use App\Domain\Autenticacion\Models\User;
-use App\Domain\Autenticacion\DTOs\AuthDTO;
-use App\Domain\Autenticacion\DTOs\UserDTO;
-use Illuminate\Auth\AuthenticationException;
 use App\Domain\Autenticacion\Mappers\UserMapper;
 use App\Infrastructure\Clients\DjangoAuthClient;
-use App\Domain\Autenticacion\Exceptions\AuthException;
 
 /**
  * Servicio de Autenticación.
@@ -34,69 +27,6 @@ class AuthService
     protected function getLogChannel(): string
     {
         return 'auth';
-    }
-
-    /**
-     * Orquestación de inicio de sesión y sincronización local.
-     * 
-     * @param AuthDTO $dto
-     * @return UserDTO
-     * @throws AuthException
-     */
-    public function authenticate(AuthDTO $dto): UserDTO
-    {
-        $this->logger()->info("Iniciando autenticación.", [
-            'username' => $dto->username
-        ]);
-        
-        return $this->handle(function () use ($dto) {
-            $response = $this->authClient->authenticate($dto->username, $dto->password);
-
-            if (!$response->successful()) {
-                $this->logger()->error("Fallo de autenticación en Django", [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-
-                $data = $response->json();
-                $errorDetail = $data['error'] ?? $data['message'] ?? 'Credenciales inválidas o error de conexión.';
-
-                if ($response->status() === 403 || $response->status() === 404 || str_contains(strtolower($errorDetail), 'permiso')) {
-                    throw AuthException::accessDenied($errorDetail);
-                }
-
-                throw AuthException::invalidCredentials($errorDetail);
-            }
-
-            $data = $response->json();
-            $this->logger()->info("Autenticación exitosa.", [
-                'data' => $data
-            ]);
-
-            $userDto = $this->userMapper->fromDjangoToDTO($data);
-            
-            $persistenceData = $this->userMapper->toPersistenceArray($userDto);
-            $user = User::updateOrCreate(
-                ['username' => $persistenceData['username']], 
-                $persistenceData
-            );
-            $userDtoResult = $this->userMapper->toDTO($user);
-
-            Auth::loginUsingId($userDtoResult->id);
-            $this->logContext->setUsername($userDtoResult->username);
-
-            $fullDto = $userDto->withId($userDtoResult->id);
-            $this->logger()->info("Sesión local sincronizada.", [
-                'data' => $fullDto
-            ]);
-
-            $this->syncLocalSession($fullDto);
-            $this->clearOtherSessions($userDtoResult->id);
-
-            $sessionData = $this->getAuthenticatedSession();
-
-            return $this->userMapper->toDTO($sessionData);
-        }, 'AuthService@authenticate');
     }
 
     /**
@@ -123,34 +53,15 @@ class AuthService
     }
 
     /**
-     * Recupera la información del usuario desde la sesión persistida.
-     * 
-     * @return UserDTO
-     */
-    public function checkSession(): UserDTO
-    {
-        $this->logger()->info("Consultando sesión activa.");
-        
-        return $this->handle(function () {
-            $sessionData = $this->getAuthenticatedSession();
-            $this->logger()->info("Sesión local recuperada.", [
-                'data' => $sessionData
-            ]);
-            return $this->userMapper->toDTO($sessionData);
-        }, 'AuthService@checkSession');
-    }
-
-    /**
      * Verifica la validez del token contra el servicio externo.
      * 
      * @param string $username
+     * @param string $token
      * @return bool
      */
-    public function verifyToken(string $username): bool
+    public function verifyToken(string $username, string $token): bool
     {
-        return $this->handle(function () use ($username) {
-            $token = (string) Session::get('token');
-            
+        return $this->handle(function () use ($username, $token) {
             if (empty($token)) {
                 return false;
             }
@@ -169,34 +80,6 @@ class AuthService
         }, 'AuthService@verifyToken');
     }
 
-    private function syncLocalSession(UserDTO $dto): void
-    {
-        Session::put([
-            'id' => $dto->id,
-            'idPersonal' => $dto->idPersonal,
-            'idEmpleado' => $dto->idEmpleado,
-            'username' => $dto->username,
-            'name' => $dto->name,
-            'email' => $dto->email,
-            'puestoActual' => $dto->puestoActual,
-            'rutaFoto' => $dto->rutaFoto,
-            'permisos' => $dto->permisos,
-            'token' => $dto->token,
-        ]);
-    }
-
-    private function clearOtherSessions(int $userId): void
-    {
-        if (config('session.driver') !== 'database') {
-            return;
-        }
-        
-        DB::table(config('session.table', 'sessions'))
-            ->where('user_id', $userId)
-            ->where('id', '!=', Session::getId())
-            ->delete();
-    }
-
     private function completeLogout(): void
     {
         $user = Auth::user();
@@ -212,17 +95,5 @@ class AuthService
             \Illuminate\Support\Facades\Session::invalidate();
             \Illuminate\Support\Facades\Session::regenerateToken();
         }
-    }
-
-    private function getAuthenticatedSession(): array
-    {
-        if (!Auth::check() || !Session::has('username')) {
-            throw new AuthenticationException('Sesión no encontrada o expirada.');
-        }
-
-        return Session::only([
-            'id', 'idPersonal', 'idEmpleado', 'username', 'name', 'email',
-            'puestoActual', 'rutaFoto', 'permisos', 'token'
-        ]);
     }
 }

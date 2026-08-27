@@ -37,4 +37,19 @@ class AuthException extends DomainException
             errorCode: 'AUTH_ACCESS_DENIED'
         );
     }
+
+    /**
+     * Report the exception.
+     *
+     * @return bool
+     */
+    public function report(): bool
+    {
+        \Illuminate\Support\Facades\Log::channel('auth')->error($this->getMessage(), [
+            'error_code' => $this->errorCode,
+            'exception' => $this
+        ]);
+
+        return false; // Evita que Laravel lo envíe también a laravel.log
+    }
 }
