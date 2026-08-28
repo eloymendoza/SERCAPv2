@@ -52,9 +52,16 @@ class AuthService
         return $this->handle(function () use ($dto) {
             $response = $this->authClient->authenticate($dto->username, $dto->password);
 
-            if (!$response->successful()) {
-                throw AuthException::invalidCredentials('Credenciales inválidas o error de conexión.');
+            if ($response->status() === 401 || $response->status() === 400) {
+                throw AuthException::invalidCredentials('Credenciales inválidas.');
             }
+
+            if ($response->status() === 403 || $response->status() === 423) {
+                throw AuthException::accountLocked('La cuenta se encuentra bloqueada o el acceso fue denegado.');
+            }
+            
+            // Lanza una excepción HTTP para cualquier otro código de error (4xx, 5xx), permitiendo que sea capturado por HandlesProcess.
+            $response->throw();
 
             $data = $response->json();
             
