@@ -52,4 +52,19 @@ class AuthException extends DomainException
 
         return false; // Evita que Laravel lo envíe también a laravel.log
     }
+
+    /**
+     * @param string $message
+     * @return self
+     */
+    public static function accountLocked(string $message = 'La cuenta se encuentra bloqueada por seguridad.'): self
+    {
+        $e = new self($message);
+        $e->errorCode = 'AUTH_ACCOUNT_LOCKED';
+        $e->statusCode = 403;
+        
+        return $e;
+    }
+
+
 }

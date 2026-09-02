@@ -26,9 +26,11 @@ trait HandlesProcess
             return $callback();
         } 
         catch (BaseApiException $e) {
-            Log::channel($channel)->error("[BASE_API_ERROR] {$context}: {$e->getMessage()}", [
-                'trace' => $e->getTraceAsString()
-            ]);
+            // Las excepciones de negocio/cliente (Capa 8) operan bajo flujos esperados.
+            // Se auditan como WARNING (o INFO) y sin stack trace para no ensuciar la telemetría.
+            $level = (method_exists($e, 'getStatusCode') && $e->getStatusCode() >= 500) ? 'error' : 'warning';
+            
+            Log::channel($channel)->{$level}("[DOMAIN_EXCEPTION] {$context}: {$e->getMessage()}");
 
             throw $e;
         }

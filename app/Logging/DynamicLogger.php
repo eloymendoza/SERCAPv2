@@ -50,6 +50,8 @@ class DynamicLogger
         // El RotatingFileHandler genera archivos con el sufijo de fecha automáticamente.
         // Formato resultante: storage/logs/Auth/auth-YYYY-MM-DD.log
         $handler->setFilenameFormat('{filename}-{date}', 'Y-m-d');
+        
+        $handler->setFormatter(new StructuredJsonFormatter());
 
         $logger = new Logger($channelName);
         $logger->pushHandler($handler);
