@@ -15,8 +15,16 @@ class ValidarEstadoLegadoRule implements UnidadOrganizativaRuleInterface
      */
     public function validate(UnidadOrganizativa $model, ?UnidadOrganizativaDTO $dto = null): void
     {
-        if ($model->estado === UnidadOrganizativaEstadoEnum::LEGADO->value) {
-            throw BusinessRuleException::withMessage("Las unidades organizativas con estado legado no pueden ser editadas.", "UNIDAD_LEGADO_NO_EDITABLE");
+        $estadosInmutables = [
+            UnidadOrganizativaEstadoEnum::LEGADO->value,
+            UnidadOrganizativaEstadoEnum::INACTIVO->value
+        ];
+
+        if (in_array(strtolower($model->estado), $estadosInmutables, true)) {
+            throw BusinessRuleException::withMessage(
+                "Las unidades organizativas históricas (inactivas o legado) no pueden ser editadas.", 
+                "UNIDAD_HISTORICA_NO_EDITABLE"
+            );
         }
     }
 }

@@ -32,6 +32,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::prefix('catalogos')->group(function () {
         
+        Route::post('/unidades-organizativas/{unidad}/activate', [UnidadOrganizativaController::class, 'activate']);
+        Route::post('/unidades-organizativas/{unidad}/deactivate', [UnidadOrganizativaController::class, 'deactivate']);
         Route::apiResource('/unidades-organizativas', UnidadOrganizativaController::class)
             ->parameters(['unidades-organizativas' => 'unidad']);
             

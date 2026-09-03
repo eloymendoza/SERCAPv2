@@ -22,7 +22,7 @@ class UnidadOrganizativaController extends Controller
     }
 
     /**
-     * Orquesta el listado integral o paginado del recurso de dominio.
+     * Obtiene la lista de unidades organizativas.
      */
     public function index(Request $request): JsonResponse
     {
@@ -41,7 +41,7 @@ class UnidadOrganizativaController extends Controller
     }
 
     /**
-     * Coordina la creación delegando el payload DTO hacia el Service subyacente.
+     * Crea una nueva unidad organizativa.
      */
     public function store(UnidadOrganizativaRequest $request): JsonResponse
     {
@@ -52,7 +52,7 @@ class UnidadOrganizativaController extends Controller
     }
 
     /**
-     * Retorna el detalle jerárquico instanciando el Service Locator del nodo.
+     * Obtiene los detalles de una unidad organizativa específica.
      */
     public function show(UnidadOrganizativa $unidad): JsonResponse
     {
@@ -62,7 +62,7 @@ class UnidadOrganizativaController extends Controller
     }
 
     /**
-     * Canaliza los campos validados para la actualización segmentada del nodo.
+     * Actualiza los datos de una unidad organizativa.
      */
     public function update(UnidadOrganizativaRequest $request, UnidadOrganizativa $unidad): JsonResponse
     {
@@ -73,12 +73,36 @@ class UnidadOrganizativaController extends Controller
     }
 
     /**
-     * Ejecuta el desprendimiento lógico (destroy) abstrayendo la transacción.
+     * Elimina una unidad organizativa.
      */
     public function destroy(UnidadOrganizativa $unidad): JsonResponse
     {
         $this->service->delete($unidad);
         
         return response()->json(null, 204);
+    }
+
+    /**
+     * Activa una unidad organizativa e inactiva a la que reemplaza.
+     */
+    public function activate(UnidadOrganizativa $unidad): JsonResponse
+    {
+        $this->service->activate($unidad);
+        
+        return response()->json([
+            'message' => 'Unidad organizativa activada exitosamente.'
+        ], 200);
+    }
+
+    /**
+     * Desactiva manualmente una unidad organizativa.
+     */
+    public function deactivate(UnidadOrganizativa $unidad): JsonResponse
+    {
+        $this->service->deactivate($unidad);
+        
+        return response()->json([
+            'message' => 'Unidad organizativa desactivada exitosamente.'
+        ], 200);
     }
 }

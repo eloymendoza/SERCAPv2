@@ -25,6 +25,7 @@ class UnidadOrganizativaResource extends JsonResource
             'nombre_corto' => $this->resource->nombreCorto,
             'rfc'          => $this->resource->rfc,
             'encargado_id' => $this->resource->encargadoId,
+            'encargado_usuario' => $this->resource->encargadoUsuario,
             'estado'       => $this->resource->estado,
             'parent'       => $this->resource->parent ? new self($this->resource->parent) : null,
             'encargado'    => $this->resource->encargado,
