@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 use App\Domain\EstructuraOrganizacional\DTOs\UnidadOrganizativaDTO;
+use Illuminate\Support\Facades\Gate;
 use App\App\Api\EstructuraOrganizacional\Requests\UnidadOrganizativaRequest;
 use App\App\Api\EstructuraOrganizacional\Resources\UnidadOrganizativaResource;
 use App\Domain\EstructuraOrganizacional\Services\UnidadOrganizativaService;
@@ -45,6 +46,8 @@ class UnidadOrganizativaController extends Controller
      */
     public function store(UnidadOrganizativaRequest $request): JsonResponse
     {
+        Gate::authorize('create', UnidadOrganizativa::class);
+
         $dto = UnidadOrganizativaDTO::fromRequest($request->validated());
         $createdDto = $this->service->create($dto);
         
@@ -66,6 +69,8 @@ class UnidadOrganizativaController extends Controller
      */
     public function update(UnidadOrganizativaRequest $request, UnidadOrganizativa $unidad): JsonResponse
     {
+        Gate::authorize('update', $unidad);
+
         $dto = UnidadOrganizativaDTO::fromRequest($request->validated());
         $updatedDto = $this->service->update($unidad, $dto);
         
@@ -77,6 +82,8 @@ class UnidadOrganizativaController extends Controller
      */
     public function destroy(UnidadOrganizativa $unidad): JsonResponse
     {
+        Gate::authorize('delete', $unidad);
+        
         $this->service->delete($unidad);
         
         return response()->json(null, 204);
@@ -87,6 +94,8 @@ class UnidadOrganizativaController extends Controller
      */
     public function activate(UnidadOrganizativa $unidad): JsonResponse
     {
+        Gate::authorize('activate', $unidad);
+
         $this->service->activate($unidad);
         
         return response()->json([
@@ -99,6 +108,8 @@ class UnidadOrganizativaController extends Controller
      */
     public function deactivate(UnidadOrganizativa $unidad): JsonResponse
     {
+        Gate::authorize('deactivate', $unidad);
+
         $this->service->deactivate($unidad);
         
         return response()->json([

@@ -25,9 +25,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Interceptar validaciones de permisos para leer de la sesión
+        // Interceptar validaciones de permisos para leer del contexto del usuario (DTO) o la sesión
         Gate::before(function ($user, $ability) {
-            $permisos = session('permisos', []);
+            $permisos = $user->contexto?->permisos ?? session('permisos', []);
             if (array_key_exists($ability, $permisos)) {
                 return true;
             }
@@ -41,6 +41,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(
             \App\Domain\Puestos\Models\Puesto::class,
             \App\Domain\Puestos\Policies\PuestoPolicy::class
+        );
+        Gate::policy(
+            \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::class,
+            \App\Domain\EstructuraOrganizacional\Policies\UnidadOrganizativaPolicy::class
         );
 
         // Forzar HTTPS solo en entorno de producción
