@@ -78,28 +78,20 @@ class MigrateUnidadesOrganizativasCommand extends Command
                 default => null,
             };
 
-            // 4. Generación y control de colisiones de Abreviatura
-            $abreviatura = trim($row->abreviatura ?? '');
-            
-            if (empty($abreviatura)) {
-                $baseAbrev = $this->generarIniciales($nombre);
-            } else {
-                $baseAbrev = mb_substr($abreviatura, 0, 2);
-            }
+            $encargadoUsuario = match ($encargadoId) {
+                1133 => 'juan.rosado',
+                1476 => 'lucia.santos',
+                2059 => 'alejandro.ramirez',
+                3002 => 'sergio.beltran',
+                4908 => 'cesar.garcia',
+                6052 => 'alejandro.garcia',
+                6197 => 'moises.arias',
+                11021 => 'alejandra.arreola',
+                default => null,
+            };
 
-            $abreviatura = $baseAbrev;
-            $contador = 1;
-            while (in_array($abreviatura, $abreviaturasUsadas, true)) {
-                $primeraLetra = mb_substr($baseAbrev, 0, 1);
-                if ($contador < 10) {
-                    $abreviatura = $primeraLetra . $contador;
-                } else {
-                    $abreviatura = $primeraLetra . chr(55 + $contador); // 10 = A, 11 = B...
-                }
-                $contador++;
-            }
-            
-            $abreviaturasUsadas[] = $abreviatura;
+            // 4. Abreviaturas
+            $abreviatura = null;
 
             $enRangoValido = ($row->idArea >= 186 && $row->idArea <= 190) || $row->idArea >= 231;
 
@@ -111,17 +103,21 @@ class MigrateUnidadesOrganizativasCommand extends Command
 
             // 5. Armado de payload
             $registrosAInsertar[] = [
-                'id'           => $row->idArea,
-                'parent_id'    => $parentId,
-                'nivel'        => $nivel,
-                'nombre'       => $nombre,
-                'abreviatura'  => $abreviatura,
-                'nombre_corto' => $row->nombreCorto,
-                'rfc'          => $row->rfc,
-                'encargado_id' => $encargadoId,
-                'estado'       => $estado, 
-                'created_at'   => now()->format('Y-m-d\TH:i:s.v'), 
-                'updated_at'   => now()->format('Y-m-d\TH:i:s.v'),
+                'id'                => $row->idArea,
+                'parent_id'         => $parentId,
+                'nivel'             => $nivel,
+                'nombre'            => $nombre,
+                'abreviatura'       => $abreviatura,
+                'nombre_corto'      => $row->nombreCorto,
+                'rfc'               => $row->rfc,
+                'encargado_id'      => $encargadoId,
+                'encargado_usuario' => $encargadoUsuario,
+                'estado'            => $estado, 
+                'enabled_at'        => $estado === 'activo' ? '2026-05-04' : null,
+                'disabled_at'       => $estado === 'activo' ? null : '2026-05-03',
+                'reemplaza_a_id'    => null,
+                'created_at'        => now()->format('Y-m-d\TH:i:s.v'), 
+                'updated_at'        => now()->format('Y-m-d\TH:i:s.v'),
             ];
 
             $bar->advance();

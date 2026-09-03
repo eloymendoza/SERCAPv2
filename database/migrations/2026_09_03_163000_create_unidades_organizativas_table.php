@@ -25,11 +25,13 @@ return new class extends Migration
             $table->string('abreviatura', 50)->nullable();
             $table->string('nombre_corto', 150)->nullable();
             $table->string('rfc', 20)->nullable();
-
+            $table->unsignedBigInteger('encargado_id')->nullable()->comment('ID del encargado (actualmente apunta a aspirantes, a futuro a empleados)');
             $table->string('encargado_usuario', 255)->nullable();
-
+            $table->unsignedBigInteger('reemplaza_a_id')->nullable()->comment('ID de la unidad a la que sustituye orgánicamente');
+            $table->foreign('reemplaza_a_id')->references('id')->on('unidades_organizativas')->onDelete('no action');
             $table->string('estado', 50)->default('Activo')->comment('Activo, Inactivo, Borrador');
-            
+            $table->date('enabled_at')->nullable();
+            $table->date('disabled_at')->nullable();
             $table->timestamps(7);
             $table->softDeletes('deleted_at', 7);
         });

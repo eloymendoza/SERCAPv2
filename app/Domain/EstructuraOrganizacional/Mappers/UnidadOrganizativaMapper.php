@@ -21,6 +21,9 @@ class UnidadOrganizativaMapper
             nombreCorto: $model->nombre_corto,
             rfc: $model->rfc,
             encargadoId: $model->encargado_id,
+            enabledAt: $model->enabled_at?->format('Y-m-d'),
+            disabledAt: $model->disabled_at?->format('Y-m-d'),
+            reemplazaAId: $model->reemplaza_a_id,
             estado: $model->estado,
             parent: $model->relationLoaded('parent') && $model->parent ? $this->toDTO($model->parent) : null,
             children: $model->relationLoaded('children') ? $model->children->map(fn($c) => $this->toDTO($c))->toArray() : null,
@@ -41,6 +44,9 @@ class UnidadOrganizativaMapper
             'nombre_corto' => $dto->nombreCorto,
             'rfc' => $dto->rfc,
             'encargado_id' => $dto->encargadoId,
+            'enabled_at' => $dto->enabledAt,
+            'disabled_at' => $dto->disabledAt,
+            'reemplaza_a_id' => $dto->reemplazaAId,
             'estado' => $dto->estado,
         ];
         
