@@ -20,7 +20,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('unidades_organizativas');
 
-            $table->string('nivel', 50);
+            $table->string('nivel', 50)->comment('presidencia, dirección, gerencia, area');
             $table->string('nombre', 255);
             $table->string('abreviatura', 50)->nullable();
             $table->string('nombre_corto', 150)->nullable();

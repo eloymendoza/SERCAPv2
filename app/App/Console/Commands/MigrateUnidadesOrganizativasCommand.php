@@ -52,10 +52,22 @@ class MigrateUnidadesOrganizativasCommand extends Command
             $nivel = '';
             $parentId = null;
 
+            // Mover cálculo de estado antes de asignar nivel/padre para poder usarlo en la asignación de presidencia
+            $enRangoValido = ($row->idArea >= 186 && $row->idArea <= 190) || $row->idArea >= 231;
+
+            if (!$enRangoValido || (int) $row->borrado === 1) {
+                $estado = 'legado';
+            } else {
+                $estado = 'activo';
+            }
+
             // 2. Determinación de Nivel Estricto y Asignación de Padre
-            if ($row->idArea == $row->idDireccion && is_null($row->idGerencia) && is_null($row->idDepartamento)) {
-                $nivel = 'direccion';
+            if ((int) $row->idArea === 189) {
+                $nivel = 'presidencia';
                 $parentId = null;
+            } elseif ($row->idArea == $row->idDireccion && is_null($row->idGerencia) && is_null($row->idDepartamento)) {
+                $nivel = 'direccion';
+                $parentId = ($estado === 'activo') ? 189 : null;
             } elseif ($row->idArea == $row->idGerencia && is_null($row->idDepartamento)) {
                 $nivel = 'gerencia';
                 $parentId = $row->idDireccion;
@@ -93,13 +105,7 @@ class MigrateUnidadesOrganizativasCommand extends Command
             // 4. Abreviaturas
             $abreviatura = null;
 
-            $enRangoValido = ($row->idArea >= 186 && $row->idArea <= 190) || $row->idArea >= 231;
-
-            if (!$enRangoValido || (int) $row->borrado === 1) {
-                $estado = 'legado';
-            } else {
-                $estado = 'activo';
-            }
+            // (El estado ya fue calculado arriba para determinar el padre de las direcciones)
 
             // 5. Armado de payload
             $registrosAInsertar[] = [
@@ -128,7 +134,7 @@ class MigrateUnidadesOrganizativasCommand extends Command
 
         // Ordenamiento topológico en memoria (padres primero) para evitar errores FK
         usort($registrosAInsertar, function ($a, $b) {
-            $pesos = ['direccion' => 1, 'gerencia' => 2, 'area' => 3];
+            $pesos = ['presidencia' => 0, 'direccion' => 1, 'gerencia' => 2, 'area' => 3];
             return $pesos[$a['nivel']] <=> $pesos[$b['nivel']];
         });
 
