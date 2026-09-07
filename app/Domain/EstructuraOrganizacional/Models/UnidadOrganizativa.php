@@ -2,8 +2,9 @@
 
 namespace App\Domain\EstructuraOrganizacional\Models;
 
-use App\Domain\Autenticacion\Models\User;
+use App\Traits\AuditableModule;
 use Illuminate\Database\Eloquent\Model;
+use App\Domain\Autenticacion\Models\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UnidadOrganizativa extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, AuditableModule;
 
     protected $table = 'unidades_organizativas';
 
@@ -77,5 +78,21 @@ class UnidadOrganizativa extends Model
     public function reemplazadoPor(): HasOne
     {
         return $this->hasOne(self::class, 'reemplaza_a_id');
+    }
+
+    /**
+     * Define el modelo responsable de registrar el historial de cambios.
+     */
+    public function getHistoryModelFqcn(): string
+    {
+        return UnidadOrganizativaHistorialCambio::class;
+    }
+
+    /**
+     * Define la llave foránea explícita, ya que Str::singular falla con plurables en español.
+     */
+    public function getHistoryForeignKey(): string
+    {
+        return 'unidad_organizativa_id';
     }
 }
