@@ -23,6 +23,18 @@ class UnidadOrganizativaController extends Controller
     }
 
     /**
+     * Retorna el árbol estructural del organigrama activo.
+     */
+    public function organigrama(): JsonResponse
+    {
+        $organigrama = $this->service->getOrganigrama();
+        
+        return response()->json([
+            'data' => $organigrama
+        ]);
+    }
+
+    /**
      * Obtiene la lista de unidades organizativas.
      */
     public function index(Request $request): JsonResponse

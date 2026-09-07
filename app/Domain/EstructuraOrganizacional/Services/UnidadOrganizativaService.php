@@ -199,6 +199,37 @@ class UnidadOrganizativaService
     }
 
     /**
+     * Resuelve la estructura jerárquica completa del organigrama activo.
+     */
+    public function getOrganigrama(): array
+    {
+        return $this->handle(function () {
+            $unidades = UnidadOrganizativa::with('encargado')
+                ->where('estado', UnidadOrganizativaEstadoEnum::ACTIVO->value)
+                ->orderBy('nombre')
+                ->get();
+
+            $unidadesPorId = $unidades->keyBy('id');
+
+            $unidadesPorId->each(function ($unidad) {
+                $unidad->setRelation('children', collect());
+            });
+
+            $roots = collect();
+
+            $unidadesPorId->each(function ($unidad) use ($unidadesPorId, $roots) {
+                if ($unidad->parent_id && $unidadesPorId->has($unidad->parent_id)) {
+                    $unidadesPorId->get($unidad->parent_id)->children->push($unidad);
+                } else {
+                    $roots->push($unidad);
+                }
+            });
+
+            return $roots->map(fn($root) => $this->mapper->toDTO($root))->toArray();
+        }, 'UnidadOrganizativaService@getOrganigrama');
+    }
+
+    /**
      * Elimina lógicamente una unidad organizativa sin borrarla físicamente.
      */
     public function delete(UnidadOrganizativa $model): void
