@@ -186,7 +186,7 @@ class UnidadOrganizativaService
     {
         return $this->handle(function () use ($perPage, $nivel) {
             $paginator = UnidadOrganizativa::with('encargado')
-                ->where('estado', UnidadOrganizativaEstadoEnum::ACTIVO->value)
+                ->whereNotIn('estado', [UnidadOrganizativaEstadoEnum::LEGADO->value])
                 ->when($nivel, fn($q) => $q->where('nivel', $nivel))
                 ->paginate($perPage);
             
@@ -196,6 +196,37 @@ class UnidadOrganizativaService
 
             return $paginator;
         }, 'UnidadOrganizativaService@paginate');
+    }
+
+    /**
+     * Resuelve la estructura jerárquica completa del organigrama activo.
+     */
+    public function getOrganigrama(): array
+    {
+        return $this->handle(function () {
+            $unidades = UnidadOrganizativa::with('encargado')
+                ->where('estado', UnidadOrganizativaEstadoEnum::ACTIVO->value)
+                ->orderBy('nombre')
+                ->get();
+
+            $unidadesPorId = $unidades->keyBy('id');
+
+            $unidadesPorId->each(function ($unidad) {
+                $unidad->setRelation('children', collect());
+            });
+
+            $roots = collect();
+
+            $unidadesPorId->each(function ($unidad) use ($unidadesPorId, $roots) {
+                if ($unidad->parent_id && $unidadesPorId->has($unidad->parent_id)) {
+                    $unidadesPorId->get($unidad->parent_id)->children->push($unidad);
+                } else {
+                    $roots->push($unidad);
+                }
+            });
+
+            return $roots->map(fn($root) => $this->mapper->toDTO($root))->toArray();
+        }, 'UnidadOrganizativaService@getOrganigrama');
     }
 
     /**
