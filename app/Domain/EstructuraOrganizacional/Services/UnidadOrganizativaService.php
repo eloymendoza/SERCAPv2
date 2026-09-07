@@ -4,8 +4,10 @@ namespace App\Domain\EstructuraOrganizacional\Services;
 
 use App\Traits\HandlesProcess;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
+use App\Domain\EstructuraOrganizacional\Models\JerarquiaHistorica;
 use App\Domain\EstructuraOrganizacional\DTOs\UnidadOrganizativaDTO;
 use App\Domain\EstructuraOrganizacional\Mappers\UnidadOrganizativaMapper;
 use App\Domain\EstructuraOrganizacional\Enums\UnidadOrganizativaEstadoEnum;
@@ -47,6 +49,17 @@ class UnidadOrganizativaService
                 $data['enabled_at'] = null; // No puede tener vigencia hasta ser activada
 
                 $model = UnidadOrganizativa::create($data);
+                
+                if ($model->parent_id) {
+                    JerarquiaHistorica::create([
+                        'padre_id' => $model->parent_id,
+                        'hijo_id' => $model->id,
+                        'fecha_inicio' => now(),
+                        'fecha_fin' => null,
+                        'usuario' => Auth::user()?->username,
+                    ]);
+                }
+                
                 return $this->mapper->toDTO($model);
             });
 
@@ -80,7 +93,28 @@ class UnidadOrganizativaService
                 if (property_exists($dto, 'encargadoId') && $dto->encargadoId === null) $data['encargado_id'] = null;
                 if (property_exists($dto, 'encargadoUsuario') && $dto->encargadoUsuario === null) $data['encargado_usuario'] = null;
 
+                $oldParentId = $model->parent_id;
+
                 $model->update($data);
+                
+                if (array_key_exists('parent_id', $data) && $oldParentId !== $data['parent_id']) {
+                    if ($oldParentId) {
+                        JerarquiaHistorica::where('padre_id', $oldParentId)
+                            ->where('hijo_id', $model->id)
+                            ->whereNull('fecha_fin')
+                            ->update(['fecha_fin' => now()]);
+                    }
+                    if ($data['parent_id']) {
+                        JerarquiaHistorica::create([
+                            'padre_id' => $data['parent_id'],
+                            'hijo_id' => $model->id,
+                            'fecha_inicio' => now(),
+                            'fecha_fin' => null,
+                            'usuario' => Auth::user()?->username,
+                        ]);
+                    }
+                }
+
                 return $this->mapper->toDTO($model);
             });
 
@@ -120,6 +154,48 @@ class UnidadOrganizativaService
                             'disabled_at' => now(),
                         ]);
                         $this->logger()->info("Predecesora desactivada automáticamente.", ['id' => $predecesora->id]);
+
+                        // Migración en cascada de los hijos
+                        $hijosParaMigrar = UnidadOrganizativa::where('parent_id', $predecesora->id)
+                            ->whereIn('estado', [
+                                UnidadOrganizativaEstadoEnum::ACTIVO->value,
+                                UnidadOrganizativaEstadoEnum::BORRADOR->value
+                            ])->get();
+                            
+                        if ($hijosParaMigrar->isNotEmpty()) {
+                            $hijosIds = $hijosParaMigrar->pluck('id')->toArray();
+                            $now = now();
+                            $username = Auth::user()?->username;
+                            
+                            // 1. Cerrar jerarquía anterior
+                            JerarquiaHistorica::where('padre_id', $predecesora->id)
+                                ->whereIn('hijo_id', $hijosIds)
+                                ->whereNull('fecha_fin')
+                                ->update(['fecha_fin' => $now]);
+                                
+                            // 2. Crear nueva jerarquía
+                            $nuevosRegistros = [];
+                            foreach ($hijosIds as $hijoId) {
+                                $nuevosRegistros[] = [
+                                    'padre_id' => $model->id,
+                                    'hijo_id' => $hijoId,
+                                    'fecha_inicio' => $now,
+                                    'fecha_fin' => null,
+                                    'usuario' => $username,
+                                    'created_at' => $now,
+                                    'updated_at' => $now,
+                                ];
+                            }
+                            JerarquiaHistorica::insert($nuevosRegistros);
+                            
+                            // 3. Mover hijos en la tabla principal
+                            UnidadOrganizativa::whereIn('id', $hijosIds)->update(['parent_id' => $model->id]);
+                            
+                            $this->logger()->info("Hijos reasignados en cascada hacia la nueva unidad.", [
+                                'cantidad_migrada' => count($hijosIds),
+                                'nuevo_padre_id' => $model->id
+                            ]);
+                        }
                     }
                 }
             });
