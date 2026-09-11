@@ -60,7 +60,7 @@ class AspiranteRequest extends FormRequest
             // -------------------------------------------------------
             'educacion'                          => ['nullable', 'array'],
             'educacion.*.institucion'            => ['required_with:educacion', 'string', 'max:200'],
-            'educacion.*.nivelEstudioId'         => ['required_with:educacion', 'integer', 'exists:catalogo_nivel_estudio,nivel_estudio_id'],
+            'educacion.*.nivelEstudioId'         => ['required_with:educacion', 'integer', 'exists:catalogo_nivel_estudios,id'],
             'educacion.*.titulo'                 => ['required_with:educacion', 'string', 'max:200'],
             'educacion.*.estadoEducacion'        => ['required_with:educacion', 'string', 'in:en_curso,titulado,concluido_sin_titulo,incompleto'],
             'educacion.*.anioFin'                => [
