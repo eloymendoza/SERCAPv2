@@ -48,7 +48,6 @@ class UnidadOrganizativaPolicy
      */
     public function delete(User $user): bool
     {
-        // Nota: en el request original te faltó inyectar el modelo en la firma, lo corrijo aquí.
         return $this->isAuthorized($user);
     }
 
