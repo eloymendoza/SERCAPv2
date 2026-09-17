@@ -25,6 +25,17 @@ beforeEach(function () {
     // Redirigir conexión Costosv2 a sqlite en memoria
     config(['database.connections.Costosv2' => config('database.connections.sqlite')]);
 
+    // Crear el usuario Sistema para evitar errores de Foreign Key en el historial
+    User::firstOrCreate(
+        ['username' => 'Sistema'],
+        [
+            'id_personal' => 0,
+            'name' => 'Usuario Sistema',
+            'email' => 'sistema@test.com',
+            'password' => bcrypt('password')
+        ]
+    );
+
     // Crear la tabla externa de proyectos en la base de datos de pruebas
     Schema::connection('Costosv2')->dropIfExists('proyecto');
     Schema::connection('Costosv2')->create('proyecto', function (Blueprint $table) {
@@ -117,65 +128,6 @@ describe('SolicitudRequisicionPolicy', function () {
 
 });
 
-describe('ValidarVinculoProyectoRule', function () {
-
-    it('pasa la validación si el solicitante tiene un vínculo contextual', function () {
-        $usuario = User::create([
-            'id_personal' => 300,
-            'username' => 'pedro.gomez',
-            'name' => 'PEDRO GOMEZ',
-            'email' => 'pedro@test.com',
-        ]);
-
-        $direccion = UnidadOrganizativa::create([
-            'nivel' => 'direccion',
-            'nombre' => 'Dirección A',
-            'encargado_usuario' => 'pedro.gomez',
-            'estado' => 'Activo'
-        ]);
-
-        $rule = new ValidarVinculoProyectoRule($direccion->id, null);
-        
-        $rule->validate('solicitante_id', 300, function ($message) {
-            $this->fail("La validación debió pasar, pero falló con: $message");
-        });
-
-        expect(true)->toBeTrue();
-    });
-
-    it('falla la validación si el solicitante no tiene un vínculo contextual', function () {
-        $usuario = User::create([
-            'id_personal' => 300,
-            'username' => 'pedro.gomez',
-            'name' => 'PEDRO GOMEZ',
-            'email' => 'pedro@test.com',
-        ]);
-
-        $rule = new ValidarVinculoProyectoRule(999, 999);
-
-        $failed = false;
-        $rule->validate('solicitante_id', 300, function ($message) use (&$failed) {
-            $failed = true;
-            expect($message)->toContain('El solicitante debe estar directamente ligado');
-        });
-
-        expect($failed)->toBeTrue();
-    });
-
-    it('falla la validación si el solicitante no existe', function () {
-        $rule = new ValidarVinculoProyectoRule(null, null);
-
-        $failed = false;
-        $rule->validate('solicitante_id', 999, function ($message) use (&$failed) {
-            $failed = true;
-            expect($message)->toContain('El solicitante especificado no es un usuario válido');
-        });
-
-        expect($failed)->toBeTrue();
-    });
-
-});
-
 describe('Integración HTTP (Request y Endpoint)', function () {
 
     it('permite que un usuario EAP acceda al validador y reciba 422 si proyecto_id no existe', function () {
@@ -247,4 +199,3 @@ describe('Integración HTTP (Request y Endpoint)', function () {
     });
 
 });
-

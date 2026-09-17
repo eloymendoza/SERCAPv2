@@ -16,8 +16,19 @@ uses(RefreshDatabase::class);
 /** @var \Tests\TestCase $this */
 
 beforeEach(function () {
-    // Redirigir conexión Costosv2 a sqlite en memoria
+    // Aislar bases de datos externas
     config(['database.connections.Costosv2' => config('database.connections.sqlite')]);
+
+    // Crear el usuario Sistema para evitar errores de Foreign Key en el historial
+    User::firstOrCreate(
+        ['username' => 'Sistema'],
+        [
+            'id_personal' => 0,
+            'name' => 'Usuario Sistema',
+            'email' => 'sistema@test.com',
+            'password' => bcrypt('password')
+        ]
+    );
 
     // Crear la tabla de proyectos para poder realizar pruebas de Eloquent en aislamiento
     Schema::connection('Costosv2')->dropIfExists('proyecto');
@@ -36,7 +47,7 @@ describe('VinculoContextualService', function () {
         $user = User::create([
             'id_personal' => 123,
             'username' => 'eloy.mendoza',
-            'name' => 'ELOY MENDOZA',
+            'name' => 'Eloy Mendoza Cortez',
             'email' => 'eloy@test.com'
         ]);
 
@@ -57,14 +68,14 @@ describe('VinculoContextualService', function () {
         $user = User::create([
             'id_personal' => 123,
             'username' => 'eloy.mendoza',
-            'name' => 'ELOY MENDOZA',
+            'name' => 'Eloy Mendoza Cortez',
             'email' => 'eloy@test.com'
         ]);
 
         $proyecto = Proyecto::create([
             'idProyecto' => 456,
             'proyecto' => 'Sistema SERCAP',
-            'gerenteProyecto' => 'ELOY MENDOZA',
+            'gerenteProyecto' => 'Eloy Mendoza Cortez',
             'jefeProyecto' => 'OTRO',
             'activoProyecto' => true
         ]);
@@ -79,7 +90,7 @@ describe('VinculoContextualService', function () {
         $user = User::create([
             'id_personal' => 123,
             'username' => 'eloy.mendoza',
-            'name' => 'ELOY MENDOZA',
+            'name' => 'Eloy Mendoza Cortez',
             'email' => 'eloy@test.com'
         ]);
 

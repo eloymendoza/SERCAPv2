@@ -18,6 +18,17 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     // Aislar bases de datos externas
     config(['database.connections.Costosv2' => config('database.connections.sqlite')]);
+
+    // Crear el usuario Sistema para evitar errores de Foreign Key en el historial
+    User::firstOrCreate(
+        ['username' => 'Sistema'],
+        [
+            'id_personal' => 0,
+            'name' => 'Usuario Sistema',
+            'email' => 'sistema@test.com',
+            'password' => bcrypt('password')
+        ]
+    );
 });
 
 describe('Aprobación de Solicitud de Requisición', function () {
