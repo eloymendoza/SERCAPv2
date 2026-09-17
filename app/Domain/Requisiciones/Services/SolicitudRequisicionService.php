@@ -11,10 +11,14 @@ use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
 use App\Domain\Requisiciones\Mappers\SolicitudRequisicionMapper;
+use App\Domain\Requisiciones\Rules\SolicitudRequisicionRuleInterface;
 
 class SolicitudRequisicionService
 {
     use HandlesProcess;
+
+    /** @var array<SolicitudRequisicionRuleInterface> */
+    private array $rules = [];
 
     public function __construct(
         private readonly SolicitudRequisicionMapper $mapper,
@@ -22,7 +26,16 @@ class SolicitudRequisicionService
         private readonly OrquestadorWorkflow $orquestadorWorkflow,
         private readonly FirmantesResolverService $firmantesResolver,
         private readonly WorkflowService $workflowService,
-    ) {}
+        private readonly VinculoContextualService $vinculoService
+    ) {
+        $this->rules = [
+            new \App\Domain\Requisiciones\Rules\Create\ValidarUnicaEnmiendaEnProcesoRule(),
+            new \App\Domain\Requisiciones\Rules\Create\ValidarUnicaRequisicionActivaPorProyectoRule(),
+            new \App\Domain\Requisiciones\Rules\Shared\ValidarEnmiendaConCambiosRealesRule(),
+            new \App\Domain\Requisiciones\Rules\Shared\ValidarRangoSueldoTabuladorRule(),
+            new \App\Domain\Requisiciones\Rules\Shared\ValidarVinculoProyectoRule($this->vinculoService),
+        ];
+    }
 
     protected function getLogChannel(): string
     {
@@ -34,6 +47,8 @@ class SolicitudRequisicionService
         $this->logger()->info("Iniciando creación de solicitud.", [
             'folio' => $dto->folio
         ]);
+
+        $this->validateRules(null, $dto);
 
         return $this->handle(function () use ($dto, $elaborador) {
             $createdModel = DB::transaction(function () use ($dto, $elaborador) {
@@ -71,6 +86,8 @@ class SolicitudRequisicionService
         $this->logger()->info("Iniciando actualización de solicitud.", [
             'id' => $model->id
         ]);
+
+        $this->validateRules($model, $dto);
 
         return $this->handle(function () use ($model, $dto, $elaborador) {
             $updatedModel = DB::transaction(function () use ($model, $dto, $elaborador) {
@@ -283,5 +300,15 @@ class SolicitudRequisicionService
             
             return $this->firmantesResolver->resolverParaRequisicion($elaborador, $solicitud);
         }, 'SolicitudRequisicionService@previewAprobadores');
+    }
+
+    /**
+     * Ejecuta las reglas de dominio sobre la solicitud.
+     */
+    private function validateRules(?SolicitudRequisicion $model, ?SolicitudRequisicionDTO $dto = null): void
+    {
+        foreach ($this->rules as $rule) {
+            $rule->validate($model, $dto);
+        }
     }
 }

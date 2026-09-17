@@ -77,9 +77,11 @@ class RequisicionDTO
             tipo: (int) ($data['tipo'] ?? 1),
             observaciones: $data['observaciones'] ?? null,
             estado: $estado,
-            detalles: isset($data['detalle']) && is_array($data['detalle']) 
-                ? array_map(fn($d) => DetalleRequisicionDTO::fromArray($d), $data['detalle']) 
-                : null
+            detalles: isset($data['detalles']) && is_array($data['detalles']) 
+                ? array_map(fn($d) => DetalleRequisicionDTO::fromArray($d), $data['detalles']) 
+                : (isset($data['detalle']) && is_array($data['detalle']) 
+                    ? array_map(fn($d) => DetalleRequisicionDTO::fromArray($d), $data['detalle']) 
+                    : null)
         );
     }
 }

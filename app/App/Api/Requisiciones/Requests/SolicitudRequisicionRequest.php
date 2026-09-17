@@ -6,17 +6,12 @@ use Illuminate\Validation\Rule;
 use App\Domain\Puestos\Models\Puesto;
 use App\Domain\Catalogos\Models\Proyecto;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Domain\Requisiciones\Enums\TipoContratoEnum;
 use App\Domain\Requisiciones\Models\Requisicion;
 use App\Domain\Catalogos\Models\TabuladorSalario;
+use App\Domain\Requisiciones\Enums\TipoContratoEnum;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\SolicitudRequisicionDTO;
-use App\App\Api\Requisiciones\Rules\ValidarVinculoProyectoRule;
-use App\App\Api\Requisiciones\Rules\UnicaEnmiendaEnProcesoRule;
-use App\App\Api\Requisiciones\Rules\EnmiendaConCambiosRealesRule;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
-use App\App\Api\Requisiciones\Rules\ValidarRangoSueldoTabuladorRule;
-use App\App\Api\Requisiciones\Rules\UnicaRequisicionActivaPorProyectoRule;
 
 /**
  * Valida los datos recibidos para la creación o edición de una SolicitudRequisicion.
@@ -80,21 +75,15 @@ class SolicitudRequisicionRequest extends FormRequest
                 'nullable',
                 'integer',
                 Rule::exists(Requisicion::class, 'id'),
-                new UnicaEnmiendaEnProcesoRule($id),
             ],
             'proyecto_id' => [
                 'nullable',
                 'integer',
                 Rule::exists(Proyecto::class, 'idProyecto')->where('activoProyecto', true),
-                new UnicaRequisicionActivaPorProyectoRule($this->input('requisicion_padre_id')),
             ],
             'solicitante_id' => [
                 'nullable',
                 'integer',
-                new ValidarVinculoProyectoRule(
-                    $this->input('direccion_id'),
-                    $this->input('proyecto_id')
-                ),
             ],
             'direccion_id' => [
                 'required',
@@ -119,7 +108,6 @@ class SolicitudRequisicionRequest extends FormRequest
             'requisicion.detalle' => [
                 'nullable', 
                 'array',
-                new EnmiendaConCambiosRealesRule($this->input('requisicion_padre_id'))
             ],
             'requisicion.detalle.*.puesto_id' => [
                 'nullable', 
@@ -154,7 +142,6 @@ class SolicitudRequisicionRequest extends FormRequest
             'requisicion.detalle.*.sueldo_asignado' => [
                 'required_with:requisicion.detalle', 
                 'numeric',
-                new ValidarRangoSueldoTabuladorRule()
             ],
             'requisicion.detalle.*.turno_horas' => ['required_with:requisicion.detalle'],
             'requisicion.detalle.*.fecha_inicio' => ['required_with:requisicion.detalle', 'date'],
