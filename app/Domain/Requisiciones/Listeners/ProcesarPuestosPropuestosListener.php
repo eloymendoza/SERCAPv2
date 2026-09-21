@@ -27,8 +27,8 @@ class ProcesarPuestosPropuestosListener
         }
 
         DB::transaction(function () use ($solicitud, $requisicion) {
-            $direccion = UnidadOrganizativa::find($solicitud->direccion_id);
-            $encargadoId = $direccion?->encargado_id ?? $solicitud->solicitante_id;
+            $unidad = UnidadOrganizativa::find($solicitud->unidad_organizativa_id);
+            $encargadoId = $unidad?->resolverDireccion()?->encargado_id ?? $solicitud->solicitante_id;
             
             $solicitudPerfil = null;
 
@@ -39,7 +39,7 @@ class ProcesarPuestosPropuestosListener
                     // 1. Crear el Puesto maestro
                     $puestoNuevo = Puesto::create([
                         'nombre_puesto' => $propuesta->nombre_puesto,
-                        'direccion_id' => $solicitud->direccion_id,
+                        'unidad_organizativa_id' => $solicitud->unidad_organizativa_id,
                         'reporta_a_puesto_id' => $propuesta->reporta_a_puesto_id,
                         'tipo' => $propuesta->tipo,
                         'estado' => PuestoEstadoEnum::BORRADOR->value,
@@ -50,7 +50,7 @@ class ProcesarPuestosPropuestosListener
                         $solicitudPerfil = SolicitudPerfilPuesto::create([
                             'solicitante_id' => $encargadoId,
                             'elaborador_id' => null, // Queda nulo para la bandeja compartida del ERS
-                            'direccion_id' => $solicitud->direccion_id,
+                            'unidad_organizativa_id' => $solicitud->unidad_organizativa_id,
                             'estado' => 'borrador', 
                             'observaciones' => 'Solicitud autogenerada desde la requisición de personal ' . $solicitud->folio,
                         ]);

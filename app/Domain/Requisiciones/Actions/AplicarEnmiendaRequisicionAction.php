@@ -9,8 +9,8 @@ use App\Domain\Requisiciones\Models\Vacante;
 use App\Exceptions\Domain\BusinessRuleException;
 use App\Domain\Requisiciones\Enums\VacanteEstadoEnum;
 use App\Domain\Requisiciones\Models\DetalleRequisicion;
-use App\Domain\Requisiciones\Models\SolicitudPerfilPuesto;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
+use App\Domain\Requisiciones\Models\SolicitudPerfilPuesto;
 
 /**
  * Orquesta la lógica de Enmiendas aplicando reducciones, cambios de perfil y ampliaciones.
@@ -96,14 +96,14 @@ class AplicarEnmiendaRequisicionAction
 
                         $puestoNuevo = Puesto::create([
                             'nombre_puesto' => $propuesta->nombre_puesto,
-                            'direccion_id' => $solicitud->direccion_id,
+                            'unidad_organizativa_id' => $solicitud->unidad_organizativa_id,
                             'reporta_a_puesto_id' => $propuesta->reporta_a_puesto_id,
                             'tipo' => $propuesta->tipo,
                         ]);
 
                         $solicitudPerfil = SolicitudPerfilPuesto::create([
                             'solicitante_id' => $solicitud->elaborador_id ?? $solicitud->solicitante_id,
-                            'direccion_id' => $solicitud->direccion_id,
+                            'unidad_organizativa_id' => $solicitud->unidad_organizativa_id,
                             'estado' => 'borrador', 
                             'observaciones' => 'Solicitud autogenerada desde enmienda ' . $solicitud->folio,
                         ]);

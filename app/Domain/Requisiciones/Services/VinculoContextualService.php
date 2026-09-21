@@ -12,12 +12,17 @@ class VinculoContextualService
     /**
      * Determina si el usuario es el encargado de una dirección organizativa específica.
      */
-    public function esDireccionEncargada(User $user, int $direccionId): bool
+    public function esDireccionEncargada(User $user, int $unidadOrganizativaId): bool
     {
-        return UnidadOrganizativa::where('id', $direccionId)
-            ->where('encargado_usuario', $user->username)
-            ->where('nivel', 'direccion')
-            ->exists();
+        $unidad = UnidadOrganizativa::find($unidadOrganizativaId);
+        
+        if (!$unidad) {
+            return false;
+        }
+
+        $direccion = $unidad->resolverDireccion();
+
+        return $direccion->encargado_usuario === $user->username;
     }
 
     /**
@@ -38,7 +43,7 @@ class VinculoContextualService
      */
     public function tieneVinculoContextual(ContextoAutorizacionDTO $contexto): bool
     {
-        if ($contexto->direccionId && $this->esDireccionEncargada($contexto->user, $contexto->direccionId)) {
+        if ($contexto->unidadOrganizativaId && $this->esDireccionEncargada($contexto->user, $contexto->unidadOrganizativaId)) {
             return true;
         }
         if ($contexto->proyectoId && $this->esVinculadoProyecto($contexto->user, $contexto->proyectoId)) {

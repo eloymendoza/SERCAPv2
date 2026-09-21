@@ -12,6 +12,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\Domain\Requisiciones\Enums\VacanteEstadoEnum;
 use App\Domain\Puestos\Actions\VincularPerfilSgcAction;
 use App\Domain\Puestos\Events\PuestoCreadoSinPerfil;
+use App\Domain\Requisiciones\Models\SolicitudPerfilPuesto;
+use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 use App\Domain\Puestos\Rules\Update\ValidarEstadoLegadoRule;
 use App\Domain\Puestos\Rules\Update\ValidarCambioPerfilSlaRule;
 use App\Domain\Puestos\Rules\Delete\ValidarRequisicionesActivasRule;
@@ -51,8 +53,8 @@ class PuestoService
 
         return $this->handle(function () use ($perPage) {
             $paginator = Puesto::query()
-                ->select(['id', 'nombre_puesto', 'tipo', 'direccion_id', 'reporta_a_puesto_id'])
-                ->with(['perfilSgc', 'direccion'])
+                ->select(['id', 'nombre_puesto', 'tipo', 'unidad_organizativa_id', 'reporta_a_puesto_id'])
+                ->with(['perfilSgc', 'unidadOrganizativa'])
                 ->withCount(['detallesRequisicion as urgente' => function($q) {
                     $q->whereHas('vacantes', function($q2) {
                         $q2->where('estado', VacanteEstadoEnum::PENDIENTE_VINCULACION_SGC->value);
@@ -107,7 +109,26 @@ class PuestoService
                 $data['estado'] = $puesto->estado === PuestoEstadoEnum::INACTIVO->value ? PuestoEstadoEnum::INACTIVO->value : PuestoEstadoEnum::BORRADOR->value;
             }
 
+            $oldUnidadId = $puesto->unidad_organizativa_id;
+
             $puesto->update($data);
+
+            if ($oldUnidadId !== (int) $data['unidad_organizativa_id']) {
+                if ($puesto->estado === PuestoEstadoEnum::BORRADOR->value) {
+                    $perfil = $puesto->perfiles()->where('estado', 'borrador')->first();
+                    if ($perfil && $perfil->solicitud_id) {
+                        $solicitud = SolicitudPerfilPuesto::find($perfil->solicitud_id);
+                        if ($solicitud) {
+                            $nuevaUnidad = UnidadOrganizativa::find($data['unidad_organizativa_id']);
+                            $nuevoEncargadoId = $nuevaUnidad?->resolverDireccion()?->encargado_id;
+                            $solicitud->update([
+                                'unidad_organizativa_id' => $data['unidad_organizativa_id'],
+                                'solicitante_id' => $nuevoEncargadoId ?? $solicitud->solicitante_id,
+                            ]);
+                        }
+                    }
+                }
+            }
 
             if ($dto->idDocumento) {
                 if (!$puesto->tienePerfilVinculadoSGC()) {
@@ -175,7 +196,7 @@ class PuestoService
      */
     private function loadRequiredRelations(Puesto $puesto): void
     {
-        $puesto->load(['perfilSgc', 'direccion']);
+        $puesto->load(['perfilSgc', 'unidadOrganizativa']);
         $puesto->loadCount(['detallesRequisicion as urgente' => function($q) {
             $q->whereHas('vacantes', function($q2) {
                 $q2->where('estado', VacanteEstadoEnum::PENDIENTE_VINCULACION_SGC->value);

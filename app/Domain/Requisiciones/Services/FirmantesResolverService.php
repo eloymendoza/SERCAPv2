@@ -54,10 +54,13 @@ class FirmantesResolverService
      */
     private function determinarRol(User $elaborador, SolicitudRequisicion $solicitud): string
     {
-        if ($solicitud->direccion_id) {
-            $direccion = UnidadOrganizativa::find($solicitud->direccion_id);
-            if ($direccion && (int)$direccion->encargado_id === (int)$elaborador->id_personal) {
-                return 'director';
+        if ($solicitud->unidad_organizativa_id) {
+            $unidadOrigen = UnidadOrganizativa::find($solicitud->unidad_organizativa_id);
+            if ($unidadOrigen) {
+                $direccion = $unidadOrigen->resolverDireccion();
+                if ((int)$direccion->encargado_id === (int)$elaborador->id_personal) {
+                    return 'director';
+                }
             }
         }
 
@@ -102,7 +105,7 @@ class FirmantesResolverService
      */
     private function resolverFirmantesEstandar(SolicitudRequisicion $solicitud, int $totalVacantes): array
     {
-        $directorId = $this->resolverDirectorArea($solicitud->direccion_id);
+        $directorId = $this->resolverDirectorArea($solicitud->unidad_organizativa_id);
 
         $firmantes = [
             ['Id_personal' => $directorId, 'orden' => 1],
@@ -134,10 +137,11 @@ class FirmantesResolverService
     }
 
     /**
-     * Resuelve el personal_id del Director del área desde la UO de dirección.
+     * Resuelve el personal_id del Director ascendiendo desde la UO origen.
      */
-    private function resolverDirectorArea(int $direccionId): int
+    private function resolverDirectorArea(int $unidadOrganizativaId): int
     {
-        return (int) UnidadOrganizativa::findOrFail($direccionId)->encargado_id;
+        $unidad = UnidadOrganizativa::findOrFail($unidadOrganizativaId);
+        return (int) $unidad->resolverDireccion()->encargado_id;
     }
 }
