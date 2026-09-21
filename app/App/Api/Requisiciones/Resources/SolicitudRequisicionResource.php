@@ -22,9 +22,7 @@ class SolicitudRequisicionResource extends JsonResource
             'id_instancia_workflow' => $this->idInstanciaWorkflow,
             'solicitante_id' => $this->solicitanteId,
             'elaborador_id' => $this->elaboradorId,
-            'direccion_id' => $this->direccionId,
-            'gerencia_id' => $this->gerenciaId,
-            'coordinacion_id' => $this->coordinacionId,
+            'unidad_organizativa_id' => $this->unidadOrganizativaId,
             'observaciones' => $this->observaciones,
             'requisicion_padre_id' => $this->requisicionPadreId,
             'estado' => $this->estado ? [

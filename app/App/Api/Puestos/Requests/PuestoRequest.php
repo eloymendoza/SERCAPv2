@@ -50,14 +50,13 @@ class PuestoRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('puestos', 'nombre_puesto')
-                    ->where('direccion_id', $this->input('direccion_id'))
+                    ->where('unidad_organizativa_id', $this->input('unidad_organizativa_id'))
                     ->ignore($this->route('puesto')),
             ],
-            'direccion_id' => [
+            'unidad_organizativa_id' => [
                 'required',
                 'integer',
                 Rule::exists(UnidadOrganizativa::class, 'id')
-                    ->where('nivel', 'direccion')
                     ->where('estado', 'Activo'),
             ],
             'reporta_a_puesto_id' => [
@@ -65,7 +64,7 @@ class PuestoRequest extends FormRequest
                 'nullable',
                 'integer',
                 Rule::exists(Puesto::class, 'id')
-                    ->where('direccion_id', $this->input('direccion_id')),
+                    ->where('unidad_organizativa_id', $this->input('unidad_organizativa_id')),
             ],
             'tipo' => ['required', Rule::enum(TipoPuestoEnum::class)],
             'id_documento' => ['nullable', 'integer', 'min:1'],
@@ -83,9 +82,9 @@ class PuestoRequest extends FormRequest
             'nombre_puesto.required' => 'El campo :attribute es obligatorio.',
             'nombre_puesto.unique' => 'Ya existe un puesto con este nombre en la dirección seleccionada.',
             
-            'direccion_id.required' => 'El campo :attribute es obligatorio.',
-            'direccion_id.integer' => 'El campo :attribute debe ser un número entero.',
-            'direccion_id.exists' => 'La dirección seleccionada no es válida o está inactiva.',
+            'unidad_organizativa_id.required' => 'El campo :attribute es obligatorio.',
+            'unidad_organizativa_id.integer' => 'El campo :attribute debe ser un número entero.',
+            'unidad_organizativa_id.exists' => 'La unidad organizativa seleccionada no es válida o está inactiva.',
             
             'reporta_a_puesto_id.integer' => 'El campo :attribute debe ser un número entero.',
             'reporta_a_puesto_id.exists' => 'El puesto superior seleccionado no existe o no pertenece a la misma dirección.',
@@ -104,7 +103,7 @@ class PuestoRequest extends FormRequest
     {
         return [
             'nombre_puesto' => 'nombre del puesto',
-            'direccion_id' => 'dirección',
+            'unidad_organizativa_id' => 'unidad organizativa',
             'reporta_a_puesto_id' => 'puesto superior (reporta a)',
             'tipo' => 'tipo de puesto',
             'id_documento' => 'ID de documento',

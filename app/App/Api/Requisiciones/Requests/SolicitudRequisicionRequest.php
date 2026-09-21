@@ -31,7 +31,7 @@ class SolicitudRequisicionRequest extends FormRequest
             return $this->user()?->can('update', $solicitud) ?? false;
         }
 
-        $direccionId = $this->filled('direccion_id') ? (int) $this->input('direccion_id') : null;
+        $unidadOrganizativaId = $this->filled('unidad_organizativa_id') ? (int) $this->input('unidad_organizativa_id') : null;
         $proyectoId  = $this->filled('proyecto_id')  ? (int) $this->input('proyecto_id') : null;
 
         if ($proyectoId && !Proyecto::where('idProyecto', $proyectoId)->where('activoProyecto', true)->exists()) {
@@ -40,7 +40,7 @@ class SolicitudRequisicionRequest extends FormRequest
 
         return $this->user()?->can('create', [
             SolicitudRequisicion::class,
-            $direccionId,
+            $unidadOrganizativaId,
             $proyectoId,
         ]) ?? false;
     }
@@ -85,18 +85,8 @@ class SolicitudRequisicionRequest extends FormRequest
                 'nullable',
                 'integer',
             ],
-            'direccion_id' => [
+            'unidad_organizativa_id' => [
                 'required',
-                'integer',
-                Rule::exists(UnidadOrganizativa::class, 'id')->where('nivel', 'direccion')->where('estado', 'Activo'),
-            ],
-            'gerencia_id' => [
-                'nullable',
-                'integer',
-                Rule::exists(UnidadOrganizativa::class, 'id')->where('nivel', 'gerencia')->where('estado', 'Activo'),
-            ],
-            'coordinacion_id' => [
-                'nullable',
                 'integer',
                 Rule::exists(UnidadOrganizativa::class, 'id')->where('estado', 'Activo'),
             ],
@@ -112,7 +102,7 @@ class SolicitudRequisicionRequest extends FormRequest
             'requisicion.detalle.*.puesto_id' => [
                 'nullable', 
                 'integer', 
-                Rule::exists(Puesto::class, 'id')->where('direccion_id', $this->input('direccion_id'))
+                Rule::exists(Puesto::class, 'id')->where('unidad_organizativa_id', $this->input('unidad_organizativa_id'))
             ],
             'requisicion.detalle.*.propuesta_nombre' => [
                 'required_without:requisicion.detalle.*.puesto_id',
@@ -120,12 +110,12 @@ class SolicitudRequisicionRequest extends FormRequest
                 'max:255',
                 'distinct',
                 Rule::unique('puestos', 'nombre_puesto')
-                    ->where('direccion_id', $this->input('direccion_id')),
+                    ->where('unidad_organizativa_id', $this->input('unidad_organizativa_id')),
             ],
             'requisicion.detalle.*.propuesta_reporta_a' => [
                 'nullable',
                 'integer',
-                Rule::exists(Puesto::class, 'id')->where('direccion_id', $this->input('direccion_id'))
+                Rule::exists(Puesto::class, 'id')->where('unidad_organizativa_id', $this->input('unidad_organizativa_id'))
             ],
             'requisicion.detalle.*.propuesta_tipo' => [
                 'required_without:requisicion.detalle.*.puesto_id',
@@ -160,23 +150,17 @@ class SolicitudRequisicionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'direccion_id.required' => 'El campo :attribute es obligatorio.',
-            'direccion_id.integer' => 'El campo :attribute debe ser un número entero.',
-            'direccion_id.exists' => 'La dirección seleccionada no es válida o está inactiva.',
-            
-            'gerencia_id.integer' => 'El campo :attribute debe ser un número entero.',
-            'gerencia_id.exists' => 'La gerencia seleccionada no es válida o está inactiva.',
-            
-            'coordinacion_id.integer' => 'El campo :attribute debe ser un número entero.',
-            'coordinacion_id.exists' => 'La coordinación seleccionada no es válida o está inactiva.',
+            'unidad_organizativa_id.required' => 'El campo :attribute es obligatorio.',
+            'unidad_organizativa_id.integer' => 'El campo :attribute debe ser un número entero.',
+            'unidad_organizativa_id.exists' => 'La unidad organizativa seleccionada no es válida o está inactiva.',
             
             'observaciones.string' => 'El campo :attribute debe ser una cadena de texto.',
             
             'proyecto_id.integer' => 'El campo :attribute debe ser un número entero.',
             'proyecto_id.exists' => 'El proyecto seleccionado no existe.',
             
-            'requisicion.detalle.*.puesto_id.exists' => 'El puesto seleccionado no es válido o no pertenece a la dirección solicitada.',
-            'requisicion.detalle.*.propuesta_nombre.unique' => 'El nombre del puesto propuesto ya existe en la dirección seleccionada.',
+            'requisicion.detalle.*.puesto_id.exists' => 'El puesto seleccionado no es válido o no pertenece a la unidad organizativa solicitada.',
+            'requisicion.detalle.*.propuesta_nombre.unique' => 'El nombre del puesto propuesto ya existe en la unidad organizativa seleccionada.',
             'requisicion.detalle.*.propuesta_nombre.distinct' => 'El nombre del puesto propuesto no puede repetirse en la misma solicitud.',
 
             'solicitante_id.integer' => 'El campo :attribute debe ser un número entero.',
@@ -197,9 +181,7 @@ class SolicitudRequisicionRequest extends FormRequest
             'proyecto_id' => 'proyecto',
             'id_instancia_workflow' => 'instancia de workflow',
             'solicitante_id' => 'solicitante',
-            'direccion_id' => 'dirección',
-            'gerencia_id' => 'gerencia',
-            'coordinacion_id' => 'coordinación',
+            'unidad_organizativa_id' => 'unidad organizativa',
             'observaciones' => 'observaciones',
             'estado' => 'estado',
             'requisicion_padre_id' => 'requisición original (enmienda)',

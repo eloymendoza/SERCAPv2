@@ -19,13 +19,13 @@ class PuestoResource extends JsonResource
         return [
             'id' => $this->resource->id,
             'nombre_puesto' => $this->resource->nombrePuesto,
-            'direccion_id' => $this->resource->direccionId,
+            'unidad_organizativa_id' => $this->resource->unidadOrganizativaId,
             'reporta_a_puesto_id' => $this->resource->reportaAPuestoId,
             'tipo' => $this->resource->tipo,
             'urgente' => $this->resource->urgente,
             'perfil_sgc' => $this->resource->perfilSgc,
             'estado' => $this->resource->estado,
-            'direccion' => $this->resource->direccion,
+            'unidad_organizativa' => $this->resource->unidadOrganizativa,
         ];
     }
 }
