@@ -28,9 +28,7 @@ class SolicitudRequisicionMapper
             idInstanciaWorkflow: $model->id_instancia_workflow,
             solicitanteId: $model->solicitante_id,
             elaboradorId: $model->elaborador_id,
-            direccionId: $model->direccion_id,
-            gerenciaId: $model->gerencia_id,
-            coordinacionId: $model->coordinacion_id,
+            unidadOrganizativaId: $model->unidad_organizativa_id,
             requisicionPadreId: $model->requisicion_padre_id,
             observaciones: $model->observaciones,
             estado: $model->estado,
@@ -54,9 +52,7 @@ class SolicitudRequisicionMapper
             'id_instancia_workflow' => $dto->idInstanciaWorkflow,
             'solicitante_id' => $dto->solicitanteId,
             'elaborador_id' => $dto->elaboradorId,
-            'direccion_id' => $dto->direccionId,
-            'gerencia_id' => $dto->gerenciaId,
-            'coordinacion_id' => $dto->coordinacionId,
+            'unidad_organizativa_id' => $dto->unidadOrganizativaId,
             'requisicion_padre_id' => $dto->requisicionPadreId,
             'observaciones' => $dto->observaciones,
             'estado' => $dto->estado,
@@ -93,8 +89,6 @@ class SolicitudRequisicionMapper
         
         return $data;
     }
-
-
 
     /**
      * Convierte una colección de modelos SolicitudRequisicion a DTOs.

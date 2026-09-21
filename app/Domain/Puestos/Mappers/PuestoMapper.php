@@ -19,7 +19,7 @@ class PuestoMapper
     {
         return [
             'nombre_puesto' => $dto->nombrePuesto,
-            'direccion_id' => $dto->direccionId,
+            'unidad_organizativa_id' => $dto->unidadOrganizativaId,
             'reporta_a_puesto_id' => $dto->reportaAPuestoId,
             'tipo' => $dto->tipo,
         ];
@@ -50,14 +50,14 @@ class PuestoMapper
 
         return new PuestoDTO(
             nombrePuesto: $model->nombre_puesto,
-            direccionId: $model->direccion_id,
+            unidadOrganizativaId: $model->unidad_organizativa_id,
             tipo: $model->tipo,
             id: $model->id,
             reportaAPuestoId: $model->reporta_a_puesto_id,
             perfilSgc: $perfilSgc,
             urgente: $model->urgente ?? 0,
             estado: $model->estado,
-            direccion: $model->relationLoaded('direccion') && $model->direccion ? $model->direccion->only(['id', 'nombre', 'abreviatura', 'nivel']) : null
+            unidadOrganizativa: $model->relationLoaded('unidadOrganizativa') && $model->unidadOrganizativa ? $model->unidadOrganizativa->only(['id', 'nombre', 'abreviatura', 'nivel']) : null
         );
     }
 }

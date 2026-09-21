@@ -6,13 +6,19 @@ use App\Traits\AuditableModule;
 use Illuminate\Database\Eloquent\Model;
 use App\Domain\Autenticacion\Models\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class UnidadOrganizativa extends Model
 {
-    use SoftDeletes, AuditableModule;
+    use SoftDeletes, AuditableModule, HasFactory;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\UnidadOrganizativaFactory::new();
+    }
 
     protected $table = 'unidades_organizativas';
 
@@ -94,5 +100,17 @@ class UnidadOrganizativa extends Model
     public function getHistoryForeignKey(): string
     {
         return 'unidad_organizativa_id';
+    }
+
+    /**
+     * Sube por la jerarquía organizativa hasta encontrar el nodo raíz (Dirección).
+     */
+    public function resolverDireccion(): self
+    {
+        if (in_array(strtolower(trim($this->nivel)), ['dirección', 'direccion']) || $this->parent_id === null) {
+            return $this;
+        }
+
+        return $this->parent ? $this->parent->resolverDireccion() : $this;
     }
 }

@@ -6,7 +6,7 @@ class PuestoDTO
 {
     public function __construct(
         public readonly string $nombrePuesto,
-        public readonly int $direccionId,
+        public readonly int $unidadOrganizativaId,
         public readonly string $tipo,
         public readonly ?int $id = null,
         public readonly ?int $reportaAPuestoId = null,
@@ -14,7 +14,7 @@ class PuestoDTO
         public readonly ?array $perfilSgc = null,
         public readonly ?int $urgente = null,
         public readonly ?string $estado = null,
-        public readonly ?array $direccion = null
+        public readonly ?array $unidadOrganizativa = null
     ) {}
 
     /**
@@ -24,7 +24,7 @@ class PuestoDTO
     {
         return new self(
             nombrePuesto: $data['nombre_puesto'],
-            direccionId: (int) $data['direccion_id'],
+            unidadOrganizativaId: (int) $data['unidad_organizativa_id'],
             tipo: $data['tipo'],
             reportaAPuestoId: array_key_exists('reporta_a_puesto_id', $data) ? ($data['reporta_a_puesto_id'] !== null ? (int) $data['reporta_a_puesto_id'] : null) : null,
             idDocumento: isset($data['id_documento']) ? (int) $data['id_documento'] : null

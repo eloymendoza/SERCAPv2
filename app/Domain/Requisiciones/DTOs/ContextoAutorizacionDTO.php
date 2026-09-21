@@ -8,7 +8,7 @@ readonly class ContextoAutorizacionDTO
 {
     public function __construct(
         public User $user,
-        public ?int $direccionId = null,
+        public ?int $unidadOrganizativaId = null,
         public ?int $proyectoId = null,
     ) {}
 }

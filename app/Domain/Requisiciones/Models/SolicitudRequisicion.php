@@ -49,9 +49,7 @@ class SolicitudRequisicion extends Model implements Workflowable
         // estos campos deberán apuntar a esa tabla en lugar de a User.php. (solicitante_id, elaborador_id, etc.)
         'solicitante_id',
         'elaborador_id',
-        'direccion_id',
-        'gerencia_id',
-        'coordinacion_id',
+        'unidad_organizativa_id',
         'observaciones',
         'estado',
         'requisicion_padre_id',
@@ -94,27 +92,11 @@ class SolicitudRequisicion extends Model implements Workflowable
     }
 
     /**
-     * Recupera la dirección organizativa solicitante.
+     * Recupera la unidad organizativa solicitante.
      */
-    public function direccion(): BelongsTo
+    public function unidadOrganizativa(): BelongsTo
     {
-        return $this->belongsTo(UnidadOrganizativa::class, 'direccion_id');
-    }
-
-    /**
-     * Recupera la gerencia organizativa solicitante.
-     */
-    public function gerencia(): BelongsTo
-    {
-        return $this->belongsTo(UnidadOrganizativa::class, 'gerencia_id');
-    }
-
-    /**
-     * Recupera la coordinación organizativa solicitante.
-     */
-    public function coordinacion(): BelongsTo
-    {
-        return $this->belongsTo(UnidadOrganizativa::class, 'coordinacion_id');
+        return $this->belongsTo(UnidadOrganizativa::class, 'unidad_organizativa_id');
     }
 
     // --- Implementación de Workflowable ---
@@ -156,7 +138,7 @@ class SolicitudRequisicion extends Model implements Workflowable
     private function asignarFoliosDefinitivos(): void
     {
         if (empty($this->folio)) {
-            $abreviatura = $this->direccion?->abreviatura ?? 'XX';
+            $abreviatura = $this->unidadOrganizativa?->abreviatura ?? 'XX';
             $this->folio = $this->generarFolioConsecutivo('RP', $abreviatura);
         }
 

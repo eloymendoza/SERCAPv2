@@ -33,7 +33,7 @@ class SolicitudPerfilPuesto extends Model
         'solicitante_id',
         'elaborador_id',
         'id_instancia_workflow',
-        'direccion_id',
+        'unidad_organizativa_id',
         'estado',
         'observaciones',
     ];
@@ -47,11 +47,11 @@ class SolicitudPerfilPuesto extends Model
     }
 
     /**
-     * Recupera la dirección organizativa solicitante.
+     * Recupera la unidad organizativa solicitante.
      */
-    public function direccion(): BelongsTo
+    public function unidadOrganizativa(): BelongsTo
     {
-        return $this->belongsTo(UnidadOrganizativa::class, 'direccion_id');
+        return $this->belongsTo(UnidadOrganizativa::class, 'unidad_organizativa_id');
     }
 
     /**
@@ -60,7 +60,7 @@ class SolicitudPerfilPuesto extends Model
     public function asignarFoliosDefinitivos(): void
     {
         if (empty($this->folio)) {
-            $abreviatura = $this->direccion?->abreviatura ?? 'XX';
+            $abreviatura = $this->unidadOrganizativa?->abreviatura ?? 'XX';
             $this->folio = $this->generarFolioConsecutivo('SPP', $abreviatura);
         }
     }

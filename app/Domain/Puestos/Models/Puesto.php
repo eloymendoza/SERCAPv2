@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Domain\Requisiciones\Models\DetalleRequisicion;
+use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 
 use App\Domain\Requisiciones\Enums\RequisicionEstadoEnum;
 
@@ -31,7 +32,7 @@ class Puesto extends Model
      */
     protected $fillable = [
         'nombre_puesto',
-        'direccion_id',
+        'unidad_organizativa_id',
         'reporta_a_puesto_id',
         'tipo',
         'estado',
@@ -46,11 +47,11 @@ class Puesto extends Model
     }
 
     /**
-     * Retorna la unidad organizativa a la que pertenece el puesto (Dirección).
+     * Retorna la unidad organizativa a la que pertenece el puesto.
      */
-    public function direccion(): BelongsTo
+    public function unidadOrganizativa(): BelongsTo
     {
-        return $this->belongsTo(\App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::class, 'direccion_id');
+        return $this->belongsTo(UnidadOrganizativa::class, 'unidad_organizativa_id');
     }
 
     /**
