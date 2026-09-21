@@ -46,7 +46,7 @@ class MigratePuestosCommand extends Command
             try {
                 foreach ($categorias as $categoria) {
                     
-                    $direccionId = (int) $categoria->Direccion_ct;
+                    $unidadOrganizativaId = (int) $categoria->Direccion_ct;
 
                     $tipoManoObra = match (trim($categoria->ManoObra_ct ?? '')) {
                         'I' => 'indirecto',
@@ -54,7 +54,7 @@ class MigratePuestosCommand extends Command
                         default => 'directo',
                     };
 
-                    $estado = in_array($direccionId, [186, 187, 188, 189, 190], true) ? 'activo' : 'legado';
+                    $estado = in_array($unidadOrganizativaId, [186, 187, 188, 189, 190], true) ? 'activo' : 'legado';
 
                     $exists = DB::table('puestos')->where('id', $categoria->Id_categoria)->exists();
 
@@ -63,7 +63,7 @@ class MigratePuestosCommand extends Command
                             ->where('id', $categoria->Id_categoria)
                             ->update([
                                 'nombre_puesto' => trim($categoria->Nombre_ct),
-                                'direccion_id' => $direccionId,
+                                'unidad_organizativa_id' => $unidadOrganizativaId,
                                 'tipo' => $tipoManoObra,
                                 'estado' => $estado,
                                 'updated_at' => now(),
@@ -72,7 +72,7 @@ class MigratePuestosCommand extends Command
                         DB::table('puestos')->insert([
                             'id' => $categoria->Id_categoria,
                             'nombre_puesto' => trim($categoria->Nombre_ct),
-                            'direccion_id' => $direccionId,
+                            'unidad_organizativa_id' => $unidadOrganizativaId,
                             'tipo' => $tipoManoObra,
                             'estado' => $estado,
                             'created_at' => now(),

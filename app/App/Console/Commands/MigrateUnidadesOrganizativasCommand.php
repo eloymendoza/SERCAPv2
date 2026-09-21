@@ -103,7 +103,7 @@ class MigrateUnidadesOrganizativasCommand extends Command
             };
 
             // 4. Abreviaturas
-            $abreviatura = null;
+            $abreviatura = !empty(trim($row->abreviatura ?? '')) ? trim($row->abreviatura) : null;
 
             // (El estado ya fue calculado arriba para determinar el padre de las direcciones)
 
@@ -170,33 +170,5 @@ class MigrateUnidadesOrganizativasCommand extends Command
         $this->info('Migración jerárquica finalizada con éxito.');
 
         return self::SUCCESS;
-    }
-
-    /**
-     * Extrae las iniciales del nombre ignorando conectores comunes.
-     */
-    private function generarIniciales(string $nombre): string
-    {
-        $palabras = explode(' ', mb_strtoupper(trim($nombre)));
-        $omitir = ['DE', 'Y', 'LA', 'EL', 'LOS', 'LAS', 'EN', 'POR', 'CON', 'PARA', 'A', 'AL', 'DEL'];
-        $iniciales = '';
-
-        foreach ($palabras as $p) {
-            $p = preg_replace('/[^A-ZÑÁÉÍÓÚ]/u', '', $p);
-            if (!empty($p) && !in_array($p, $omitir)) {
-                $iniciales .= mb_substr($p, 0, 1);
-                if (mb_strlen($iniciales) === 2) {
-                    break;
-                }
-            }
-        }
-
-        if (mb_strlen($iniciales) < 2 && mb_strlen($nombre) >= 2) {
-            $p = preg_replace('/[^A-ZÑÁÉÍÓÚ]/u', '', mb_strtoupper(trim($nombre)));
-            $iniciales = mb_substr($p, 0, 2);
-        }
-
-        $resultado = empty($iniciales) ? 'ND' : $iniciales;
-        return mb_substr($resultado, 0, 2);
     }
 }

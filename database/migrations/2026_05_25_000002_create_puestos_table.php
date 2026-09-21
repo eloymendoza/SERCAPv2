@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('puestos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre_puesto');
-            $table->integer('direccion_id');
+            $table->foreignId('unidad_organizativa_id')->constrained('unidades_organizativas');
             $table->foreignId('reporta_a_puesto_id')
                 ->nullable()
                 ->constrained('puestos')

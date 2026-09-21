@@ -17,9 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('elaborador_id')->nullable()->comment('id_empleado');
             $table->unsignedBigInteger('id_instancia_workflow')->nullable()
                 ->comment('Referencia lógica a BD externa para gestión de firmas');
-            $table->unsignedBigInteger('direccion_id');
-            $table->unsignedBigInteger('gerencia_id')->nullable();
-            $table->unsignedBigInteger('coordinacion_id')->nullable();
+            $table->foreignId('unidad_organizativa_id')->constrained('unidades_organizativas');
             $table->string('observaciones')->nullable();
             $table->string('estado')->default('borrador')->comment('borrador, en_proceso, rechazado, cancelado, terminado');
             $table->timestamps(7);
