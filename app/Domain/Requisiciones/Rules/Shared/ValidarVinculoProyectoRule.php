@@ -22,7 +22,7 @@ class ValidarVinculoProyectoRule implements SolicitudRequisicionRuleInterface
     public function validate(?SolicitudRequisicion $model, ?SolicitudRequisicionDTO $dto = null): void
     {
         $solicitanteId = $dto ? $dto->solicitanteId : ($model ? $model->solicitante_id : null);
-        $direccionId = $dto ? $dto->direccionId : ($model ? $model->direccion_id : null);
+        $unidadOrganizativaId = $dto ? $dto->unidadOrganizativaId : ($model ? $model->unidad_organizativa_id : null);
         $proyectoId = $dto ? $dto->proyectoId : ($model ? $model->proyecto_id : null);
 
         if (!$solicitanteId) {
@@ -39,7 +39,7 @@ class ValidarVinculoProyectoRule implements SolicitudRequisicionRuleInterface
         }
 
         $service = $this->vinculoService ?? app(VinculoContextualService::class);
-        $contexto = new ContextoAutorizacionDTO($usuario, $direccionId, $proyectoId);
+        $contexto = new ContextoAutorizacionDTO($usuario, $unidadOrganizativaId, $proyectoId);
         
         if (!$service->tieneVinculoContextual($contexto)) {
             throw BusinessRuleException::withMessage(

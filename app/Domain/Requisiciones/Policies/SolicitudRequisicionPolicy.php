@@ -6,8 +6,8 @@ use App\Domain\Autenticacion\Models\User;
 use App\Domain\Workflows\Services\WorkflowService;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
 use App\Domain\Requisiciones\DTOs\ContextoAutorizacionDTO;
-use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstadoEnum;
 use App\Domain\Requisiciones\Services\VinculoContextualService;
+use App\Domain\Requisiciones\Enums\SolicitudRequisicionEstadoEnum;
 
 class SolicitudRequisicionPolicy
 {
@@ -22,13 +22,13 @@ class SolicitudRequisicionPolicy
      * EAP opera sin restricción contextual. Los demás roles deben tener vínculo
      * directo con la dirección o proyecto especificados en la solicitud.
      */
-    public function create(User $user, ?int $direccionId = null, ?int $proyectoId = null): bool
+    public function create(User $user, ?int $unidadOrganizativaId = null, ?int $proyectoId = null): bool
     {
         if ($user->can('EAP')) {
             return true;
         }
 
-        $contexto = new ContextoAutorizacionDTO($user, $direccionId, $proyectoId);
+        $contexto = new ContextoAutorizacionDTO($user, $unidadOrganizativaId, $proyectoId);
         return $this->vinculoService->tieneVinculoContextual($contexto);
     }
 
