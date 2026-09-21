@@ -58,7 +58,7 @@ it('lanza excepcion si ya existe una requisicion activa para el proyecto', funct
         'folio' => 'RP-200',
         'elaborador_id' => 1,
         'solicitante_id' => 1,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'proyecto_id' => $proyecto->idProyecto,
         'estado' => 'terminado'
     ]);
@@ -91,7 +91,7 @@ it('pasa la validacion si las requisiciones existentes del proyecto estan cubier
         'folio' => 'RP-201',
         'elaborador_id' => 1,
         'solicitante_id' => 1,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'proyecto_id' => $proyecto->idProyecto,
         'estado' => 'terminado'
     ]);

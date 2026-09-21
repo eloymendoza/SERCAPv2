@@ -29,7 +29,7 @@ it('lanza excepcion si ya existe una enmienda en borrador para la misma requisic
         'folio' => 'RP-100',
         'elaborador_id' => 1,
         'solicitante_id' => 1,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'estado' => SolicitudRequisicionEstadoEnum::TERMINADO,
     ]);
     $requisicionPadre = Requisicion::create([
@@ -43,7 +43,7 @@ it('lanza excepcion si ya existe una enmienda en borrador para la misma requisic
         'folio' => 'RP-100-ENM1',
         'elaborador_id' => 1,
         'solicitante_id' => 1,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'requisicion_padre_id' => $requisicionPadre->id,
         'estado' => SolicitudRequisicionEstadoEnum::BORRADOR,
     ]);
@@ -65,7 +65,7 @@ it('pasa la validacion si la enmienda anterior ya esta terminada', function () {
         'folio' => 'RP-101',
         'elaborador_id' => 1,
         'solicitante_id' => 1,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'estado' => SolicitudRequisicionEstadoEnum::TERMINADO,
     ]);
     $requisicionPadre = Requisicion::create([
@@ -78,7 +78,7 @@ it('pasa la validacion si la enmienda anterior ya esta terminada', function () {
         'folio' => 'RP-101-ENM1',
         'elaborador_id' => 1,
         'solicitante_id' => 1,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'requisicion_padre_id' => $requisicionPadre->id,
         'estado' => SolicitudRequisicionEstadoEnum::TERMINADO,
     ]);

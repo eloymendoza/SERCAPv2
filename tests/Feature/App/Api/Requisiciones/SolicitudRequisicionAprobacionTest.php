@@ -47,7 +47,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
             'folio' => 'RP-TEST-001',
             'elaborador_id' => $user->id_personal,
             'solicitante_id' => $user->id_personal,
-            'direccion_id' => 1,
+            'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
             'estado' => SolicitudRequisicionEstadoEnum::BORRADOR,
             'id_instancia_workflow' => null
         ]);
@@ -71,7 +71,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
             'folio' => 'RP-TEST-002',
             'elaborador_id' => 999,
             'solicitante_id' => 999,
-            'direccion_id' => 1,
+            'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
             'estado' => SolicitudRequisicionEstadoEnum::EN_PROCESO,
             'id_instancia_workflow' => 888
         ]);
@@ -104,7 +104,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
             'folio' => 'RP-TEST-003',
             'elaborador_id' => 999,
             'solicitante_id' => 999,
-            'direccion_id' => 1,
+            'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
             'estado' => SolicitudRequisicionEstadoEnum::EN_PROCESO,
             'id_instancia_workflow' => 777
         ]);
@@ -166,7 +166,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'folio' => 'RP-TEST-004',
                 'elaborador_id' => $user->id_personal,
                 'solicitante_id' => $user->id_personal,
-                'direccion_id' => 1,
+                'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
                 'estado' => SolicitudRequisicionEstadoEnum::BORRADOR,
                 'id_instancia_workflow' => null
             ]);
@@ -192,7 +192,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'folio' => 'RP-TEST-005',
                 'elaborador_id' => 999,
                 'solicitante_id' => 999,
-                'direccion_id' => 1,
+                'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
                 'estado' => SolicitudRequisicionEstadoEnum::EN_PROCESO,
                 'id_instancia_workflow' => 888
             ]);
@@ -225,7 +225,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'folio' => 'RP-TEST-006',
                 'elaborador_id' => 999,
                 'solicitante_id' => 999,
-                'direccion_id' => 1,
+                'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
                 'estado' => SolicitudRequisicionEstadoEnum::EN_PROCESO,
                 'id_instancia_workflow' => 777
             ]);
@@ -286,7 +286,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'folio' => 'RP-TEST-007',
                 'elaborador_id' => $user->id_personal,
                 'solicitante_id' => $user->id_personal,
-                'direccion_id' => 1,
+                'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
                 'estado' => SolicitudRequisicionEstadoEnum::BORRADOR,
                 'id_instancia_workflow' => null
             ]);
@@ -312,7 +312,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'folio' => 'RP-TEST-008',
                 'elaborador_id' => 999,
                 'solicitante_id' => 999,
-                'direccion_id' => 1,
+                'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
                 'estado' => SolicitudRequisicionEstadoEnum::RECHAZADO,
                 'id_instancia_workflow' => 888
             ]);
@@ -338,7 +338,7 @@ describe('Aprobación de Solicitud de Requisición', function () {
                 'folio' => 'RP-TEST-009',
                 'elaborador_id' => 400,
                 'solicitante_id' => 400,
-                'direccion_id' => 1,
+                'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
                 'estado' => SolicitudRequisicionEstadoEnum::RECHAZADO,
                 'id_instancia_workflow' => 777
             ]);

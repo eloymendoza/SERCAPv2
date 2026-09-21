@@ -6,7 +6,6 @@ use App\Domain\Requisiciones\Rules\Shared\ValidarVinculoProyectoRule;
 use App\Domain\Requisiciones\Services\VinculoContextualService;
 use App\Exceptions\Domain\BusinessRuleException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Mockery;
 uses(RefreshDatabase::class);
 
 describe('ValidarVinculoProyectoRule', function () {
@@ -25,7 +24,7 @@ it('pasa la validacion si el usuario no esta seteado', function () {
 it('lanza excepcion si el usuario no existe', function () {
     $dto = SolicitudRequisicionDTO::fromArray([
         'solicitante_id' => 999,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'proyecto_id' => 10,
     ]);
 
@@ -48,7 +47,7 @@ it('lanza excepcion si el usuario no tiene vinculo contextual', function () {
 
     $dto = SolicitudRequisicionDTO::fromArray([
         'solicitante_id' => 100,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'proyecto_id' => 10,
     ]);
 
@@ -76,7 +75,7 @@ it('pasa la validacion si el usuario tiene vinculo contextual', function () {
 
     $dto = SolicitudRequisicionDTO::fromArray([
         'solicitante_id' => 100,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'proyecto_id' => 10,
     ]);
 

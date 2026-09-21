@@ -51,7 +51,7 @@ describe('VinculoContextualService', function () {
             'email' => 'eloy@test.com'
         ]);
 
-        $direccion = UnidadOrganizativa::create([
+        $direccion = UnidadOrganizativa::factory()->createQuietly([
             'nivel' => 'direccion',
             'nombre' => 'Dirección de Desarrollo',
             'encargado_usuario' => 'eloy.mendoza',

@@ -9,7 +9,6 @@ use Illuminate\Database\Schema\Blueprint;
 use App\Domain\Catalogos\Models\Proyecto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Domain\Requisiciones\Models\SolicitudRequisicion;
-use App\App\Api\Requisiciones\Rules\ValidarVinculoProyectoRule;
 use App\Domain\Requisiciones\Policies\SolicitudRequisicionPolicy;
 use App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa;
 
@@ -81,12 +80,13 @@ describe('SolicitudRequisicionPolicy', function () {
         ]);
         Gate::define('EAP', fn () => false);
 
-        $direccion = UnidadOrganizativa::create([
-            'nivel' => 'direccion',
-            'nombre' => 'Dirección A',
-            'encargado_usuario' => 'juan.perez',
-            'estado' => 'Activo'
-        ]);
+        $direccion = UnidadOrganizativa::factory()
+            ->createQuietly([
+                'nivel' => 'direccion',
+                'nombre' => 'Dirección A',
+                'encargado_usuario' => 'juan.perez',
+                'estado' => 'Activo',
+            ]);
 
         $proyecto = Proyecto::create([
             'idProyecto' => 1,
@@ -141,18 +141,19 @@ describe('Integración HTTP (Request y Endpoint)', function () {
         Gate::define('EAP', fn () => true);
 
         // Crear dirección activa necesaria para la validación
-        $direccion = UnidadOrganizativa::create([
-            'nivel' => 'direccion',
-            'nombre' => 'Dirección A',
-            'encargado_usuario' => 'juan.perez',
-            'estado' => 'Activo'
-        ]);
+        $direccion = UnidadOrganizativa::factory()
+            ->createQuietly([
+                'nivel' => 'direccion',
+                'nombre' => 'Dirección A',
+                'encargado_usuario' => 'juan.perez',
+                'estado' => 'Activo',
+            ]);
 
         $this->actingAs($user);
 
         // Enviar proyecto_id inexistente (999)
         $response = $this->postJson('/api/requisiciones/solicitudes', [
-            'direccion_id' => $direccion->id,
+            'unidad_organizativa_id' => $direccion->id,
             'proyecto_id' => 999,
         ]);
 
@@ -180,18 +181,19 @@ describe('Integración HTTP (Request y Endpoint)', function () {
         ]);
         Gate::define('EAP', fn () => false);
 
-        $direccion = UnidadOrganizativa::create([
-            'nivel' => 'direccion',
-            'nombre' => 'Dirección A',
-            'encargado_usuario' => 'pedro.gomez', // Pertenece a otro encargado
-            'estado' => 'Activo'
-        ]);
+        $direccion = UnidadOrganizativa::factory()
+            ->createQuietly([
+                'nivel' => 'direccion',
+                'nombre' => 'Dirección A',
+                'encargado_usuario' => 'pedro.gomez', // Pertenece a otro encargado
+                'estado' => 'Activo',
+            ]);
 
         $this->actingAs($user);
 
         // Intentar crear sin tener vínculo
         $response = $this->postJson('/api/requisiciones/solicitudes', [
-            'direccion_id' => $direccion->id,
+            'unidad_organizativa_id' => $direccion->id,
             'proyecto_id' => null,
         ]);
 

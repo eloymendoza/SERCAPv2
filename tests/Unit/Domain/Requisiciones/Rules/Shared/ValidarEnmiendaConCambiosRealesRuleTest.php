@@ -34,7 +34,7 @@ it('lanza excepcion si la enmienda no contiene cambios en los detalles', functio
         'folio' => 'RP-300',
         'elaborador_id' => 1,
         'solicitante_id' => 1,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'estado' => 'terminado'
     ]);
     $requisicionPadre = Requisicion::create([
@@ -60,14 +60,13 @@ it('lanza excepcion si la enmienda no contiene cambios en los detalles', functio
         ['name' => 'Sistema', 'email' => 'sistema@test.com', 'password' => bcrypt('password')]
     );
 
-    \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::firstOrCreate(
-        ['id' => 1],
-        ['nombre' => 'Mock Direccion', 'tipo' => 'direccion', 'activa' => true, 'nivel' => 1]
+    \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly(
+        ['nombre' => 'Mock Direccion', 'nivel' => 'direccion', 'estado' => 'Activo']
     );
 
     \App\Domain\Puestos\Models\Puesto::firstOrCreate(
         ['id' => 1],
-        ['nombre_puesto' => 'Mock Puesto', 'tipo' => 'interno', 'estado' => 'activo', 'direccion_id' => 1]
+        ['nombre_puesto' => 'Mock Puesto', 'tipo' => 'interno', 'estado' => 'activo', 'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,]
     );
 
     \App\Domain\Requisiciones\Models\Disciplina::firstOrCreate(
@@ -124,7 +123,7 @@ it('pasa la validacion si la enmienda cambia el sueldo', function () {
         'folio' => 'RP-301',
         'elaborador_id' => 1,
         'solicitante_id' => 1,
-        'direccion_id' => 1,
+        'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,
         'estado' => 'terminado'
     ]);
     $requisicionPadre = Requisicion::create([
@@ -150,14 +149,13 @@ it('pasa la validacion si la enmienda cambia el sueldo', function () {
         ['name' => 'Sistema', 'email' => 'sistema@test.com', 'password' => bcrypt('password')]
     );
 
-    \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::firstOrCreate(
-        ['id' => 1],
-        ['nombre' => 'Mock Direccion', 'tipo' => 'direccion', 'activa' => true, 'nivel' => 1]
+    \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly(
+        ['nombre' => 'Mock Direccion', 'nivel' => 'direccion', 'estado' => 'Activo']
     );
 
     \App\Domain\Puestos\Models\Puesto::firstOrCreate(
         ['id' => 1],
-        ['nombre_puesto' => 'Mock Puesto', 'tipo' => 'interno', 'estado' => 'activo', 'direccion_id' => 1]
+        ['nombre_puesto' => 'Mock Puesto', 'tipo' => 'interno', 'estado' => 'activo', 'unidad_organizativa_id' => \App\Domain\EstructuraOrganizacional\Models\UnidadOrganizativa::factory()->createQuietly()->id,]
     );
 
     \App\Domain\Requisiciones\Models\Disciplina::firstOrCreate(
