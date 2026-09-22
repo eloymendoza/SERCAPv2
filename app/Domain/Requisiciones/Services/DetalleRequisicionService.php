@@ -9,13 +9,15 @@ use App\Domain\Requisiciones\Models\DetalleRequisicion;
 use App\Domain\Requisiciones\DTOs\DetalleRequisicionDTO;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Domain\Requisiciones\Mappers\DetalleRequisicionMapper;
+use App\Domain\Requisiciones\Rules\Shared\ValidarUnicidadPlazaLiderazgoRule;
 
 class DetalleRequisicionService
 {
     use HandlesProcess;
 
     public function __construct(
-        private readonly DetalleRequisicionMapper $mapper
+        private readonly DetalleRequisicionMapper $mapper,
+        private readonly ValidarUnicidadPlazaLiderazgoRule $validarLiderazgoRule
     ) {}
 
     protected function getLogChannel(): string
@@ -34,6 +36,8 @@ class DetalleRequisicionService
         ]);
 
         return $this->handle(function () use ($dto, $requisicionId) {
+            $this->validarLiderazgoRule->validate(null, $dto, $requisicionId);
+
             $data = $this->mapper->toPersistenceArray($dto, $requisicionId);
             $model = DetalleRequisicion::create($data);
 
@@ -59,6 +63,9 @@ class DetalleRequisicionService
         return $this->handle(function () use ($id, $dto) {
             $updatedDto = DB::transaction(function () use ($id, $dto) {
                 $model = DetalleRequisicion::findOrFail($id);
+                
+                $this->validarLiderazgoRule->validate($model, $dto);
+
                 $data = $this->mapper->toUpdatePersistenceArray($dto);
                 
                 $model->update($data);
