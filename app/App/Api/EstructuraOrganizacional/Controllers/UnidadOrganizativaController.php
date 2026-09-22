@@ -40,7 +40,8 @@ class UnidadOrganizativaController extends Controller
     public function index(Request $request): JsonResponse
     {
         $nivel = $request->query('nivel');
-        $paginator = $this->service->paginate(15, $nivel);
+        $perPage = (int) $request->query('per_page', 15);
+        $paginator = $this->service->paginate($perPage, $nivel);
         
         return response()->json([
             'data' => UnidadOrganizativaResource::collection($paginator->items()),
