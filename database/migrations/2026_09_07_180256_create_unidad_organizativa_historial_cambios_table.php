@@ -13,27 +13,14 @@ return new class extends Migration
     {
         Schema::create('unidad_organizativa_historial_cambios', function (Blueprint $table) {
             $table->id();
-            
-            // 1. Identificador de la Entidad
-            $table->foreignId('unidad_organizativa_id')
-                  ->constrained('unidades_organizativas')
-                  ->cascadeOnDelete();
-            
-            // 2. Acción realizada ('created', 'updated', 'deleted', 'restored')
+            $table->foreignId('unidad_organizativa_id')->constrained('unidades_organizativas')->cascadeOnDelete();
             $table->string('event');
-            
-            // 3. Delta de Datos
-            $table->json('old_values')->nullable(); // Nulo si es un evento 'created'
-            $table->json('new_values')->nullable(); // Nulo si es un evento 'deleted'
-            
-            // 4. Trazabilidad de Autoría
-            $table->string('username')->nullable(); // Usuario que ejecutó el cambio
+            $table->json('old_values')->nullable(); 
+            $table->json('new_values')->nullable(); 
+            $table->string('username')->nullable(); 
             $table->foreign('username')->references('username')->on('users')->nullOnDelete();
+            $table->timestamp('created_at', 7)->useCurrent();
             
-            // 5. Fecha exacta
-            $table->timestamp('created_at')->useCurrent();
-            
-            // Índices recomendados
             $table->index(['unidad_organizativa_id', 'created_at']);
         });
     }
