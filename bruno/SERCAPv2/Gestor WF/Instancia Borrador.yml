@@ -1,0 +1,30 @@
+info:
+  name: Instancia Borrador
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:98/api/instancias/guardar_borrador/
+  headers:
+    - name: Authorization
+      value: TOKEN 64f5e785893ee074de1d2a3f7350183a2bc06b80
+  body:
+    type: json
+    data: "{\r
+
+      \    \"workflow_id\": 14,\r
+
+      \    \"Id_personal\": 11018,\r
+
+      \    \"firmantes\": [] \r
+
+      }"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

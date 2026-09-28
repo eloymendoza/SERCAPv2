@@ -1,0 +1,30 @@
+info:
+  name: Reiniciar Solicitud
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/api/requisiciones/solicitudes/1/reiniciar"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Referer
+      value: "{{base_url}}"
+    - name: X-XSRF-TOKEN
+      value: "{{xsrf_token}}"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"observaciones\": \"Usa mis utilidades xD\"\r
+
+      }"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

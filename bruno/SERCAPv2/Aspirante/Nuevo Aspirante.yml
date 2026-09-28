@@ -1,0 +1,74 @@
+info:
+  name: Nuevo Aspirante
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/api/aspirantes/"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Referer
+      value: "{{base_url}}"
+    - name: X-XSRF-TOKEN
+      value: "{{xsrf_token}}"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"nombres\": \"Bruno\",\r
+
+      \    \"apellidoPaterno\": \"Diaz\",\r
+
+      \    \"apellidoMaterno\": \"Garcia\",\r
+
+      \    \"telefono\": \"1234567890\",\r
+
+      \    \"email\": \"bruno.diaz@gmail.com\",\r
+
+      \    \"resumen\": \"Programador apasionado por soluciones integrales y modulares con una visión enfocada a la resolución de problemáticas complejas\",\r
+
+      \    \"experiencias\": [\r
+
+      \        {\r
+
+      \            \"cargo\": \"Jefe\",\r
+
+      \            \"nombreEmpresa\": \"Gobierno Federal\",\r
+
+      \            \"trabajoActual\": false,\r
+
+      \            \"fechaInicio\": \"2026-06-15\"\r
+
+      \        }\r
+
+      \    ],\r
+
+      \    \"educacion\": [\r
+
+      \        {\r
+
+      \            \"institucion\": \"Universidad Veracruzana\",\r
+
+      \            \"nivelEstudioId\": 5,\r
+
+      \            \"titulo\": \"Ingeniero Informático\",\r
+
+      \            \"anioFin\": 2023,\r
+
+      \            \"estadoEducacion\": \"titulado\"\r
+
+      \        }\r
+
+      \    ]\r
+
+      }\r\n"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

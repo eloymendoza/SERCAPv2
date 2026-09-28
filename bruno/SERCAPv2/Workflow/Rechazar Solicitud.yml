@@ -1,0 +1,30 @@
+info:
+  name: Rechazar Solicitud
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{base_url}}/api/requisiciones/solicitudes/1/rechazar"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Referer
+      value: "{{base_url}}"
+    - name: X-XSRF-TOKEN
+      value: "{{xsrf_token}}"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"observaciones\": \"Nel no hay dineros\"\r
+
+      }"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

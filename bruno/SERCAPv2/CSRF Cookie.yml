@@ -1,0 +1,46 @@
+info:
+  name: CSRF Cookie
+  type: http
+  seq: 10
+
+http:
+  method: GET
+  url: "{{base_url}}/sanctum/csrf-cookie"
+  headers:
+    - name: Accept
+      value: application/json
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: "const jar = bru.cookies.jar();\r
+
+        \r
+
+        // Forzamos a Postman a resolver la variable real\r
+
+        const urlCompleta = bru.interpolate(req.getUrl().toString());\r
+
+        const domain = urlCompleta.replace(/^https?:\\/\\//, '').split('/')[0];\r
+
+        \r
+
+        // Limpiamos las cookies de ese dominio específico\r
+
+        jar.deleteCookies(domain, function (error) {\r
+
+        \    if (error) {\r
+
+        \        console.log(\"Error limpiando cookies:\", error);\r
+
+        \    }\r
+
+        });"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

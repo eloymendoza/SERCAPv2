@@ -1,0 +1,36 @@
+info:
+  name: Listar Unidades Organizativas
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{base_url}}/api/catalogos/unidades-organizativas?per_page=50&page=1&nivel=direccion"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Referer
+      value: "{{base_url}}"
+    - name: X-XSRF-TOKEN
+      value: "{{xsrf_token}}"
+  params:
+    - name: per_page
+      value: "50"
+      type: query
+    - name: page
+      value: "1"
+      type: query
+    - name: nivel
+      value: direccion
+      type: query
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

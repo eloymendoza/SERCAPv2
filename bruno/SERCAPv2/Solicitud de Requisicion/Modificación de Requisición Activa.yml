@@ -1,0 +1,108 @@
+info:
+  name: Modificación de Requisición Activa
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{base_url}}/api/requisiciones/solicitudes"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Referer
+      value: "{{base_url}}"
+    - name: X-XSRF-TOKEN
+      value: "{{xsrf_token}}"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"proyecto_id\": 12297,\r
+
+      \    \"id_instancia_workflow\": 15,\r
+
+      \    \"solicitante_id\": 1476,\r
+
+      \    \"direccion_id\": 186,\r
+
+      \    \"gerencia_id\": 232,\r
+
+      \    \"coordinacion_id\": 241,\r
+
+      \    \"observaciones\": \"Reducción de personal por ajuste presupuestal y retención del frontend\",\r
+
+      \    \"accion\": \"emitir\",\r
+
+      \    \"requisicion_padre_id\": 1,\r
+
+      \    \"requisicion\": {\r
+
+      \        \"tipo\": 1,\r
+
+      \        \"detalle\": [\r
+
+      \            {\r
+
+      \                \"puesto_id\": 1607,\r
+
+      \                \"cantidad_solicitada\": 1, // <--- CAMBIO: Redujimos de 2 a 1\r
+
+      \                \"disciplina_id\": 3,\r
+
+      \                \"tipo_contrato\": \"obra_determinada\",\r
+
+      \                \"tabulador_id\": 1,\r
+
+      \                \"sueldo_asignado\": 0.0,\r
+
+      \                \"turno_horas\": \"8\",\r
+
+      \                \"fecha_inicio\": \"2026-01-01\",\r
+
+      \                \"fecha_termino\": \"2026-12-31\",\r
+
+      \                \"fecha_limite_requerimiento\": \"2026-06-30\",\r
+
+      \                \"empleados_propuestos\": []\r
+
+      \            },\r
+
+      \            {\r
+
+      \                \"puesto_id\": 1608,\r
+
+      \                \"cantidad_solicitada\": 2, // Se mantiene intacto (El diffing lo ignorará)\r
+
+      \                \"disciplina_id\": 3,\r
+
+      \                \"tipo_contrato\": \"obra_determinada\",\r
+
+      \                \"tabulador_id\": 1,\r
+
+      \                \"sueldo_asignado\": 0.0,\r
+
+      \                \"turno_horas\": \"8\",\r
+
+      \                \"fecha_inicio\": \"2026-01-01\",\r
+
+      \                \"fecha_termino\": \"2026-12-31\",\r
+
+      \                \"fecha_limite_requerimiento\": \"2026-06-30\",\r
+
+      \                \"empleados_propuestos\": []\r
+
+      \            }\r
+
+      \        ]\r
+
+      \    }\r
+
+      }"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

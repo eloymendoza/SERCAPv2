@@ -1,0 +1,48 @@
+info:
+  name: Iniciar Instancia
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://127.0.0.1:98/api/instancias/iniciar/
+  headers:
+    - name: Authorization
+      value: TOKEN 64f5e785893ee074de1d2a3f7350183a2bc06b80
+  body:
+    type: json
+    data: "{\r
+
+      \    \"Id_personal\": 11018,\r
+
+      \    \"workflow_id\": 14,\r
+
+      \    \"firmantes\": [\r
+
+      \        {\r
+
+      \            \"Id_personal\": 10970,\r
+
+      \            \"orden\": 1\r
+
+      \        },\r
+
+      \        {\r
+
+      \            \"Id_personal\": 11062,\r
+
+      \            \"orden\": 2\r
+
+      \        }\r
+
+      \    ]\r
+
+      }"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

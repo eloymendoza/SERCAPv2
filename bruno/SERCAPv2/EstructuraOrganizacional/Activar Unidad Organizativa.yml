@@ -1,0 +1,38 @@
+info:
+  name: Activar Unidad Organizativa
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{base_url}}/api/catalogos/unidades-organizativas/259/activate"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Referer
+      value: "{{base_url}}"
+    - name: X-XSRF-TOKEN
+      value: "{{xsrf_token}}"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"parent_id\": null,\r
+
+      \    \"nivel\": \"direccion\",\r
+
+      \    \"nombre\": \"Tecnológias de la Información\",\r
+
+      \    \"abreviatura\": \"TI\",\r
+
+      \    \"estado\": \"Activo\"\r
+
+      }"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

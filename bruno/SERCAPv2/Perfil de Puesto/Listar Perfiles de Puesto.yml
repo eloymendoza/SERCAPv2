@@ -1,0 +1,26 @@
+info:
+  name: Listar Perfiles de Puesto
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{base_url}}/api/catalogos/puestos/perfiles-sgc/"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Referer
+      value: "{{base_url}}"
+    - name: X-XSRF-TOKEN
+      value: "{{xsrf_token}}"
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

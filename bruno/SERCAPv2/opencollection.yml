@@ -1,0 +1,103 @@
+opencollection: 1.0.0
+
+info:
+  name: SERCAPv2
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  variables:
+    - name: base_url
+      value: "{{process.env.BASE_URL}}"
+  scripts:
+    - type: before-request
+      code: "const jar = bru.cookies.jar();\r
+
+        const urlCompleta = bru.interpolate(req.getUrl().toString());\r
+
+        const domain = urlCompleta.replace(/^https?:\\/\\//, '').split('/')[0];\r
+
+        \r
+
+        const savedXsrf = bru.getEnvVar('cookie_xsrf_raw');\r
+
+        const sessionName = bru.getEnvVar('session_cookie_name');\r
+
+        const sessionValue = bru.getEnvVar('session_cookie_value');\r
+
+        \r
+
+        // Inyectamos XSRF\r
+
+        if (savedXsrf) {\r
+
+        \    jar.setCookie(domain, 'XSRF-TOKEN', savedXsrf, (err) => {\r
+
+        \        if (err) console.error(\"Error restaurando XSRF:\", err);\r
+
+        \    });\r
+
+        }\r
+
+        \r
+
+        // Inyectamos Sesión\r
+
+        if (sessionName && sessionValue) {\r
+
+        \    jar.setCookie(domain, sessionName, sessionValue, (err) => {\r
+
+        \        if (err) console.error(\"Error restaurando Sesión:\", err);\r
+
+        \    });\r
+
+        }"
+    - type: after-response
+      code: "// 1. Mantener tu lógica para el header X-XSRF-TOKEN\r
+
+        const xsrfCookie = bru.cookies.get('XSRF-TOKEN');\r
+
+        if (xsrfCookie) {\r
+
+        \    bru.setEnvVar('xsrf_token', decodeURIComponent(xsrfCookie));\r
+
+        \    bru.setEnvVar('cookie_xsrf_raw', xsrfCookie); // Respaldamos la cookie original\r
+
+        }\r
+
+        \r
+
+        // 2. Convertir las cookies a un objeto de JS para poder iterarlas\r
+
+        const todasLasCookies = bru.cookies.toObject();\r
+
+        \r
+
+        for (const nombreCookie in todasLasCookies) {\r
+
+        \    // Detecta la cookie de sesión de Laravel\r
+
+        \    if (nombreCookie.includes('session')) {\r
+
+        \        bru.setEnvVar('session_cookie_name', nombreCookie);\r
+
+        \        bru.setEnvVar('session_cookie_value', todasLasCookies[nombreCookie]);\r
+
+        \    }\r
+
+        }"
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git

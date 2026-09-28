@@ -1,0 +1,36 @@
+info:
+  name: Crear Puesto
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{base_url}}/api/catalogos/puestos"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Referer
+      value: "{{base_url}}"
+    - name: X-XSRF-TOKEN
+      value: "{{xsrf_token}}"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"nombre_puesto\": \"DESARROLLADOR BACKEND\",\r
+
+      \    \"unidad_organizativa_id\": 243,\r
+
+      \    \"reporta_a_puesto_id\": null,\r
+
+      \    \"tipo\": \"directo\"\r
+
+      }"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

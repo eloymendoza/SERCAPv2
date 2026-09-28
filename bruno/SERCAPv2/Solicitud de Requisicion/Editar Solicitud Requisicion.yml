@@ -1,0 +1,104 @@
+info:
+  name: Editar Solicitud Requisicion
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{base_url}}/api/requisiciones/solicitudes/6"
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Referer
+      value: "{{base_url}}"
+    - name: X-XSRF-TOKEN
+      value: "{{xsrf_token}}"
+  body:
+    type: json
+    data: "{\r
+
+      \    \"proyecto_id\": 12247,\r
+
+      \    \"id_instancia_workflow\": 14,\r
+
+      \    \"solicitante_id\": 10510,\r
+
+      \    \"direccion_id\": 186,\r
+
+      \    \"coordinacion_id\": 243,\r
+
+      \    \"observaciones\": \"\",\r
+
+      \    \"accion\": \"guardar\",\r
+
+      \    \"requisicion\": {\r
+
+      \        \"tipo\": 1,\r
+
+      \        \"detalle\": [\r
+
+      \            {\r
+
+      \                \"puesto_id\": 3,\r
+
+      \                \"cantidad_solicitada\": 3,\r
+
+      \                \"disciplina_id\": 3,\r
+
+      \                \"tipo_contrato\": \"obra_determinada\",\r
+
+      \                \"tabulador_id\": 1,\r
+
+      \                \"sueldo_asignado\": 0.0,\r
+
+      \                \"turno_horas\": \"8\",\r
+
+      \                \"fecha_inicio\": \"2026-01-01\",\r
+
+      \                \"fecha_termino\": \"2026-12-31\",\r
+
+      \                \"fecha_limite_requerimiento\": \"2026-06-30\",\r
+
+      \                \"empleados_propuestos\": []\r
+
+      \            },\r
+
+      \            {\r
+
+      \                \"puesto_id\": 4,\r
+
+      \                \"cantidad_solicitada\": 3,\r
+
+      \                \"disciplina_id\": 4,\r
+
+      \                \"tipo_contrato\": \"obra_determinada\",\r
+
+      \                \"tabulador_id\": 1,\r
+
+      \                \"sueldo_asignado\": 0.0,\r
+
+      \                \"turno_horas\": \"8\",\r
+
+      \                \"fecha_inicio\": \"2026-01-01\",\r
+
+      \                \"fecha_termino\": \"2026-12-31\",\r
+
+      \                \"fecha_limite_requerimiento\": \"2026-06-30\",\r
+
+      \                \"empleados_propuestos\": []\r
+
+      \            }\r
+
+      \        ]\r
+
+      \    }\r
+
+      }"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
